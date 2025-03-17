@@ -1,16 +1,22 @@
-import { useState } from 'react'
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import CreatePassword from './components/authentication/CreatePassword';
+import ResetPassword from './components/authentication/resetPassword'; // Ensure the correct case
+import Login from './components/authentication/Login';
+import Register from './components/authentication/Register';
 
-import './App.css'
-
-import LoginPage from './pages/LoginPage/LoginPage'
+import './App.css';
 
 function App() {
-
-  return (
-    <>
-      <LoginPage/>
-    </>
-  )
+    return (
+        <Routes>
+            <Route path="/create-password" element={<CreatePassword />} />
+            <Route path="/forgot-password" element={<ResetPassword />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Register />} />
+            {/* Add other routes here */}
+        </Routes>
+    );
 }
 
-export default App
+export default App;
