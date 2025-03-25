@@ -22,6 +22,7 @@ import "./App.css";
 import Login from "./components/authentication/Login.jsx";
 import ResetPassword from "./components/authentication/resetPassword.jsx";
 import CreatePassword from "./components/authentication/CreatePassword.jsx";
+import Register from "./components/authentication/Register.jsx";
 
 
 const router = createBrowserRouter([
@@ -31,12 +32,12 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "/login",
-    element: <Login/>,
+    path: "/register",
+    element: <Register/>,
   },
 
   {
-    path: "/login",
+    path: "/",
     element: <Login/>,
   },
   {
