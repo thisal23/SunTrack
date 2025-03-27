@@ -11,6 +11,9 @@ const VehicleDetail = require("./VehicleDetail");
 const ServiceInfo = require("./ServiceInfo");
 const Service = require("./Service");
 
+// Thisal work imports
+const geoname = require("./geoname");
+
 // Define the associations
 User.belongsTo(Role, {
   foreignKey: 'roleId',
@@ -57,4 +60,5 @@ module.exports = {
   TripDetail,
   Service,
   ServiceInfo,
+  geoname,
 }; // Export the models

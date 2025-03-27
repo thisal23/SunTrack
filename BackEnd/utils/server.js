@@ -2,11 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const connectDB = require('../config/db'); // Assuming you have a database connection file
 const { User, Role, UserDetail } = require('../models');
+const liveTrackingRoutes = require('../routes/liveTrackingRoutes');
+const geoRoutes = require('../routes/geoRoutes');
+
 const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+connectDB;
 
 
 // Init Middleware
@@ -17,11 +21,13 @@ app.use(cors({
   credentials: true,               // Allow cookies/session handling
 }));
 
-//hthththht
+
 
 
 // Define Routes
 app.use('/api/auth', require('../routes/authRoutes'));
+app.use('/api', liveTrackingRoutes);
+app.use('/api', geoRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
