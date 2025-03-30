@@ -1,7 +1,7 @@
 import React from 'react'
 import NavBar from '../../components/NavBar/NavBar'
 
-function MaintenancePage() {
+function InfoPage() {
   return (
     <>
     <NavBar/>
@@ -9,4 +9,4 @@ function MaintenancePage() {
   )
 }
 
-export default MaintenancePage
+export default InfoPage

@@ -1,0 +1,120 @@
+.add{
+    width: 300px;
+    height: 48px;
+    border-radius: 8px;
+    border-style: none;
+    background-color: #E8AF30;
+    color: white;
+    font-size: 24px;
+    margin-top: 25px;
+    
+}
+.vehicleNo-g{
+    margin-top: -60px;
+    margin-left: 50px;
+}
+
+#type{
+    width: 300px;
+    text-align: center;
+    height: 48px;
+    border-style: none;
+    border-radius: 5px;
+    color: #0F2043;
+    font-size: 20px;
+    
+}
+.body-g {
+    display: block;
+    justify-content: center;
+    align-items: center;
+    place-content: center;
+    height: 100%; 
+    width: 100%; 
+}
+
+.box-g {
+    width: 100%;
+    height: 860px;
+    display: block;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    background-color: #F0F3F8;
+    justify-content: center;
+    align-items: center;
+    margin-top: 80px; 
+}
+.horizon-g{
+    display: flex;
+    flex-direction: row;
+}
+.vehicleNo-g label {
+    color: #0F2043;
+    align-items: center;
+    position: relative;
+}
+
+.vehicleNo-g {
+    padding-top: 100px;
+    display: flex;
+    flex-direction: column;
+    color: #0F2043; 
+    align-items: center;
+    justify-content: center;
+}
+
+#vehicleno-g {
+    margin-left: 40px;
+    font-size: 20px;
+    background-color: white;
+    color: #0F2043;
+    justify-content: left;
+    align-items: left;
+}
+
+.maps-g {
+    width: 800px;
+    height: 600px;
+    display: block;
+    margin-top: 25px;
+    margin-left: 25px;
+    flex-direction: column;
+    align-items: right;
+    justify-content: right;
+}
+@media (max-width: 642px) {
+    
+    .vehicleNo-g {
+        padding-top: 10px;
+        margin-top:0;
+        display: flex;
+        flex-direction: column;
+        color: #0F2043; 
+        align-items: center;
+        justify-content: center;
+        place-items: center;
+    }
+    .box-g {
+        width: 100vw;
+        height: calc(100vh + 630px);
+        display: block;
+        flex-direction: column;
+        align-items: right;
+        justify-content: right;
+    }
+    .horizon-g{
+        display: flex;
+        flex-direction: column;
+    }
+    .maps-g {
+        padding-top: 20px;
+        display: block;
+        width: 350px;
+        height: auto;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        place-content: center;
+    }
+    
+}
