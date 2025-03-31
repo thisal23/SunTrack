@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import NavBar from '../../components/NavBar/NavBar';
 import TrackingNavBar from '../../components/TrackingNavBar/TrackingNavBar';
 import './TrackingPage.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import apiService from '../../config/axiosConfig';
 
 function TrackingPage() {
   const [coordinates, setCoordinates] = useState([7.211559,80.427956]);
+  const [geoFences, setGeoFences] = useState([]);
 
   const displayMap = async () => {
     try {
@@ -30,8 +32,32 @@ function TrackingPage() {
     }
   };
 
+  const display = async () => {
+    try{
+      const response = await apiService
+  .get("/geofence/all")
+  
+  const data = response.data.data;
+  console.log(data);
+  if (response.data.data) {
+    setGeoFences(response.data.data);
+  }
+  
+}
+catch (error) {
+  console.log(error);
+}
+
+ }
+
+
   useEffect(() => {
     displayMap();
+    
+  }, []);
+
+  useEffect(() => {
+    display();
   }, []);
 
   return (
@@ -56,7 +82,15 @@ function TrackingPage() {
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
+                /> 
+
+                {geoFences.map((geoFence, index) => (
+                  <Circle key={index} center={[geoFence.centerLatitude, geoFence.centerLongitude]} radius={parseInt(geoFence.radius)} color="blue" fillOpacity={0.5}>
+                    <Popup>
+                      {geoFence.name} - {geoFence.type}
+                    </Popup>
+                  </Circle>
+                ))}
                 <Marker position={coordinates}>
                   <Popup>
                     Latest location
