@@ -1,4 +1,4 @@
-.body {
+.body1 {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -6,17 +6,20 @@
     height: 100%; 
     width: 100%; }
 
-.box {
-    width: 100%;
+.box1 {
+    width:1200px;
     height: 860px;
-    display: block;
+    display: flex;
+    flex-direction: column;
     border-top-left-radius: 14px;
     border-top-right-radius: 14px;
-    background-color: #F0F3F8;
+    background-color: #d7e1f4;
     justify-content: center;
     align-items: center;
     margin-top: 80px; 
 }
+
+
 .horizon{
     display: flex;
     flex-direction: row;

@@ -65,8 +65,8 @@ catch (error) {
       <div>
         <NavBar />
       </div>
-      <div className="body">
-        <div className='box'>
+      <div className="body1">
+        <div className='box1'>
           <div className="navtrack-l">
             <TrackingNavBar />
           </div>
