@@ -1,0 +1,36 @@
+.input{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    color: #0F2043;
+    gap: 2rem;
+    margin-top: 20px;
+}
+
+.input label{
+    color: #0F2043;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.search-button4 {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #0F2043;
+    position: relative;
+    right: 60px;
+    top: 5px;
+  }
+
+  #vehicleNo{
+    width: 140px;
+    text-align: center;
+    padding: 8px;
+    font-size: 14px;
+    /* border: 1px solid #ccc; */
+    border-radius: 5px;
+    height: 30px;
+  }

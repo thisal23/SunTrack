@@ -1,0 +1,42 @@
+.date-picker-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .date-label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 10px;
+    color: #0F2043;
+  }
+  
+  .custom-datepicker {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #0F2043;
+    border-radius: 5px;
+    width: 100px;
+    height: 25px;
+  }
+  
+  .search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #0F2043;
+    position: relative;
+    right:32px; 
+    top: 2px;
+  }
+  
+  .search-button:hover {
+    color: #254e7a; 
+  }
+  
+  .search-icon {
+    width: 20px;
+    height: 20px;
+  }
