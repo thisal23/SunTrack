@@ -13,11 +13,13 @@ function Reportspage() {
       <div>
         <NavBar />
       </div>
+      <div className="bodyReport">
       <div className="boxReport">
         <div className="repoNav">
           <NavRepo />
         </div>
         
+      </div>
       </div>
     </>
   );

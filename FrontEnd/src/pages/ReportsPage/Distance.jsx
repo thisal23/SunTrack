@@ -17,6 +17,7 @@ function Distance() {
       <div>
         <NavBar />    
       </div>
+      <div className="bodyReport">
       <div className="boxReport">
         <div className="repoNav">
           <NavRepo />
@@ -35,7 +36,8 @@ function Distance() {
             <FaSearch />
           </button>
         </div>
-      </div>    
+      </div> 
+        </div>   
     </>
   );
 }

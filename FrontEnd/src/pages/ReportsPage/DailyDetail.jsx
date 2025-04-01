@@ -21,6 +21,7 @@ function DailyDetail() {
       <div>
         <NavBar />    
       </div>
+      <div className="bodyReport">
       <div className="boxReport">
         <div className="repoNav">
           <NavRepo />
@@ -65,7 +66,8 @@ function DailyDetail() {
             <FaSearch />
           </button>
         </div>
-      </div>    
+      </div> 
+        </div>   
     </>
   );
 }
