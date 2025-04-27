@@ -13,7 +13,8 @@ const Service = require("./Service");
 
 // Thisal work imports
 const geoname = require("./geoname");
-
+const geoFenceEvent = require("./geoFenceEvent");
+const gpsdata = require("./gpsdata");
 // Define the associations
 User.belongsTo(Role, {
   foreignKey: 'roleId',
@@ -26,7 +27,7 @@ UserDetail.belongsTo(User, {
   as: 'user',
 }); // Define the association
 
-
+geoFenceEvent.belongsTo(geoname, {foreignKey: 'geoId'});
 /* ################ Sachini Work ################ */
 VehicleDetail.belongsTo(Vehicle, { foreignKey: "vehicleId" });
 Vehicle.hasOne(VehicleDetail, { foreignKey: "vehicleId" });
@@ -61,4 +62,6 @@ module.exports = {
   Service,
   ServiceInfo,
   geoname,
+  geoFenceEvent,
+  gpsdata
 }; // Export the models

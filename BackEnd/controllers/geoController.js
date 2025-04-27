@@ -16,15 +16,38 @@ const addGeoFence = async (req, res) => {
 
     console.log("received Data" ,req.body);
     try {
-        const nameExists = await geoname.findOne({attributes: ['name'] , where: { name } });
-        if (nameExists) {
-            return res.status(400).json({ status: false, message: "Name already exists!" });
-        } 
-        const setName = await geoname.create({ name, type, centerLatitude, centerLongitude, radius, width, length });
-        if (setName) {
-            return res.status(200).json({ status: true, message: "Name added successfully!" });
-        } else {
-            return res.status(400).json({ status: false, message: "Name not added!" });
+        if(type === "circle"){
+            if(!radius || radius <= 0){
+                return res.status(400).json({ status: false, message: "Radius is required and should be greater than 0!" });
+            }
+            const nameExists = await geoname.findOne({attributes: ['name'] , where: { name } });
+            if (nameExists) {
+                return res.status(400).json({ status: false, message: "Name already exists!" });
+            } 
+            const setName = await geoname.create({ name, type, centerLatitude, centerLongitude, radius, width, length });
+            if (setName) {
+                return res.status(200).json({ status: true, message: "Name added successfully!" });
+            } else {
+                return res.status(400).json({ status: false, message: "Name not added!" });
+            }
+        }
+        else if(type === "square"){
+            if(!width || width <= 0 || !length || length <= 0){
+                return res.status(400).json({ status: false, message: "Width and Length are required and should be greater than 0!" });
+            }
+            const nameExists = await geoname.findOne({attributes: ['name'] , where: { name } });
+            if (nameExists) {
+                return res.status(400).json({ status: false, message: "Name already exists!" });
+            } 
+            const setName = await geoname.create({ name, type, centerLatitude, centerLongitude, radius, width, length });
+            if (setName) {
+                return res.status(200).json({ status: true, message: "Name added successfully!" });
+            } else {
+                return res.status(400).json({ status: false, message: "Name not added!" });
+            }
+        }
+        else{
+            return res.status(400).json({ status: false, message: "Invalid type! Type should be either circle or rectangle." });
         }
     } catch (err) {
         return res.status(500).json({ status: false, message: "Something went wrong!", error: err.message });

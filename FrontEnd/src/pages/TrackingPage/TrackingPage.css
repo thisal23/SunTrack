@@ -74,7 +74,7 @@
         padding-top: 10px;
         display: flex;
         flex-direction: column;
-        color: #0F2043; /* Fixed font color */
+        color: #0F2043; 
         align-items: center;
         justify-content: center;
         place-items: center;

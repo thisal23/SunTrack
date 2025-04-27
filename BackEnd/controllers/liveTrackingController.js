@@ -4,7 +4,7 @@ const { gpsdata } = require('../models');
 const getLiveTrackingData = async (req, res) => {
     try {
         const [liveTrackingData, metadata] = await sequelize.query(
-            "SELECT deviceId, latitude, longitude FROM gpsdata ORDER BY recDate DESC, recTime DESC LIMIT 1;"
+            "SELECT deviceId, latitude, longitude FROM gpsdatas ORDER BY recDate DESC, recTime DESC LIMIT 1;"
         );
         // console.log(liveTrackingData);
 

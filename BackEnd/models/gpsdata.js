@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const gpsdata = sequelize.define('LiveTracking', {
+const gpsdata = sequelize.define('gpsdata', {
     deviceId: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -26,11 +26,11 @@ const gpsdata = sequelize.define('LiveTracking', {
         allowNull: false
     },
     latitude: {
-        type: DataTypes.STRING,
+        type: DataTypes.DOUBLE,
         allowNull: false
     },
     longitude: {
-        type: DataTypes.STRING,
+        type: DataTypes.DOUBLE,
         allowNull: false
     },
     speed: {
@@ -49,6 +49,6 @@ const gpsdata = sequelize.define('LiveTracking', {
         type: DataTypes.STRING,
         allowNull: true
     }
-}, {timestamps: true})
+}, {tableName: 'gpsdatas', timestamps: false})
 
 module.exports = gpsdata;
