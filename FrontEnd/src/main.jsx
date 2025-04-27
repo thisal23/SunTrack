@@ -21,9 +21,13 @@ import "./App.css";
 import Login from "./components/authentication/Login.jsx";
 import ResetPassword from "./components/authentication/resetPassword.jsx";
 import CreatePassword from "./components/authentication/CreatePassword.jsx";
+
+import Register from "./components/authentication/Register.jsx";
+
 import DocumentMaintenance from "./pages/MaintenancePage/DocumentMaintenance.jsx";
 import ServiceMaintenance from "./pages/MaintenancePage/ServiceMaintenance.jsx";
 import Maintenance from "./pages/MaintenancePage/Maintenance.jsx";
+
 
 const router = createBrowserRouter([
   {
@@ -32,6 +36,15 @@ const router = createBrowserRouter([
   },
 
   {
+
+    path: "/register",
+    element: <Register/>,
+  },
+
+  {
+    path: "/",
+    element: <Login/>,
+
     path: "/login",
     element: <Login />,
   },
@@ -39,6 +52,7 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+
   },
   {
     path: "/forgot-password",

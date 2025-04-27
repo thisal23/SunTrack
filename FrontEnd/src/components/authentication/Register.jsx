@@ -151,7 +151,7 @@ const Register = () => {
                     <div className="input-group">
                         <label htmlFor="roleId">Role</label>
                         <select id="roleId" name="roleId" value={formData.roleId} onChange={handleChange}>
-                            <option value="1">Admin</option>
+                            <option value="1">FleetManager</option>
                             <option value="2">User</option>
                         </select>
                     </div>
@@ -171,7 +171,7 @@ const Register = () => {
                     {success && <p className="success-message">{success}</p>}
                     <button type="submit">Register</button>
                 </form>
-                <p>Already have an account? <a href="/login">Login here</a></p>
+                <p>Already have an account? <a href="/">Login here</a></p>
             </div>
         </div>
     );

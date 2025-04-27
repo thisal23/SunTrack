@@ -12,8 +12,8 @@ function App() {
         <Routes>
             <Route path="/create-password" element={<CreatePassword />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Register />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             {/* Add other routes here */}
         </Routes>
     );
