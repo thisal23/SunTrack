@@ -1,0 +1,22 @@
+.boxReport{
+    width: 1200px;
+    height: 860px;
+    display: flex;
+    flex-direction: column;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    background-color: #d7e1f4;
+    justify-content: center;
+    align-items: center;
+    margin-top: 80px; 
+
+}
+
+.bodyReport{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    place-content: center;
+    height: 100%; 
+    width: 100%;
+}

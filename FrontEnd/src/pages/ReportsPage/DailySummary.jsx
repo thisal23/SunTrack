@@ -18,7 +18,8 @@ function DailySummary() {
       <div>
         <NavBar />
       </div>
-      <div className="box">
+      <div className="bodyReport">
+      <div className="boxReport">
         <div className="repoNav">
           <NavRepo />
         </div>
@@ -36,6 +37,7 @@ function DailySummary() {
              <FaSearch />
             </button>
         </div>
+      </div>
       </div>
     </>
   );

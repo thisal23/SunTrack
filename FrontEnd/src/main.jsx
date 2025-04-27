@@ -7,7 +7,6 @@ import InfoPage from "./pages/InfoPage/InfoPage.jsx";
 import Dashboard from "./pages/Dashboard/Dashboard.jsx";
 import TrackingPage from "./pages/TrackingPage/TrackingPage.jsx";
 import ReportsPage from "./pages/ReportsPage/ReportsPage.jsx";
-import MaintenancePage from "./pages/MaintenancePage/MaintenancePage.jsx";
 import HistoryPage from "./pages/TrackingPage/HistoryPage.jsx";
 import GeoFencePage from "./pages/TrackingPage/GeoFencePage.jsx";
 import Idle from "./pages/ReportsPage/Idle.jsx";
@@ -22,7 +21,12 @@ import "./App.css";
 import Login from "./components/authentication/Login.jsx";
 import ResetPassword from "./components/authentication/resetPassword.jsx";
 import CreatePassword from "./components/authentication/CreatePassword.jsx";
+
 import Register from "./components/authentication/Register.jsx";
+
+import DocumentMaintenance from "./pages/MaintenancePage/DocumentMaintenance.jsx";
+import ServiceMaintenance from "./pages/MaintenancePage/ServiceMaintenance.jsx";
+import Maintenance from "./pages/MaintenancePage/Maintenance.jsx";
 
 
 const router = createBrowserRouter([
@@ -32,6 +36,7 @@ const router = createBrowserRouter([
   },
 
   {
+
     path: "/register",
     element: <Register/>,
   },
@@ -39,14 +44,23 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Login/>,
+
+    path: "/login",
+    element: <Login />,
+  },
+
+  {
+    path: "/login",
+    element: <Login />,
+
   },
   {
     path: "/forgot-password",
-    element: <ResetPassword/>,
+    element: <ResetPassword />,
   },
   {
     path: "/create-password",
-    element: <CreatePassword/>,
+    element: <CreatePassword />,
   },
 
   {
@@ -65,11 +79,6 @@ const router = createBrowserRouter([
     path: "/reports",
     element: <ReportsPage />,
   },
-  {
-    path: "/maintenance",
-    element: <MaintenancePage />,
-  },
-
   {
     path: "/history",
     element: <HistoryPage />,
@@ -109,6 +118,18 @@ const router = createBrowserRouter([
   {
     path: "/vehicle/all",
     element: <AllVehicle />,
+  },
+  {
+    path: "/maintenance/document-maintenance",
+    element: <DocumentMaintenance />,
+  },
+  {
+    path: "/maintenance/service-maintenance",
+    element: <ServiceMaintenance />,
+  },
+  {
+    path: "/maintenance",
+    element: <Maintenance />,
   },
 ]);
 

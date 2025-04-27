@@ -17,7 +17,8 @@ function Idle() {
         <div>
             <NavBar/>    
         </div>
-        <div className="box">
+        <div className="bodyReport">
+        <div className="boxReport">
             <div className="repoNav">
                 <NavRepo/>
             </div>
@@ -30,6 +31,8 @@ function Idle() {
               
             </div> 
         </div>    
+        </div>
+
     
     </>
   )
