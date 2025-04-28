@@ -11,7 +11,7 @@ import { RiEBikeLine } from "react-icons/ri";
 import { IoCarOutline } from "react-icons/io5";
 import { createRoot } from "react-dom/client";
 import { Modal } from "antd";
-import AssignCard from "./components/AssignCard";
+import AssignCard from "./AssignCard";
 import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 

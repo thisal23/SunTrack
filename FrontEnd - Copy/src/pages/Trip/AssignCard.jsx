@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import apiService from "../../../config/axiosConfig";
+import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 
 // Sachini part
