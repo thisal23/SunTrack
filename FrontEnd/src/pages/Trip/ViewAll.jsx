@@ -19,7 +19,7 @@ import { toast } from "react-toastify";
 const ViewAll = () => {
   const tableRef = useRef(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const [tripData, setTripData] = useState([]);
   const [tripId, setTripId] = useState("");
 
