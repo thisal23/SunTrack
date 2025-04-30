@@ -16,7 +16,7 @@
     "antd": "^5.24.3",
     "axios": "^1.8.2",
     "datatables.net-dt": "^2.2.2",
-    "datatables.net-react": "^1.0.0",
+    "datatables.net-react": "^1.0.1",
     "datatables.net-responsive-dt": "^3.0.4",
     "datatables.net-select-dt": "^3.0.0",
     "leaflet": "^1.9.4",

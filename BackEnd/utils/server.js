@@ -1,4 +1,6 @@
 require('dotenv').config();
+
+require('../shedulers/geoFenceSheduler');
 const express = require('express');
 const connectDB = require('../config/db'); // Assuming you have a database connection file
 const { User, Role, UserDetail } = require('../models');
@@ -8,6 +10,7 @@ const geoFenceEventRoutes = require('../routes/geoFenceEventRoutes');
 const cors = require("cors");
 const { isVehicleInGeoFence } = require('../controllers/geoFenceEventController');
 const mapRouteHistory = require('../routes/routeHistoryRoute');
+const geoFenceReportRoutes = require('../routes/geoFenceReportRoutes');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
@@ -32,6 +35,9 @@ app.use('/api', liveTrackingRoutes);
 app.use('/api', geoRoutes);
 app.use('/api',geoFenceEventRoutes);
 app.use('/api',mapRouteHistory);
+app.use('/api',geoFenceReportRoutes);
+
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

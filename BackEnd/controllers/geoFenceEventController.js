@@ -3,7 +3,7 @@ const geolib = require('geolib');
 const sequelize = require('../config/db');
 
 
-const checkGeofence = async (req, res) => {
+const checkGeofence = async () => {
     try {
         
         const latestLocations = await gpsdata.findAll({
@@ -47,27 +47,50 @@ const checkGeofence = async (req, res) => {
                 );
                 if (isInside) {
                     matchedGeo = fence;
-                    const now = new Date();
-                    const eTime = now.toTimeString().split(' ')[0];
-                    await geoFenceEvent.create({
-                        deviceId: latest.deviceId,
-                        geoId: matchedGeo ? matchedGeo.geoId : null,
-                        eType: matchedGeo ? 'IN' : 'OUT',
-                        eDate: new Date(),
-                        eTime: eTime
-                    });
+                    
+
                     break;
                 }
             }
+            const lastEvent = await geoFenceEvent.findOne({
+                where: { deviceId: latest.deviceId },
+                order: [['eDate', 'DESC'], ['eTime', 'DESC']],
+                raw: true
+            });
+            console.log("Last Event: ", lastEvent);
+            const now = new Date();
+            const eTime = now.toTimeString().split(' ')[0];
+
+            if(matchedGeo){
+                if(!lastEvent|| lastEvent.eType === 'OUT' || lastEvent.geoId !== matchedGeo.geoId){
+                    await geoFenceEvent.create({
+                        deviceId: latest.deviceId,
+                        geoId: matchedGeo.geoId,
+                        eType: 'IN',
+                        eDate: now,
+                        eTime: eTime
+                    });
+                    
+                }
+            }else{
+                if(lastEvent && lastEvent.eType === 'IN'){
+                    await geoFenceEvent.create({
+                        deviceId: latest.deviceId,
+                        geoId: lastEvent.geoId,
+                        eType: 'OUT',
+                        eDate: now,
+                        eTime: eTime
+                    });
+                }
+            }
+
 
             
         }
 
-        return res.status(200).json({ status: true, message: "Geofence check completed." });
-
+    console.log("Geofence check completed successfully.");
     } catch (error) {
         console.error("Geofence check error:", error);
-        return res.status(500).json({ status: false, message: "Internal server error." });
     }
 };
 
