@@ -13,7 +13,9 @@ const mapRouteHistory = require('../routes/routeHistoryRoute');
 const geoFenceReportRoutes = require('../routes/geoFenceReportRoutes');
 const app = express();
 const PORT = process.env.PORT || 8000;
-
+const dailySummaryRoutes = require('../routes/DailySumreports');
+const dailydetailRoutes = require('../routes/Dailydetail');
+const distanceRoutes = require('../routes/distanceRoutes');
 connectDB;
 
 
@@ -36,7 +38,9 @@ app.use('/api', geoRoutes);
 app.use('/api',geoFenceEventRoutes);
 app.use('/api',mapRouteHistory);
 app.use('/api',geoFenceReportRoutes);
-
+app.use('/api',dailySummaryRoutes);
+app.use('/api',dailydetailRoutes);
+app.use('/api', distanceRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
