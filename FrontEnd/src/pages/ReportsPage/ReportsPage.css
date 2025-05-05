@@ -55,10 +55,7 @@
     top: 2px;
   }
   
-  .search-button:hover {
-    color: #254e7a; 
-  }
-
+  
  .report{
     display: flex;
     flex-direction: column;
