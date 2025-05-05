@@ -9,14 +9,17 @@ import apiService from '../../config/axiosConfig';
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
 
+DataTable.use(DT);
 
 function Reportspage() {
   // const [selectedDate, setSelectedDate] = useState(null);
   const [selectedGeoName, setSelectedGeoName] = useState('');
   const [geoReport, setGeoReport] = useState([]);
-  DataTable.use(DT);
+
 
   const displayGeoReport = async() => {
+
+    
     try{
       console.log("Selected Geo Name:", selectedGeoName);
       const response = await apiService.get(`/reports/${selectedGeoName}`);
@@ -61,7 +64,7 @@ function Reportspage() {
             placeholder="Enter geofence name"
             className="geofence-input" onChange={(e) => setSelectedGeoName(e.target.value)}
           />
-          <button className="search-button" onClick={displayGeoReport}> 
+          <button className="search-button" onClick={displayGeoReport} type='button'>  
             <FaSearch />
           </button>
         </div>)}

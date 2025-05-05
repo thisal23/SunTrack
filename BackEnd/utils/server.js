@@ -11,6 +11,8 @@ const cors = require("cors");
 const { isVehicleInGeoFence } = require('../controllers/geoFenceEventController');
 const mapRouteHistory = require('../routes/routeHistoryRoute');
 const geoFenceReportRoutes = require('../routes/geoFenceReportRoutes');
+const idleReportRoutes = require('../routes/idleReportRoutes');
+
 const app = express();
 const PORT = process.env.PORT || 8000;
 
@@ -36,7 +38,7 @@ app.use('/api', geoRoutes);
 app.use('/api',geoFenceEventRoutes);
 app.use('/api',mapRouteHistory);
 app.use('/api',geoFenceReportRoutes);
-
+app.use('/api',idleReportRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
