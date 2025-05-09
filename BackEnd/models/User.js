@@ -1,4 +1,4 @@
-const {DataTypes} = require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const bcrypt = require('bcrypt');
 
@@ -24,10 +24,10 @@ const User = sequelize.define('User', {
     allowNull: false,
   },
 
-    email: {
+  email: {
     type: DataTypes.STRING,
     allowNull: false,
-    },
+  },
 
   password: {
     type: DataTypes.STRING,
@@ -42,6 +42,18 @@ const User = sequelize.define('User', {
   isActive: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
+  },
+
+  // Add resetPasswordOtp column
+  resetPasswordOtp: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  // Add resetPasswordExpires column
+  resetPasswordExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
   },
 
 }, {

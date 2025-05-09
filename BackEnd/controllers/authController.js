@@ -1,17 +1,18 @@
-const bcrypt = require('bcrypt'); // ✅ Use bcryptjs
+const bcrypt = require('bcrypt'); // Use bcryptjs
 const crypto = require('crypto'); 
 const sendEmail = require('../utils/sendEmail'); 
 const jwt = require('jsonwebtoken');
-const { User } = require('../models'); // ✅ Ensure correct import
-require('dotenv').config(); // ✅ Load environment variables
+const { Op } = require('sequelize');
+const { User } = require('../models'); // Ensure correct import
+require('dotenv').config(); // Load environment variables
 
 exports.register = async (req, res) => {
     try {
         const { firstName, lastName, userName, email, password, roleId, isActive } = req.body;
 
-        console.log("Received Data:", req.body); // ✅ Log received data
+        console.log("Received Data:", req.body); //  Log received data
 
-        // ✅ Check if user already exists
+        //  Check if user already exists
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
@@ -30,7 +31,7 @@ exports.register = async (req, res) => {
 
         res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (error) {
-        console.error("Registration Error:", error); // ✅ Log full error
+        console.error("Registration Error:", error); // Log full error
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
@@ -91,153 +92,66 @@ exports.login = async (req, res) => {
 };
 
 
-// forgot password function (working)
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-
+        
         // Find user by email
         const user = await User.findOne({ where: { email } });
-
+        
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
-        // Generate a secure token
-        const resetToken = crypto.randomBytes(32).toString("hex");
-
-        // Set token and expiry in user record
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-        await user.save();
-
         
-
-        // Construct the password reset URL
-        const resetUrl = `http://yourfrontend.com/reset-password?token=${resetToken}&email=${email}`;
-
-        // Send email
+        // Generate a 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Set OTP and expiry in user record
+        user.resetPasswordOtp = otp;
+        user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+        
+        await user.save();
+        
+        // Send email with OTP
         await sendEmail(
             user.email,
-            "Password Reset Request",
-            `Click the link to reset your password: ${resetUrl}\n\nThis link expires in 10 minutes.`
+            "Password Reset OTP",
+            `Your OTP for password reset is: ${otp}\n\nThis OTP expires in 10 minutes.`
         );
-
-        res.json({ message: 'Password reset link sent to your email' });
+        
+        res.json({ message: 'OTP sent to your email' });
     } catch (error) {
         console.error("Forgot Password Error:", error);
         res.status(500).json({ message: error.message });
     }
 };
 
-// // forgot password function 3
-
-
-// exports.forgotPassword = async (req, res) => {
-//   try {
-//     const { email } = req.body;
-//     const user = await User.findOne({ where: { email } });
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     // Generate reset token
-//     const resetToken = crypto.randomBytes(32).toString("hex");
-//     console.log("Generated Token:", resetToken); // Debugging
-
-//     // Hash token before storing
-//     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-//     console.log("Hashed Token:", hashedToken); // Debugging
-
-//     // Set expiry time (1 hour from now)
-//     const expiryTime = Date.now() + 3600000;
-//     console.log("Expiry Time:", expiryTime); // Debugging
-
-//     // Save token and expiry to database
-//     user.resetToken = hashedToken;
-//     user.resetTokenExpiry = expiryTime;
-
-//     await user.save();
-//     console.log("Token saved successfully in database");
-
-//     // Send the reset token to the user's email (send plain token, not hashed)
-//     sendResetEmail(user.email, resetToken);
-
-//     res.json({ message: "Reset token sent to email" });
-//   } catch (error) {
-//     console.error("Error saving token:", error);
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// };
-
-
-// // forgot password function2
-
-// exports.forgotPassword = async (req, res) => {
-//   try {
-//     const { email } = req.body;
-//     const user = await User.findOne({ where: { email } });
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     // Generate token and hash it before storing
-//     const resetToken = crypto.randomBytes(32).toString("hex");
-//     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-
-//     // Save the hashed token in the database with an expiry time
-//     user.resetToken = hashedToken;
-//     user.resetTokenExpiry = Date.now() + 3600000; // 1 hour expiry
-//     await user.save();
-
-//     // Send the reset token to the user's email (not hashed version)
-//     sendResetEmail(user.email, resetToken);
-
-//     res.json({ message: "Reset token sent to email" });
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// };
-
-
 
 // reset password function
 
 exports.resetPassword = async (req, res) => {
     try {
-        const { token, email, newPassword } = req.body;
+        const { email, otp, newPassword } = req.body;
 
-        // Find user by email and reset token
-        // const user = await User.findOne({
-        //     where: {
-        //         email,
-        //         resetPasswordToken: token,
-        //         resetPasswordExpires: { $gt: Date.now() } // Ensure token is not expired
-        //     }
-        // });
-        const { Op } = require("sequelize");
-
+        // Find user by email and OTP
         const user = await User.findOne({
-        where: {
-        resetToken: token,
-        resetTokenExpiry: { [Op.gt]: Date.now() } // ✅ Correct way in Sequelize
-    }
-});
-
+            where: {
+                email,
+                resetPasswordOtp: otp,
+                resetPasswordExpires: { [Op.gt]: Date.now() } // Ensure OTP is not expired
+            }
+        });
 
         if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
 
         // Hash new password
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
 
-        // Clear reset token fields
-        user.resetPasswordToken = null;
+        // Clear reset OTP fields
+        user.resetPasswordOtp = null;
         user.resetPasswordExpires = null;
 
         await user.save();
