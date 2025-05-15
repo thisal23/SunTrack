@@ -76,7 +76,19 @@ const AllVehicle = () => {
   };
 
   const handleDelete = async (e) => {
-    const delete_response = await apiService.delete("vehicle/remove/:${id}");
+    try {
+      const delete_response = await apiService.delete("vehicle/remove/:${id}");
+      if (res.status === 200) {
+        toast.success("Vehicle deleted successfully");
+        fetchVehicles(); //refresh the table
+        setIsModal_3_Open(false);
+      } else {
+        toast.error("Failed to delete vehicle");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occured during deletion");
+    }
   };
 
   useEffect(() => {
@@ -96,8 +108,8 @@ const AllVehicle = () => {
         `<a href="${config.fileUrl}${item.VehicleDetail.licenceDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
         `<a href="${config.fileUrl}${item.VehicleDetail.insuranceDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
         `<a href="${config.fileUrl}${item.VehicleDetail.ecoDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
-        `${item.vehicleDetail.licenceId}`,
-        `${item.vehiicleTitle}`,
+        `${item.VehicleDetail.licenceId}`,
+        `${item.vehicleTitle}`,
       ]),
       columns: [
         { title: "ID" },
