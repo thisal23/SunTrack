@@ -28,7 +28,6 @@ import DocumentMaintenance from "./pages/MaintenancePage/DocumentMaintenance.jsx
 import ServiceMaintenance from "./pages/MaintenancePage/ServiceMaintenance.jsx";
 import Maintenance from "./pages/MaintenancePage/Maintenance.jsx";
 
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -36,23 +35,12 @@ const router = createBrowserRouter([
   },
 
   {
-
     path: "/register",
-    element: <Register/>,
+    element: <Register />,
   },
-
-  {
-    path: "/",
-    element: <Login/>,
-
-    path: "/login",
-    element: <Login />,
-  },
-
   {
     path: "/login",
     element: <Login />,
-
   },
   {
     path: "/forgot-password",

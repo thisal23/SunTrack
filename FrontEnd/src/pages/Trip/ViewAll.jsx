@@ -12,65 +12,66 @@ import { IoCarOutline } from "react-icons/io5";
 import { createRoot } from "react-dom/client";
 import { Modal } from "antd";
 import AssignCard from "./AssignCard";
+import PendingTripEditCard from "./PendingTripEditCard";
 import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
+import NavBar from "../../components/NavBar/NavBar";
 
 // Sachini part
 const ViewAll = () => {
   const tableRef = useRef(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModal_assignOpen, setIsModal_assignOpen] = useState(false);
+  const [isModal_editOpen, setIsModal_editOpen] = useState(false);
+  const [isModal_deleteOpen, setIsModal_deleteOpen] = useState(false);
   const [tripData, setTripData] = useState([]);
   const [tripId, setTripId] = useState("");
 
-  const showModal = (id) => {
-    setIsModalOpen(true);
+  const showModal_assign = (id) => {
+    setIsModal_assignOpen(true);
 
     setTripId(id);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
+  const showModal_edit = (id) => {
+    setIsModal_editOpen(true);
+    setTripId(id);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  const showModal_delete = (id) => {
+    setIsModal_deleteOpen(true);
+    setTripId(id);
   };
 
-  const data = [
-    [
-      1,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Pending",
-      "Test Remarks",
-    ],
-    [
-      2,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Approved",
-      "Test Remarks",
-    ],
-    [
-      3,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Rejected",
-      "Test Remarks",
-    ],
-  ];
+  const handleOk_assign = () => {
+    setIsModal_assignOpen(false);
+  };
+
+  const handleOk_edit = () => {
+    setIsModal_editOpen(false);
+  };
+
+  const handleOk_delete = () => {
+    setIsModal_deleteOpen(false);
+  };
+
+  const handleCancel_edit = () => {
+    setIsModal_editOpen(false);
+  };
+
+  const handleCancel_delete = () => {
+    setIsModal_deleteOpen(false);
+  };
+
+  const handlecancel_assign = () => {
+    setIsModal_assignOpen(false);
+  };
 
   const fetchTrips = async () => {
     try {
       const data = await apiService
-        .get("trip/trip/all")
+        .get("trip/all")
         .catch((err) => console.log(`api error`, err));
-
-      // axios.get("http://localhost:8000/api/trip/trip/all")
 
       if (data.status !== 200) {
         toast.error("Trip data fetching error!!!");
@@ -130,7 +131,6 @@ const ViewAll = () => {
           data: null,
           render: function (data, type, row) {
             return `
-              <button class="btn-view" data-id="${row[0]}" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
               <button class="btn-edit" data-id="${row[0]}" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
               <button class="btn-delete" data-id="${row[0]}" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
             `;
@@ -150,11 +150,12 @@ const ViewAll = () => {
       },
     });
 
-    $(tableRef.current).on("click", ".btn-view", function () {
-      // alert(`Viewing trip ID: ${$(this).data("id")}`);
-    });
+    // $(tableRef.current).on("click", ".btn-view", function () {
+    //   // alert(`Viewing trip ID: ${$(this).data("id")}`);
+    // });
 
     $(tableRef.current).on("click", ".btn-edit", function () {
+      showModal_edit($(this).data("id"));
       // alert(`Editing trip ID: ${$(this).data("id")}`);
     });
 
@@ -165,7 +166,7 @@ const ViewAll = () => {
     });
 
     $(tableRef.current).on("click", ".assign_data", function () {
-      showModal($(this).data("id"));
+      showModal_assign($(this).data("id"));
     });
 
     return () => {
@@ -173,34 +174,48 @@ const ViewAll = () => {
         $(tableRef.current).DataTable().destroy();
       }
     };
-  }, [data]);
+  }, [tripData]);
 
   return (
-    <div className="container mx-auto w-full">
-      <div className="flex flex-row justify-start my-5">
-        <span className="text-3xl text-[#0F2043] font-semibold">
-          Trip &gt; View All Trip
-        </span>
-      </div>
-      <div className="border-b-1 border-[#000] w-full mb-5"></div>
-      <div className="flex flex-row w-full mx-auto custom_table">
-        <table
-          ref={tableRef}
-          className="display"
-          style={{ width: "100%" }}
-        ></table>
+    <>
+      <NavBar />
+      <div className="container_custom mx-auto w-full pt-15">
+        <div className="flex flex-row justify-start my-5">
+          <span className="text-3xl text-[#0F2043] font-semibold">
+            Trip &gt; View All Trip
+          </span>
+        </div>
+        <div className="border-b-1 border-[#000] w-full mb-5"></div>
+        <div className="text-black flex flex-row w-full mx-auto custom_table">
+          <table
+            ref={tableRef}
+            className="display"
+            style={{ width: "100%" }}
+          ></table>
 
-        <Modal
-          title="Assign Driver/Vehicle"
-          open={isModalOpen}
-          onCancel={handleCancel}
-          cancelButtonProps={{ style: { display: "none" } }}
-          okButtonProps={{ style: { display: "none" } }}
-        >
-          <AssignCard tripId={tripId} />
-        </Modal>
+          <Modal
+            title="Assign Driver/Vehicle"
+            open={isModal_assignOpen}
+            onCancel={handlecancel_assign}
+            cancelButtonProps={{ style: { display: "none" } }}
+            okButtonProps={{ style: { display: "none" } }}
+          >
+            <AssignCard tripId={tripId} />
+          </Modal>
+
+          <Modal
+            title="Edit Trip"
+            open={isModal_editOpen}
+            onCancel={handleCancel_edit}
+            cancelButtonProps={{ style: { display: "none" } }}
+            okButtonProps={{ style: { display: "none" } }}
+          >
+            {" "}
+            <PendingTripEditCard tripId={tripId} />
+          </Modal>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

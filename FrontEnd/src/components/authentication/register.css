@@ -88,8 +88,6 @@ button:hover {
     }
 }
 
-/* Add these styles to your register.css file */
-
 .checkbox-group {
     display: flex;
     flex-direction: column;
@@ -100,7 +98,6 @@ button:hover {
     margin-top: 5px;
   }
   
-  /* You might need to adjust these styles to match your existing design */
   .input-group input[type="checkbox"] {
     width: auto;
     height: auto;

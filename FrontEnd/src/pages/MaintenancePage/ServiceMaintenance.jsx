@@ -6,7 +6,7 @@ const ServiceMaintenance = () => {
     <>
       <>
         <NavBar />
-        <div className="container mx-auto w-full">
+        <div className="container_custom mx-auto w-full py-15">
           <div className="flex flex-row justify-start my-5">
             <span className="text-3xl text-[#0F2043] font-semibold">
               Maintenance &gt; Service Maintenance

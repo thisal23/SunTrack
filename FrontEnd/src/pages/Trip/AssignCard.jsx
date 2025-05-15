@@ -11,7 +11,7 @@ const AssignCard = ({ tripId }) => {
 
   const fetchVehicleData = async () => {
     try {
-      const data = await apiService.get("vehicle/vehicle/all");
+      const data = await apiService.get("vehicle/all");
 
       if (data.status !== 200) {
         toast.error("Trip data fetching error!!!");
@@ -25,7 +25,7 @@ const AssignCard = ({ tripId }) => {
 
   const fetchDriver = async () => {
     try {
-      const data = await apiService.get(`trip/trip/driver/${selectedVehicle}`);
+      const data = await apiService.get(`trip/driver/${selectedVehicle}`);
 
       if (data.status !== 200) {
         toast.error("Driver data fetching error!!!");
@@ -53,7 +53,7 @@ const AssignCard = ({ tripId }) => {
         `trip/trip/assign_vehicle/${tripId}`,
         { vehicleId: selectedVehicle }
       );
-      const driver = await apiService.put(`trip/trip/assign_driver/${tripId}`, {
+      const driver = await apiService.put(`trip/assign_driver/${tripId}`, {
         driverId: selectedDriver,
       });
 

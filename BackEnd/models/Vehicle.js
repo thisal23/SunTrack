@@ -23,11 +23,6 @@ const Vehicle = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    model: {
-      // 2021, 2022, 2023 - Laurel Spirit / X5 / z5
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     image: {
       // image url saving
       type: DataTypes.STRING(500),
@@ -41,6 +36,14 @@ const Vehicle = sequelize.define(
         key: "id",
       },
     },
+    model:{
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references:{
+        model: "VehicleModels",
+        key:"id",
+      },
+        },
   },
   { timestamps: true }
 );

@@ -17,10 +17,6 @@ const VehicleDetail = sequelize.define(
         key: "id",
       },
     },
-    color: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     licenseId: {
       type: DataTypes.STRING,
       allowNull: false,

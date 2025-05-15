@@ -10,7 +10,7 @@ const DriverInfoCard = () => {
       </div>
 
       <div>
-        <div className="rounded-full flex flex-row justify-center">
+        <div className="rounded flex flex-row justify-center">
           <img src={user} alt="user_img" className="w-50 h-50" />
         </div>
       </div>

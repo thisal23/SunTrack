@@ -12,7 +12,9 @@ const { isVehicleInGeoFence } = require('../controllers/geoFenceEventController'
 const mapRouteHistory = require('../routes/routeHistoryRoute');
 const geoFenceReportRoutes = require('../routes/geoFenceReportRoutes');
 const idleReportRoutes = require('../routes/idleReportRoutes');
-
+const vehicleRoutes = require('../routes/vehicleRoutes');
+const userRoutes = require('../routes/tripRoutes');
+const tripRoutes = require('../routes/tripRoutes');
 const app = express();
 const PORT = process.env.PORT || 8000;
 const dailySummaryRoutes = require('../routes/DailySumreports');
@@ -30,13 +32,13 @@ app.use(cors({
   allowedHeaders: "Content-Type,Authorization"
 }));
 
-
-
-
 // Define Routes
 app.use('/api/auth', require('../routes/authRoutes'));
 app.use('/api', liveTrackingRoutes);
 app.use('/api', geoRoutes);
+app.use('/api', userRoutes)
+app.use('/api', vehicleRoutes)
+app.use('/api', tripRoutes) 
 app.use('/api',geoFenceEventRoutes);
 app.use('/api',mapRouteHistory);
 app.use('/api',geoFenceReportRoutes);

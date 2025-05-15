@@ -12,63 +12,56 @@ import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 import { config } from "../../config/config";
 import NavBar from "../../components/NavBar/NavBar";
+import VehicleInfoCard from "./VehicleInfoCard";
+import VehicleEditCard from "./VehicleEditCard";
+import VehicleDeleteCard from "./VehicleDeleteCard";
 
 // Sachini part
 const AllVehicle = () => {
   const tableRef = useRef(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModal_1_Open, setIsModal_1_Open] = useState(false);
+  const [isModal_2_Open, setIsModal_2_Open] = useState(false);
+  const [isModal_3_Open, setIsModal_3_Open] = useState(false);
   const [vehicleData, setVehicleData] = useState([]);
-  const [tripId, setTripId] = useState("");
+  const [VehicleId, setVehicleId] = useState("");
+  const [vehicleName, setVehicleName] = useState("");
+  const [licenseId, setLicenseId] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
 
-  const showModal = (id) => {
-    setIsModalOpen(true);
-
-    setTripId(id);
+  const showModal_1 = (id) => {
+    setIsModal_1_Open(true);
+    setVehicleId(id);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
+  const showModal_2 = (id) => {
+    setIsModal_2_Open(true);
+    setVehicleId(id);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  const showModal_3 = (id, name) => {
+    setIsModal_3_Open(true);
+    setVehicleId(id);
+    setVehicleName(name);
   };
 
-  const data = [
-    [
-      1,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Pending",
-      "Test Remarks",
-    ],
-    [
-      2,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Approved",
-      "Test Remarks",
-    ],
-    [
-      3,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Rejected",
-      "Test Remarks",
-    ],
-  ];
+  const handleCancel_1 = () => {
+    setIsModal_1_Open(false);
+  };
+
+  const handleCancel_2 = () => {
+    setIsModal_2_Open(false);
+  };
+
+  const handleCancel_3 = () => {
+    setIsModal_3_Open(false);
+  };
 
   const fetchVehicles = async () => {
     try {
       const data = await apiService
-        .get("vehicle/vehicle/all")
+        .get("vehicle/all")
         .catch((err) => console.log(`api error`, err));
-
-      // axios.get("http://localhost:8000/api/trip/trip/all")
 
       if (data.status !== 200) {
         toast.error("Vehicle data fetching error!!!");
@@ -80,6 +73,10 @@ const AllVehicle = () => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleDelete = async (e) => {
+    const delete_response = await apiService.delete("vehicle/remove/:${id}");
   };
 
   useEffect(() => {
@@ -94,16 +91,18 @@ const AllVehicle = () => {
     $(tableRef.current).DataTable({
       data: vehicleData?.map((item) => [
         item.id,
-        `${item.vehicleTitle}/${item.vehicleTypeTwo}`,
-        `${item.VehicleBrand.title}/${item.VehicleDetail.color}`,
+        `${item.VehicleBrand.title}/${item.vehicleTitle}`,
+        `${item.VehicleDetail.color}/${item.vehicleTypeTwo}`,
         `<a href="${config.fileUrl}${item.VehicleDetail.licenceDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
         `<a href="${config.fileUrl}${item.VehicleDetail.insuranceDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
         `<a href="${config.fileUrl}${item.VehicleDetail.ecoDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
+        `${item.vehicleDetail.licenceId}`,
+        `${item.vehiicleTitle}`,
       ]),
       columns: [
         { title: "ID" },
-        { title: "Title/Type" },
-        { title: "Brand/Color" },
+        { title: "Brand/Title" },
+        { title: "Color/Type" },
         { title: "License Document" },
         { title: "Insurance Document" },
         { title: "ECO Document" },
@@ -111,10 +110,18 @@ const AllVehicle = () => {
           title: "Action",
           data: null,
           render: function (data, type, row) {
+            console.log(row);
             return `
-              <button class="btn-view" data-id="${row[0]}" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
-              <button class="btn-edit" data-id="${row[0]}" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
-              <button class="btn-delete" data-id="${row[0]}" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
+              <button class="btn-view" data-id="${
+                row[0]
+              }" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
+              <button class="btn-edit" data-id="${
+                row[0]
+              }" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
+              <button class="btn-delete" data-id="${row[0]}" data-dt="${
+              row[1].split("/")[0]
+            }" data-licence="${row[6]}" data-model="${row[7]}" 
+            }" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
             `;
           },
         },
@@ -123,16 +130,25 @@ const AllVehicle = () => {
 
     $(tableRef.current).on("click", ".btn-view", function () {
       // alert(`Viewing trip ID: ${$(this).data("id")}`);
+      showModal_1($(this).data("id"));
     });
 
     $(tableRef.current).on("click", ".btn-edit", function () {
-      // alert(`Editing trip ID: ${$(this).data("id")}`);
+      showModal_2($(this).data("id"));
     });
 
     $(tableRef.current).on("click", ".btn-delete", function () {
-      if (window.confirm("Are you sure you want to delete this trip?")) {
-        // alert(`Deleted trip ID: ${$(this).data("id")}`);
-      }
+      const id = $(this).data("id");
+      const name = $(this).data("dt");
+      const license = $(this).data("licence");
+      const model = $(this).data("model");
+
+      setVehicleId(id);
+      setVehicleName(name);
+      setLicenseId(license);
+      setVehicleModel(model);
+
+      setIsModal_3_Open(true);
     });
 
     $(tableRef.current).on("click", ".assign_data", function () {
@@ -149,14 +165,14 @@ const AllVehicle = () => {
   return (
     <>
       <NavBar />
-      <div className="container mx-auto w-full">
+      <div className="_custom mx-auto w-full py-15">
         <div className="flex flex-row justify-start my-5">
           <span className="text-3xl text-[#0F2043] font-semibold">
             Vehicle &gt; All Vehicles
           </span>
         </div>
         <div className="border-b-1 border-[#000] w-full mb-5"></div>
-        <div className="flex flex-row w-full mx-auto custom_table">
+        <div className="text-black flex flex-row w-full mx-auto custom_table">
           <table
             ref={tableRef}
             className="display"
@@ -164,6 +180,38 @@ const AllVehicle = () => {
           ></table>
         </div>
       </div>
+
+      <Modal
+        open={isModal_1_Open}
+        onCancel={handleCancel_1}
+        // cancelButtonProps={{ style: { display: "none" } }}
+        okButtonProps={{ style: { display: "none" } }}
+      >
+        <VehicleInfoCard />
+      </Modal>
+
+      <Modal
+        open={isModal_2_Open}
+        onCancel={handleCancel_2}
+        // cancelButtonProps={{ style: { display: "none" } }}
+        // okButtonProps={{ style: { display: "none" } }}
+      >
+        <VehicleEditCard vehicleId={VehicleId} />
+      </Modal>
+
+      <Modal
+        open={isModal_3_Open}
+        onCancel={handleCancel_3}
+        onOk={handleDelete}
+        // cancelButtonProps={{ style: { display: "none" } }}
+        // okButtonProps={{ style: { display: "none" } }}
+      >
+        <VehicleDeleteCard
+          title={vehicleName}
+          licenceId={licenseId}
+          vehicleModel={vehicleModel}
+        />
+      </Modal>
     </>
   );
 };
