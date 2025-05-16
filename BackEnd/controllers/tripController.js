@@ -130,14 +130,6 @@ const fetchAllTrips = async (req, res) => {
           model: Trip,
           required: true,
         },
-        // {
-        //   model: User,
-        //   required: false,
-        // },
-        // {
-        //   model: Vehicle,
-        //   required: false,
-        // },
       ],
     });
 

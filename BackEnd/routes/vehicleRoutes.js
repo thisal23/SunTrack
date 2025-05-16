@@ -6,8 +6,6 @@ const {
   deleteBrands,
   createModel,
   fetchModels,
-  updateModels,
-  deleteModels,
   createVehicle,
   fetchVehicle,
   fetchVehicleById,
@@ -29,8 +27,6 @@ router.delete("/brand/destroy/:id", deleteBrands);
 // Vehicle Model routes
 router.post("/model/create", createModel);
 router.get("/model/all", fetchModels);
-// router.put("/model/update/:id", updateModels);
-// router.delete("/model/destroy/:id", deleteModels);
 
 // Vehicle Route
 router.post(

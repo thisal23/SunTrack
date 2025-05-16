@@ -150,18 +150,12 @@ const ViewAll = () => {
       },
     });
 
-    // $(tableRef.current).on("click", ".btn-view", function () {
-    //   // alert(`Viewing trip ID: ${$(this).data("id")}`);
-    // });
-
     $(tableRef.current).on("click", ".btn-edit", function () {
       showModal_edit($(this).data("id"));
-      // alert(`Editing trip ID: ${$(this).data("id")}`);
     });
 
     $(tableRef.current).on("click", ".btn-delete", function () {
       if (window.confirm("Are you sure you want to delete this trip?")) {
-        // alert(`Deleted trip ID: ${$(this).data("id")}`);
       }
     });
 

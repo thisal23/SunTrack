@@ -27,7 +27,7 @@ const VehicleDetail = sequelize.define(
       allowNull: false,
     },
     insuranceType: {
-      type: DataTypes.STRING, // Full Insurance - Third Party
+      type: DataTypes.STRING, // Full Insurance, Third Party
       allowNull: false,
     },
     insuranceNo: {

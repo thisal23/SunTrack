@@ -16,7 +16,6 @@ router.post("/trip/create", createTrip);
 router.get("/trip/all", fetchAllTrips);
 router.get("/trip/driver/:id", fetchDriverForTrip);
 router.put("/trip/assign_driver/:id", assignDriver);
-// router.post('/tripdetail/create',createTripDetail)
 router.put("/trip/assign_vehicle/:id", assignVehicle);
 router.get("/trip/count", fetchTripCount);
 router.get("/trip/pending", fetchPendingTrips)

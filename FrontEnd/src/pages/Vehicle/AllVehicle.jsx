@@ -141,7 +141,6 @@ const AllVehicle = () => {
     });
 
     $(tableRef.current).on("click", ".btn-view", function () {
-      // alert(`Viewing trip ID: ${$(this).data("id")}`);
       showModal_1($(this).data("id"));
     });
 
@@ -196,18 +195,12 @@ const AllVehicle = () => {
       <Modal
         open={isModal_1_Open}
         onCancel={handleCancel_1}
-        // cancelButtonProps={{ style: { display: "none" } }}
         okButtonProps={{ style: { display: "none" } }}
       >
         <VehicleInfoCard />
       </Modal>
 
-      <Modal
-        open={isModal_2_Open}
-        onCancel={handleCancel_2}
-        // cancelButtonProps={{ style: { display: "none" } }}
-        // okButtonProps={{ style: { display: "none" } }}
-      >
+      <Modal open={isModal_2_Open} onCancel={handleCancel_2}>
         <VehicleEditCard vehicleId={VehicleId} />
       </Modal>
 
@@ -215,8 +208,6 @@ const AllVehicle = () => {
         open={isModal_3_Open}
         onCancel={handleCancel_3}
         onOk={handleDelete}
-        // cancelButtonProps={{ style: { display: "none" } }}
-        // okButtonProps={{ style: { display: "none" } }}
       >
         <VehicleDeleteCard
           title={vehicleName}
