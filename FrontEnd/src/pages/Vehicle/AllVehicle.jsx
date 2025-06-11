@@ -15,6 +15,7 @@ import NavBar from "../../components/NavBar/NavBar";
 import VehicleInfoCard from "./VehicleInfoCard";
 import VehicleEditCard from "./VehicleEditCard";
 import VehicleDeleteCard from "./VehicleDeleteCard";
+import { none } from "ol/centerconstraint";
 
 // Sachini part
 const AllVehicle = () => {
@@ -127,9 +128,11 @@ const AllVehicle = () => {
               <button class="btn-view" data-id="${
                 row[0]
               }" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
+
               <button class="btn-edit" data-id="${
                 row[0]
               }" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
+              
               <button class="btn-delete" data-id="${row[0]}" data-dt="${
               row[1].split("/")[0]
             }" data-licence="${row[6]}" data-model="${row[7]}" 
@@ -200,7 +203,11 @@ const AllVehicle = () => {
         <VehicleInfoCard />
       </Modal>
 
-      <Modal open={isModal_2_Open} onCancel={handleCancel_2}>
+      <Modal
+        open={isModal_2_Open}
+        onCancel={handleCancel_2}
+        okButtonProps={{ style: { display: "none" } }}
+      >
         <VehicleEditCard vehicleId={VehicleId} />
       </Modal>
 

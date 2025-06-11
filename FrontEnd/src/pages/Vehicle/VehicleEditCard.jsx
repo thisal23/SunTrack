@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from "react";
 import apiService from "../../config/axiosConfig";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const VehicleEditCard = ({ vehicleId }) => {
   const [isFocused, setIsFocused] = useState(false);
   console.log(vehicleId);
   const [brands, setBrands] = useState([]);
+
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
 
   const [formData, setFormData] = useState({
     // assigning all the vehicle input data into vehicle form data state
@@ -30,6 +40,7 @@ const VehicleEditCard = ({ vehicleId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsFocused(true);
 
     try {
       const fData = new FormData();
@@ -57,7 +68,10 @@ const VehicleEditCard = ({ vehicleId }) => {
       console.log(...fData);
 
       // Fetching vehicle data using api
-      const response = await apiService.post("vehicle/create", fData);
+      const response = await apiService.put(
+        `/vehicle/update/${vehicleId}`,
+        fData
+      );
 
       console.log(response);
 
@@ -121,148 +135,164 @@ const VehicleEditCard = ({ vehicleId }) => {
         <div className="flex flex-row justify-center">
           <span className="text-2xl text-[#0F2043]">Edit vehicle Details</span>
         </div>
-        <table>
-          <tbody>
-            <tr>
-              <td className=" px-4 py-2 font-bold">Vehicle ID</td>
-              <td>#{vehicleId}</td>
-            </tr>
+        <form onSubmit={handleSubmit}>
+          <table>
+            <tbody>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Vehicle ID</td>
+                <td>#{vehicleId}</td>
+              </tr>
 
-            <tr>
-              <td className=" px-4 py-2 font-bold">Vehicle Type:</td>
-              <td className="text-right px-4 py-2">
-                <select
-                  name="type"
-                  value={formData.type}
-                  // onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
-                >
-                  <option value="" disabled selected>
-                    Select vehicle Type
-                  </option>
-                  <option value="car">Car</option>
-                  <option value="van">Van</option>
-                  <option value="three-wheel">Three wheel</option>
-                  <option value="bike">Bike</option>
-                  <option value="cab">Cab</option>
-                </select>
-              </td>
-            </tr>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Vehicle Type:</td>
+                <td className="text-right px-4 py-2">
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
+                  >
+                    <option value="" disabled selected>
+                      Select vehicle Type
+                    </option>
+                    <option value="car">Car</option>
+                    <option value="van">Van</option>
+                    <option value="three-wheel">Three wheel</option>
+                    <option value="bike">Bike</option>
+                    <option value="cab">Cab</option>
+                  </select>
+                </td>
+              </tr>
 
-            <tr>
-              <td className=" px-4 py-2 font-bold">Vehicle Brand:</td>
-              <td className="text-right px-4 py-2">
-                <select
-                  name="vehicle_brand"
-                  id="vehcile_brand"
-                  value={formData.vehicle_brand}
-                  // onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
-                >
-                  <option value="" disabled selected>
-                    Select vehicle Type
-                  </option>
-                  {Array.isArray(brands) &&
-                    brands.map((item, idx) => {
-                      return (
-                        <option value={item.id} key={idx}>
-                          {item.title}
-                        </option>
-                      );
-                    })}
-                </select>
-              </td>
-            </tr>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Vehicle Brand:</td>
+                <td className="text-right px-4 py-2">
+                  <select
+                    name="vehicle_brand"
+                    id="vehcile_brand"
+                    value={formData.vehicle_brand}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
+                  >
+                    <option value="" disabled selected>
+                      Select vehicle Type
+                    </option>
+                    {Array.isArray(brands) &&
+                      brands.map((item, idx) => {
+                        return (
+                          <option value={item.id} key={idx}>
+                            {item.title}
+                          </option>
+                        );
+                      })}
+                  </select>
+                </td>
+              </tr>
 
-            <tr>
-              <td className=" px-4 py-2 font-bold">Vehicle Model:</td>
-              <td className="text-right px-4 py-2">
-                <input
-                  type="text"
-                  name="vehicle_title"
-                  value={formData.vehicle_title}
-                  // onChange={handleInputChange}
-                  // placeholder="Sunny"
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
-                />
-              </td>
-            </tr>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Vehicle Model:</td>
+                <td className="text-right px-4 py-2">
+                  <input
+                    type="text"
+                    name="vehicle_title"
+                    value={formData.vehicle_title}
+                    onChange={handleInputChange}
+                    // placeholder="Sunny"
+                    className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
+                  />
+                </td>
+              </tr>
 
-            <tr>
-              <td className=" px-4 py-2 font-bold">Fuel Type:</td>
-              <td className="text-right px-4 py-2">
-                <select
-                  name="fuel_type"
-                  value={formData.fuel_type}
-                  // onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
-                >
-                  <option value="Petrol" selected>
-                    Petrol
-                  </option>
-                  <option value="Diesel">Diesel</option>
-                </select>
-              </td>
-            </tr>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Fuel Type:</td>
+                <td className="text-right px-4 py-2">
+                  <select
+                    name="fuel_type"
+                    value={formData.fuel_type}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
+                  >
+                    <option value="Petrol" selected>
+                      Petrol
+                    </option>
+                    <option value="Diesel">Diesel</option>
+                  </select>
+                </td>
+              </tr>
 
-            <tr>
-              <td className=" px-4 py-2 font-bold">Vehicle Color:</td>
-              <td className="text-right px-4 py-2">
-                <input
-                  type="text"
-                  name="vehicle_color"
-                  value={formData.vehicle_color}
-                  // onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
-                />
-              </td>
-            </tr>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Vehicle Color:</td>
+                <td className="text-right px-4 py-2">
+                  <input
+                    type="text"
+                    name="vehicle_color"
+                    value={formData.vehicle_color}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
+                  />
+                </td>
+              </tr>
 
-            <tr>
-              <td className=" px-4 py-2 font-bold">Vehicle Category:</td>
-              <td className="text-right px-4 py-2">
-                <select
-                  name="category"
-                  value={formData.category}
-                  // onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
-                >
-                  <option value="" selected disabled>
-                    Select vehicle category
-                  </option>
-                  <option value="H">Heavy</option>
-                  <option value="L">Light</option>
-                </select>
-              </td>
-            </tr>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Vehicle Category:</td>
+                <td className="text-right px-4 py-2">
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
+                  >
+                    <option value="" selected disabled>
+                      Select vehicle category
+                    </option>
+                    <option value="H">Heavy</option>
+                    <option value="L">Light</option>
+                  </select>
+                </td>
+              </tr>
 
-            <tr>
-              <td className=" px-4 py-2 font-bold">Chassie Number:</td>
-              <td className="text-right px-4 py-2">
-                <input
-                  type="text"
-                  name="chassie_number"
-                  value={formData.chassie_number}
-                  // onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
-                />
-              </td>
-            </tr>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Chassie Number:</td>
+                <td className="text-right px-4 py-2">
+                  <input
+                    type="text"
+                    name="chassie_number"
+                    value={formData.chassie_number}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
+                  />
+                </td>
+              </tr>
 
-            <tr>
-              <td className=" px-4 py-2 font-bold">Registered Year:</td>
-              <td className="text-right px-4 py-2">
-                <input
-                  type="text"
-                  name="register_year"
-                  value={formData.register_year}
-                  // onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <tr>
+                <td className=" px-4 py-2 font-bold">Registered Year:</td>
+                <td className="text-right px-4 py-2">
+                  <input
+                    type="text"
+                    name="register_year"
+                    value={formData.register_year}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div className="flex justify-center mt-4">
+            <button
+              type="submit"
+              disabled={isFocused}
+              className={`px-6 py-2 bg-blue-600 text-white rounded-md ${
+                isFocused
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-700"
+              }`}
+            >
+              {isFocused ? "Updating..." : "Update Vehicle"}
+            </button>
+          </div>
+        </form>
       </div>
     </>
   );

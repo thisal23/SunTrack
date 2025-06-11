@@ -23,7 +23,7 @@ const VehicleDetail = sequelize.define(
       unique: true,
     },
     licenseExpireDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     insuranceType: {
@@ -36,7 +36,7 @@ const VehicleDetail = sequelize.define(
       unique: true,
     },
     insuranceExpireDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     chassieNumber: {

@@ -26,10 +26,18 @@ const TripDetail = sequelize.define("TripDetail",{
     driverId:{
         type: DataTypes.INTEGER,
         allowNull: true,
+        references:{
+            model:"UserDetail",
+            key:"id"
+        }
     },
     vehicleId:{
         type: DataTypes.INTEGER,
         allowNull: true,
+        references:{
+            model:"Vehicle",
+            key:"id"
+        }
     },
 },{timestamps:true})
 
