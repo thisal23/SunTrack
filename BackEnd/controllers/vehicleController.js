@@ -207,6 +207,8 @@ const createVehicle = async (req, res) => {
   }
 };
 
+
+
 // Update exist vehicle
 const updateVehicleById = async (req, res) => {
   const { id } = req.params; // Get the vehicle ID from the URL params
@@ -230,16 +232,16 @@ const updateVehicleById = async (req, res) => {
   } = req.body;
 
   // Check if required files are exist
-  if (
-    !req.files["vehicleImage"] ||
-    !req.files["licenceDocument"] ||
-    !req.files["insuranceDocument"] ||
-    !req.files["ecoDocument"]
-  ) {
-    return res
-      .status(400)
-      .json({ status: false, message: "Image and document are required" });
-  }
+  // if (
+  //   !req.files["vehicleImage"] ||
+  //   !req.files["licenceDocument"] ||
+  //   !req.files["insuranceDocument"] ||
+  //   !req.files["ecoDocument"]
+  // ) {
+  //   return res
+  //     .status(400)
+  //     .json({ status: false, message: "Image and document are required" });
+  // }
 
   const sequelize = Vehicle.sequelize;
   const transaction = await sequelize.transaction();
@@ -266,7 +268,7 @@ const updateVehicleById = async (req, res) => {
         registerYear,
         color,
         modelId,
-        image: `/uploads/${req.files["vehicleImage"][0].filename}`,
+        // image: `/uploads/${req.files["vehicleImage"][0].filename}`,
         brandId,
       },
       { transaction }
@@ -299,9 +301,9 @@ const updateVehicleById = async (req, res) => {
         insuranceExpireDate,
         licenceLastUpdate,
         insuranceLastUpdate,
-        licenceDocument: `/uploads/${req.files["licenceDocument"][0].filename}`,
-        insuranceDocument: `/uploads/${req.files["insuranceDocument"][0].filename}`,
-        ecoDocument: `/uploads/${req.files["ecoDocument"][0].filename}`,
+        // licenceDocument: `/uploads/${req.files["licenceDocument"][0].filename}`,
+        // insuranceDocument: `/uploads/${req.files["insuranceDocument"][0].filename}`,
+        // ecoDocument: `/uploads/${req.files["ecoDocument"][0].filename}`,
       },
       { transaction }
     );
@@ -322,6 +324,10 @@ const updateVehicleById = async (req, res) => {
     });
   }
 };
+
+
+
+
 
 // Fetch all vehicles with details
 const fetchVehicle = async (req, res) => {
@@ -394,6 +400,7 @@ const fetchVehicleById = async (req, res) => {
   }
 };
 
+
 // Delete vehicle details
 const deleteVehicleData = async (req, res) => {
   try {
@@ -417,6 +424,8 @@ const deleteVehicleData = async (req, res) => {
       .json({ status: false, message: error.message, stack: error.stack });
   }
 };
+
+
 
 // Creating new vehicle model
 const createModel = async (req, res) => {
@@ -464,6 +473,8 @@ const fetchModels = async (req, res) => {
   }
 };
 
+
+
 // fetch data for info table
 const fetchVehicleInfo = async (req, res) => {
   try {
@@ -495,6 +506,16 @@ const fetchVehicleInfo = async (req, res) => {
       .json({ status: false, message: error.message, stack: error.stack });
   }
 };
+
+// const fetchVehicleCount = async (res,req) => {
+//   try{
+//     const [total,available, outofservice] = await Promise.all([
+//       Vehicle.count(),
+//       Vehicle.count(),
+//       Vehicle.count(),
+//     ]);
+//   };
+// };
 
 
 

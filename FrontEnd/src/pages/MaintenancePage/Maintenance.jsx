@@ -32,9 +32,7 @@ const Maintenance = () => {
       </div>
 
       <div>
-        <label className="font-medium text-gray-700">
-          License Last Update:
-        </label>
+        <label className="font-medium text-gray-700">Last Update:</label>
         <input
           type="date"
           name="lisence_last_date"
