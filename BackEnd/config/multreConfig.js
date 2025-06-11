@@ -1,17 +1,23 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+
+const uploadPath = path.join(__dirname, "../uploads/documents");
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
 // defining storage location for vehicle documents files ~~ images
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // uplaoding each file in uploads folder
-    cb(null, path.join(__dirname, "../uploads"));
+    cb(null,uploadPath);
   },
   filename: function (req, file, cb) {
     // unique file name generate
     const extension = path.extname(file.originalname);
     const uniqueName = `${Date.now()}-${Math.round(
-      Math.random * 1024
+      Math.random() * 1024
     )}${extension}`; // file name with extension type
     //return 2025/02/28T22:57:00-21450xcsjhdweu342942.pdf
 
@@ -38,8 +44,6 @@ const fileFilter = (req, file, cb) => {
     );
   }
 };
-
-// npm install multer
 
 const upload = multer({
   storage: storage,

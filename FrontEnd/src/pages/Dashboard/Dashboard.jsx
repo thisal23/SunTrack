@@ -7,12 +7,17 @@ import { Link, NavLink } from "react-router-dom";
 import NavBar from "../../components/NavBar/NavBar";
 import apiService from "../../config/axiosConfig";
 
-// Sachini part
 const Dashboard = () => {
   const [fetchTripCount, setFetchTripCount] = useState({
     pending: 0,
     live: 0,
     finished: 0,
+  });
+
+  const [fetchVehicleCount, setFetchVehicleCount] = useState({
+    total: 0,
+    available: 0,
+    outofservice: 0,
   });
 
   const [pendingTrips, setPendingTrips] = useState([]);
@@ -50,8 +55,24 @@ const Dashboard = () => {
     }
   };
 
+  const fetchVehicleCounts = async () => {
+    try {
+      const response = await apiService.get("vehicle/count");
+      console.log(response);
+      const data = response.data;
+      setFetchVehicleCount({
+        total: data.total,
+        available: data.available,
+        outofservice: data.outofservice,
+      });
+    } catch (error) {
+      console.error("Error fetchinf vehicle counts:", error);
+    }
+  };
+
   useEffect(() => {
     fetchTripCounts();
+    fetchVehicleCounts();
     fetchPendingTrips();
   }, []);
 
@@ -64,9 +85,9 @@ const Dashboard = () => {
           count_name_1="Total"
           count_name_2="Available"
           count_name_3="Out of Service"
-          count_1="100"
-          count_2="20"
-          count_3="13"
+          count_1={fetchVehicleCount.total}
+          count_2={fetchVehicleCount.available}
+          count_3={fetchVehicleCount.outofservice}
         />
         <InfoCard
           CardName="Drivers"
