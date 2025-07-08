@@ -7,6 +7,7 @@ const Register = () => {
         firstName: "",
         lastName: "",
         userName: "",
+        birthday: "",
         email: "",
         password: "",
         confirmPassword: "",
@@ -39,6 +40,7 @@ const Register = () => {
                     firstName: formData.firstName,
                     lastName: formData.lastName,
                     userName: formData.userName,
+                    birthday: formData.birthday,
                     email: formData.email,
                     password: formData.password,
                     roleId: formData.roleId,
@@ -53,6 +55,7 @@ const Register = () => {
                     firstName: "",
                     lastName: "",
                     userName: "",
+                    birthday: "",
                     email: "",
                     password: "",
                     confirmPassword: "",
@@ -99,6 +102,17 @@ const Register = () => {
                             onChange={handleChange}
                             required
                         />
+                        </div>
+                    <div className="input-group">   
+                        <label htmlFor="birthday">Birthday</label>
+                        <input
+                            type="date"
+                            id="birthday"
+                            name="birthday"
+                            value={formData.birthday}
+                            onChange={handleChange}
+                            required
+                        />  
                     </div>
                     <div className="input-group">
                         <label htmlFor="userName">Username</label>
