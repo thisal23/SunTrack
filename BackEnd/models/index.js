@@ -1,6 +1,7 @@
 const User = require('./User');
-const Role = require('./Role'); // Import the Role model
-const UserDetail = require('./UserDetail'); // Import the UserDetail model
+const Role = require('./Role');
+const DriverDetails = require('./DriverDetails'); // Updated to match DriverDetails.js
+const PasswordReset = require('./PasswordReset');
 
 // Sachini work imports
 const TripDetail = require("./TripDetail");
@@ -15,19 +16,34 @@ const Service = require("./Service");
 const geoname = require("./geoname");
 const geoFenceEvent = require("./geoFenceEvent");
 const gpsdata = require("./gpsdata");
-// Define the associations
+
+// Define associations
 User.belongsTo(Role, {
   foreignKey: 'roleId',
   as: 'role',
 });
 
-// User-detail association
-UserDetail.belongsTo(User, {
+// DriverDetails association
+DriverDetails.belongsTo(User, {
   foreignKey: 'userId',
   as: 'user',
-}); // Define the association
+});
+User.hasOne(DriverDetails, {
+  foreignKey: 'userId',
+  as: 'driverDetails',
+});
 
-geoFenceEvent.belongsTo(geoname, {foreignKey: 'geoId'});
+// PasswordReset association
+PasswordReset.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
+User.hasMany(PasswordReset, {
+  foreignKey: 'userId',
+  as: 'passwordResets',
+});
+
+geoFenceEvent.belongsTo(geoname, { foreignKey: 'geoId' });
 /* ################ Sachini Work ################ */
 VehicleDetail.belongsTo(Vehicle, { foreignKey: "vehicleId" });
 Vehicle.hasOne(VehicleDetail, { foreignKey: "vehicleId" });
@@ -48,20 +64,9 @@ ServiceInfo.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(ServiceInfo, { foreignKey: "userId" });
 /* ################ Sachini Work ################ */
 
-
-
 module.exports = {
   User,
   Role,
-  UserDetail,
-  Vehicle,
-  VehicleBrand,
-  VehicleDetail,
-  Trip,
-  TripDetail,
-  Service,
-  ServiceInfo,
-  geoname,
-  geoFenceEvent,
-  gpsdata
-}; // Export the models
+  DriverDetails,
+  PasswordReset,
+};

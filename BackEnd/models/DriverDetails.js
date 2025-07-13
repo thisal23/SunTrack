@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/db');
 
-const UserDetail = sequelize.define('UserDetail', {
+const DriverDetails = sequelize.define('DriverDetails', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -46,4 +46,7 @@ const UserDetail = sequelize.define('UserDetail', {
     timestamps: false,
     });
 
-module.exports = UserDetail;
+module.exports = DriverDetails;
+
+// Example import update
+const DriverDetails = require('./models/DriverDetails');
