@@ -44,17 +44,17 @@ const User = sequelize.define('User', {
     allowNull: false,
   },
 
-  // Add resetPasswordOtp column
-  resetPasswordOtp: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
+  // // Add resetPasswordOtp column
+  // resetPasswordOtp: {
+  //   type: DataTypes.STRING,
+  //   allowNull: true,
+  // },
 
-  // Add resetPasswordExpires column
-  resetPasswordExpires: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
+  // // Add resetPasswordExpires column
+  // resetPasswordExpires: {
+  //   type: DataTypes.DATE,
+  //   allowNull: true,
+  // },
 
 }, {
   timestamps: false,

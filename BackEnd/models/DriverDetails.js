@@ -48,5 +48,5 @@ const DriverDetails = sequelize.define('DriverDetails', {
 
 module.exports = DriverDetails;
 
-// Example import update
-const DriverDetails = require('./models/DriverDetails');
+// // Example import update
+// const DriverDetails = require('./models/DriverDetails');
