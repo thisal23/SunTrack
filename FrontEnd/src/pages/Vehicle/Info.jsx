@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "datatables.net-dt/css/dataTables.dataTables.min.css";
 import "datatables.net-responsive-dt/css/responsive.dataTables.min.css";
 import "datatables.net-select-dt/css/select.dataTables.min.css";
@@ -9,151 +9,230 @@ import "datatables.net-select-dt";
 import { createRoot } from "react-dom/client";
 import { LuMoveDown, LuMoveLeft, LuMoveRight, LuMoveUp } from "react-icons/lu";
 import NavBar from "../../components/NavBar/NavBar";
+import apiService from "../../config/axiosConfig";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-// Sachini part
 const Info = () => {
   const tableRef = useRef(null);
   const roots = new Map();
+  const [data, setData] = useState([]);
 
-  const data = [
-    [
-      1,
-      "East",
-      "WPBEV-4963",
-      "Wattala Yard",
-      "PVD-Piliyandala",
-      "2025-10-10 21:51:01",
-      "Idle",
-      "100mph",
-      "Ignition On",
-    ],
-    [
-      2,
-      "South",
-      "WPBEV-4963",
-      "Wattala Yard",
-      "PVD-Piliyandala",
-      "2025-10-10 21:51:01",
-      "Idle",
-      "100mph",
-      "Ignition On",
-    ],
-    [
-      3,
-      "North",
-      "WPBEV-4963",
-      "Wattala Yard",
-      "PVD-Piliyandala",
-      "2025-10-10 21:51:01",
-      "Idle",
-      "100mph",
-      "Ignition On",
-    ],
-    [
-      4,
-      "West",
-      "WPBEV-4963",
-      "Wattala Yard",
-      "PVD-Piliyandala",
-      "2025-10-10 21:51:01",
-      "Idle",
-      "100mph",
-      "Ignition On",
-    ],
-  ];
+  const fetchVehicleInfo = async () => {
+    try {
+      const data = await apiService
+        .get("vehicleInfo/all")
+        .catch((err) => console.log(`api error`, err));
+
+      if (data?.status !== 200) {
+        toast.error("Vehicle Info fetching error!!!");
+        return;
+      }
+
+      console.log(data);
+      setData(data.data.data || []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
+    fetchVehicleInfo();
+  }, []);
+
+  useEffect(() => {
+    // Only initialize DataTable if we have data
+    if (!data || data.length === 0) return;
+
+    // Destroy existing DataTable if it exists
     if ($.fn.DataTable.isDataTable(tableRef.current)) {
       $(tableRef.current).DataTable().destroy();
     }
 
+    // Prepare data in the correct format
+    const tableData = data?.map((item, index) => ({
+      id: index + 1,
+      direction: item?.gpsDevice?.gpsData?.direction || "N/A",
+      plateNo: item?.plateNo || "N/A",
+      lastLocation: item?.lastLocation || "N/A",
+      tripLocation: item?.tripLocation || "N/A",
+      lastUpdate: `${item?.gpsDevice?.gpsData?.recDate || "N/A"} | ${
+        item?.gpsDevice?.gpsData?.recTime || "N/A"
+      }`,
+      acc: item?.gpsDevice?.gpsData?.acc || "N/A",
+      speed: item?.gpsDevice?.gpsData?.speed || "N/A",
+      door: item?.gpsDevice?.gpsData?.door || "N/A",
+    }));
+
     $(tableRef.current).DataTable({
-      data: data,
+      data: tableData,
       columns: [
-        { title: "ID", data: 0 },
+        {
+          title: "ID",
+          data: "id",
+          defaultContent: "N/A",
+        },
         {
           title: "Direction",
-          data: null,
+          data: "direction",
+          defaultContent: "N/A",
           render: function (data, type, row, meta) {
-            return `<span class="assign_data" id="icon-${meta.row}" data-type="${row[1]}"></span>`;
+            return `<span class="assign_data" id="icon-${meta.row}" data-type="${data}"></span>`;
           },
         },
-        { title: "Lcn: Plate No", data: 2 },
-        { title: "Last Location", data: 3 },
-        { title: "Trip Location", data: 4 },
-        { title: "Last Updated Date/Time", data: 5 },
+        {
+          title: "Lcn: Plate No",
+          data: "plateNo",
+          defaultContent: "N/A",
+        },
+        {
+          title: "Last Location",
+          data: "lastLocation",
+          defaultContent: "N/A",
+        },
+        {
+          title: "Trip Location",
+          data: "tripLocation",
+          defaultContent: "N/A",
+        },
+        {
+          title: "Last Updated Date/Time",
+          data: "lastUpdate",
+          defaultContent: "N/A",
+        },
         {
           title: "Vehicle Status",
-          data: 6,
+          data: "acc",
+          defaultContent: "N/A",
         },
         {
           title: "Speed",
-          data: 7,
+          data: "speed",
+          defaultContent: "N/A",
         },
         {
           title: "Ignition Status",
-          data: 8,
+          data: "door",
+          defaultContent: "N/A",
         },
       ],
       createdRow: function (row, data, dataIndex) {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           const iconContainer = document.getElementById(`icon-${dataIndex}`);
-
           if (!iconContainer) return;
 
-          let root;
-          if (roots.has(iconContainer)) {
-            root = roots.get(iconContainer);
-          } else {
-            root = createRoot(iconContainer);
-            roots.set(iconContainer, root);
-          }
+          let root = roots.get(iconContainer) || createRoot(iconContainer);
+          roots.set(iconContainer, root);
 
+          const directionStr = iconContainer.getAttribute("data-type");
+          const direction = parseFloat(directionStr);
           let iconElement = null;
 
-          switch (iconContainer.getAttribute("data-type")) {
-            case "North":
+          const boxStyle =
+            "w-8 h-8 !w-8 !h-8 border-2 rounded-md flex items-center justify-center";
+
+          const arrowStyle = "text-xl"; // reduce size to prevent overflow
+
+          if (!isNaN(direction)) {
+            if (direction >= 337.6 || direction <= 22.5) {
               iconElement = (
-                <LuMoveUp className="border-2 border-red-400 rounded-sm p-1 text-3xl text-red-400" />
+                <div className={`${boxStyle} border-blue-500`}>
+                  <LuMoveUp
+                    className={`${arrowStyle} rotate-0 text-blue-500`}
+                  />
+                </div>
               );
-              break;
-            case "East":
+            } else if (direction >= 22.6 && direction <= 67.5) {
               iconElement = (
-                <LuMoveRight className="border-2 border-red-400 rounded-sm p-1 text-3xl text-red-400" />
+                <div className={`${boxStyle} border-blue-500`}>
+                  <LuMoveUp
+                    className={`${arrowStyle} rotate-45 text-blue-500`}
+                  />
+                </div>
               );
-              break;
-            case "South":
+            } else if (direction >= 67.6 && direction <= 112.5) {
               iconElement = (
-                <LuMoveDown className="border-2 border-yellow-400 rounded-sm p-1 text-3xl text-black" />
+                <div className={`${boxStyle} border-green-500`}>
+                  <LuMoveRight
+                    className={`${arrowStyle} rotate-0 text-green-500`}
+                  />
+                </div>
               );
-              break;
-            case "West":
+            } else if (direction >= 112.6 && direction <= 157.5) {
               iconElement = (
-                <LuMoveLeft className="border-2 border-yellow-400 rounded-sm p-1 text-3xl text-black" />
+                <div className={`${boxStyle} border-yellow-500`}>
+                  <LuMoveDown
+                    className={`${arrowStyle} rotate-45 text-yellow-500`}
+                  />
+                </div>
               );
-              break;
-            default:
-              iconElement = null;
+            } else if (direction >= 157.6 && direction <= 202.5) {
+              iconElement = (
+                <div className={`${boxStyle} border-yellow-500`}>
+                  <LuMoveDown
+                    className={`${arrowStyle} rotate-0 text-yellow-500`}
+                  />
+                </div>
+              );
+            } else if (direction >= 202.6 && direction <= 247.5) {
+              iconElement = (
+                <div className={`${boxStyle} border-yellow-500`}>
+                  <LuMoveDown
+                    className={`${arrowStyle} -rotate-45 text-yellow-500`}
+                  />
+                </div>
+              );
+            } else if (direction >= 247.6 && direction <= 292.5) {
+              iconElement = (
+                <div className={`${boxStyle} border-red-500`}>
+                  <LuMoveLeft
+                    className={`${arrowStyle} rotate-0 text-red-500`}
+                  />
+                </div>
+              );
+            } else if (direction >= 292.6 && direction <= 337.5) {
+              iconElement = (
+                <div className={`${boxStyle} border-red-500`}>
+                  <LuMoveUp
+                    className={`${arrowStyle} -rotate-45 text-red-500`}
+                  />
+                </div>
+              );
+            }
+          } else {
+            iconElement = <span>N/A</span>;
           }
 
-          if (iconElement) {
-            root.render(iconElement);
-          }
-        }, 0);
+          if (iconElement) root.render(iconElement);
+        });
+      },
+      // Add error handling
+      drawCallback: function (settings) {
+        console.log("DataTable drawn successfully");
       },
     });
 
+    // Cleanup function
     return () => {
       if ($.fn.DataTable.isDataTable(tableRef.current)) {
         $(tableRef.current).DataTable().destroy();
       }
+      // Clean up React roots
+      roots.forEach((root) => {
+        try {
+          root.unmount();
+        } catch (error) {
+          console.warn("Error unmounting root:", error);
+        }
+      });
+      roots.clear();
     };
   }, [data]);
 
   return (
     <>
       <NavBar />
-      <div className="container_custom mx-auto w-full py-15">
+      <div className="min-h-screen container_custom mx-auto w-full pt-15">
         <div className="flex flex-row justify-start my-5">
           <span className="text-3xl text-[#0F2043] font-semibold">
             Info Page

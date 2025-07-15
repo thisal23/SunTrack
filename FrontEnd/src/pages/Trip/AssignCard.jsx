@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 
-// Sachini part
 const AssignCard = ({ tripId }) => {
   const [vehicleData, setVehicleData] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
@@ -23,9 +22,9 @@ const AssignCard = ({ tripId }) => {
     }
   };
 
-  const fetchDriver = async () => {
+  const fetchDriver = async (vehicleId) => {
     try {
-      const data = await apiService.get(`trip/driver/${selectedVehicle}`);
+      const data = await apiService.get(`trip/driver/${vehicleId}`);
 
       if (data.status !== 200) {
         toast.error("Driver data fetching error!!!");
@@ -43,7 +42,7 @@ const AssignCard = ({ tripId }) => {
     setSelectedVehicle(id);
 
     if (id) {
-      fetchDriver();
+      fetchDriver(id);
     }
   };
 

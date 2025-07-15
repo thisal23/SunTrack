@@ -7,7 +7,7 @@ const VehicleBrand = sequelize.define("VehicleBrand", {
         autoIncrement: true,
         primaryKey: true
     },
-    title:{
+    brand:{
         type: DataTypes.STRING,
         allowNull: false,
         unique: true

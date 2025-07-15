@@ -7,7 +7,7 @@ const VehicleModel= sequelize.define("VehicleModel", {
         autoIncrement: true,
         primaryKey: true
     },
-    title:{
+    model:{
         type: DataTypes.STRING,
         allowNull: false,
         unique: true

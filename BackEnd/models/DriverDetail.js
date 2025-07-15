@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/db');
 
-const UserDetail = sequelize.define('UserDetail', {
+const driverDetail = sequelize.define('driverDetail', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -41,9 +41,13 @@ const UserDetail = sequelize.define('UserDetail', {
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+        model: "User",
+        key: "id",
+      },
     }
     }, {
     timestamps: false,
     });
 
-module.exports = UserDetail;
+module.exports = driverDetail;

@@ -18,34 +18,30 @@ const DocumentMaintenance = () => {
   const tableRef = useRef(null);
   const [isModal_1_Open, setIsModal_1_Open] = useState(false);
   const [isModal_2_Open, setIsModal_2_Open] = useState(false);
-  const [licenseId, setlicenseId] = useState("");
+  const [plateNo, setPlateNo] = useState("");
   const [documentData, setDocumentData] = useState([]);
   const [currentDocumentType, setCurrentDocumentType] = useState("");
 
   const showModal_1 = (id, documentType) => {
     setIsModal_1_Open(true);
-    setlicenseId(id);
+    setPlateNo(id);
     setCurrentDocumentType(documentType);
   };
 
   const showModal_2 = (id) => {
     setIsModal_2_Open(true);
-    setlicenseId(id);
+    setPlateNo(id);
   };
-
-  // const handleOk = () => {
-  //   setIsModalOpen(false);
-  // };
 
   const handleCancel_1 = () => {
     setIsModal_1_Open(false);
-    setlicenseId("");
+    setPlateNo("");
     setCurrentDocumentType("");
   };
 
   const handleCancel_2 = () => {
     setIsModal_2_Open(false);
-    setlicenseId("");
+    setPlateNo("");
   };
 
   const fetchDocumentDetails = async () => {
@@ -81,7 +77,7 @@ const DocumentMaintenance = () => {
       // Always include all document types for each vehicle
 
       rows.push([
-        item.licenseId,
+        item.vehicle.plateNo,
         "License",
         item.licenseLastUpdate || "N/A",
         item.licenseExpireDate || "N/A",
@@ -90,7 +86,7 @@ const DocumentMaintenance = () => {
       ]);
 
       rows.push([
-        item.licenseId,
+        item.vehicle.plateNo,
         "Insurance",
         item.insuranceLastUpdate || "N/A",
         item.insuranceExpireDate || "N/A",
@@ -99,10 +95,10 @@ const DocumentMaintenance = () => {
       ]);
 
       rows.push([
-        item.licenseId,
+        item.vehicle.plateNo,
         "Eco Test",
-        "N/A",
-        "N/A",
+        item.ecoLastUpdate || "N/A",
+        item.ecoExpireDate || "N/A",
         item.ecoDocument || "Not Available",
         "Action",
       ]);
@@ -133,7 +129,8 @@ const DocumentMaintenance = () => {
       rowGroup: {
         dataSrc: 0, // Vehicle No
       },
-
+      pageLength: 9,
+      lengthChange: false,
       columnDefs: [
         {
           targets: [4], // Document
@@ -216,7 +213,7 @@ const DocumentMaintenance = () => {
             width={700}
           >
             <DocumentEditCard
-              licenseId={licenseId}
+              plateNo={plateNo}
               documentType={currentDocumentType}
               handleCancel={handleCancel_1}
               onUpdateSuccess={handleDocumentUpdateSuccess}
@@ -230,7 +227,7 @@ const DocumentMaintenance = () => {
             footer={null} // Remove default footer buttons
           >
             <DocumentDeleteCard
-              licenseId={licenseId}
+              plateNo={plateNo}
               handleCancel={handleCancel_2}
               onDeleteSuccess={fetchDocumentDetails}
             />

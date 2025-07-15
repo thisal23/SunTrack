@@ -17,7 +17,7 @@ const CustomDateInput = React.forwardRef(({ value, onClick }, ref) => (
 ));
 
 const DocumentEditCard = ({
-  licenseId,
+  plateNo,
   documentType,
   handleCancel,
   onUpdateSuccess,
@@ -53,7 +53,7 @@ const DocumentEditCard = ({
     }
     setStatusMessage("");
     setIsSuccess(false);
-  }, [licenseId, documentType]);
+  }, [plateNo, documentType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission (page reload)
@@ -62,7 +62,7 @@ const DocumentEditCard = ({
     setIsSuccess(false);
 
     // --- Validation ---
-    if (!licenseId || !selectedDocumentType || !lastUpdate || !expiryDate) {
+    if (!plateNo || !selectedDocumentType || !lastUpdate || !expiryDate) {
       setStatusMessage("Please fill all required date fields.");
       setIsSuccess(false);
       return; // Stop submission
@@ -93,7 +93,7 @@ const DocumentEditCard = ({
 
     try {
       const response = await apiService.put(
-        `/document/update/${licenseId}`,
+        `/document/update/${plateNo}`,
         formDataToSend,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -133,7 +133,7 @@ const DocumentEditCard = ({
             type="text"
             name="vehicle_title"
             className="py-2 px-3 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
-            value={licenseId}
+            value={plateNo}
             readOnly
           />
         </div>

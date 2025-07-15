@@ -1,7 +1,7 @@
 import React from "react";
 
 const PendingTripDeleteCard = () => {
-  return <div></div>;
+  return <div>Are you suree ???</div>;
 };
 
 export default PendingTripDeleteCard;

@@ -25,7 +25,7 @@ const Trip = sequelize.define("Trip",{
     },
     suggestEndTime:{
         type:DataTypes.TIME,
-        allowNull:false
+        allowNull:true
     },
     status:{
         type:DataTypes.STRING,

@@ -8,31 +8,48 @@ import "datatables.net-responsive-dt";
 import "datatables.net-select-dt";
 import { Modal } from "antd";
 import { config } from "../../config/config";
-import Maintenance from "./Maintenance";
 import NavBar from "../../components/NavBar/NavBar";
 import "datatables.net-rowgroup";
 import "datatables.net-rowgroup-dt/css/rowGroup.dataTables.min.css";
 import apiService from "../../config/axiosConfig";
 import { render } from "react-dom";
-import ServiceEditCard from "./ServiceEditCard";
+import ServiceAddCard from "./ServiceAddCard";
+import ServiceDeleteCard from "./ServiceDeleteCard";
+import ServiceHistoryCard from "./ServiceHistoryCard";
 
 const ServiceMaintenance = () => {
   const tableRef = useRef(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModal_add_Open, setIsModal_add_Open] = useState(false);
+  const [isModal_delete_Open, setIsModal_delete_Open] = useState(false);
+  const [isModal_history_Open, setIsModal_history_Open] = useState(false);
   const [vehicleId, setVehicleId] = useState("");
   const [serviceData, setServiceData] = useState([]);
 
-  const showModal = (id) => {
-    setIsModalOpen(true);
+  const showModal_add = (id) => {
+    setIsModal_add_Open(true);
     setVehicleId(id);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
+  const showModal_delete = (id) => {
+    setIsModal_delete_Open(true);
+    setVehicleId(id);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  const showModal_history = (id) => {
+    setIsModal_history_Open(true);
+    setVehicleId(id);
+  };
+
+  const handleCancel_add = () => {
+    setIsModal_add_Open(false);
+  };
+
+  const handleCancel_delete = () => {
+    setIsModal_delete_Open(false);
+  };
+
+  const handleCancel_history = () => {
+    setIsModal_history_Open(false);
   };
 
   const fetchServiceDetails = async () => {
@@ -60,7 +77,7 @@ const ServiceMaintenance = () => {
           serviceType: entry.Service.serviceType,
           remark: entry.serviceRemark,
           updatedAt: entry.updatedAt,
-          addedBy: entry.User.firstName,
+          addedBy: entry.User.firstName + " " + entry.User.lastName,
           serviceId: entry.Service.id,
         });
       });
@@ -134,13 +151,17 @@ const ServiceMaintenance = () => {
             const service = JSON.parse(row[5]);
             return `
             <div style="display: flex; gap: 6px;">
-              <button class="btn-edit" data-vehicle-id="${service.vehicleId}" data-service-id="${service.serviceId}"
+              <button class="btn-add" data-vehicle-id="${service.vehicleId}" data-service-id="${service.serviceId}"
                       style="background:#28a745;color:white;padding:5px 10px;border:none;cursor:pointer;">
-                Edit
+                Add New
               </button>
               <button class="btn-delete" data-vehicle-id="${service.vehicleId}" data-service-id="${service.serviceId}"
                       style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">
                 Delete
+              </button>
+              <button class="btn-history" data-vehicle-id="${service.vehicleId}" data-service-id="${service.serviceId}"
+                      style="background:#b9ba1e;color:white;padding:5px 10px;border:none;cursor:pointer;">
+                View History
               </button>
             </div>
           `;
@@ -184,21 +205,25 @@ const ServiceMaintenance = () => {
   useEffect(() => {
     const table = $(tableRef.current);
 
-    table.on("click", ".btn-edit", function () {
+    table.on("click", ".btn-add", function () {
       const vehicleId = $(this).data("vehicle-id");
-      setVehicleId(vehicleId);
-      setIsModalOpen(true);
+      showModal_add(vehicleId);
     });
 
     table.on("click", ".btn-delete", function () {
       const serviceId = $(this).data("service-id");
-      // TODO: Implement your delete modal or logic here
-      console.log("Delete Service ID:", serviceId);
+      showModal_delete(serviceId);
+    });
+
+    table.on("click", ".btn-history", function () {
+      const serviceId = $(this).data("service-id");
+      showModal_history(serviceId);
     });
 
     return () => {
-      table.off("click", ".btn-edit");
+      table.off("click", ".btn-add");
       table.off("click", ".btn-delete");
+      table.off("click", ".btn-history");
     };
   }, []);
 
@@ -217,14 +242,38 @@ const ServiceMaintenance = () => {
           <table ref={tableRef} className="display w-full text-sm"></table>
 
           <Modal
-            title="Update Document Services"
-            open={isModalOpen}
-            onCancel={handleCancel}
+            title="Add vehicle Service"
+            open={isModal_add_Open}
+            onCancel={handleCancel_add}
             footer={null} // Remove default footer buttons
           >
-            <ServiceEditCard
+            <ServiceAddCard
               vehicleId={vehicleId}
-              handleCancel={handleCancel}
+              handleCancel={handleCancel_add}
+            />
+          </Modal>
+
+          <Modal
+            title="Delete Vehicle Service"
+            open={isModal_delete_Open}
+            onCancel={handleCancel_delete}
+            footer={null} // Remove default footer buttons
+          >
+            <ServiceDeleteCard
+              vehicleId={vehicleId}
+              handleCancel={handleCancel_delete}
+            />
+          </Modal>
+
+          <Modal
+            title="View Service History"
+            open={isModal_history_Open}
+            onCancel={handleCancel_history}
+            footer={null} // Remove default footer buttons
+          >
+            <ServiceHistoryCard
+              vehicleId={vehicleId}
+              handleCancel={handleCancel_history}
             />
           </Modal>
         </div>

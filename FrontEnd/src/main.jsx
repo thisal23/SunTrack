@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App.jsx";
-import InfoPage from "./pages/InfoPage/InfoPage.jsx";
 import Dashboard from "./pages/Dashboard/Dashboard.jsx";
 import TrackingPage from "./pages/TrackingPage/TrackingPage.jsx";
 import ReportsPage from "./pages/ReportsPage/ReportsPage.jsx";
@@ -24,7 +23,6 @@ import CreatePassword from "./components/authentication/CreatePassword.jsx";
 import Register from "./components/authentication/Register.jsx";
 import DocumentMaintenance from "./pages/MaintenancePage/DocumentMaintenance.jsx";
 import ServiceMaintenance from "./pages/MaintenancePage/ServiceMaintenance.jsx";
-import Maintenance from "./pages/MaintenancePage/Maintenance.jsx";
 
 const router = createBrowserRouter([
   {
@@ -52,10 +50,6 @@ const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <Dashboard />,
-  },
-  {
-    path: "/info",
-    element: <InfoPage />,
   },
   {
     path: "/tracking",
@@ -112,10 +106,6 @@ const router = createBrowserRouter([
   {
     path: "/maintenance/service-maintenance",
     element: <ServiceMaintenance />,
-  },
-  {
-    path: "/maintenance",
-    element: <Maintenance />,
   },
 ]);
 

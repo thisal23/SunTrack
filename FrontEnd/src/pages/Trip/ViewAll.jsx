@@ -13,11 +13,11 @@ import { createRoot } from "react-dom/client";
 import { Modal } from "antd";
 import AssignCard from "./AssignCard";
 import PendingTripEditCard from "./PendingTripEditCard";
+import PendingTripDeleteCard from "./PendingTripDeleteCard";
 import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 import NavBar from "../../components/NavBar/NavBar";
 
-// Sachini part
 const ViewAll = () => {
   const tableRef = useRef(null);
 
@@ -29,7 +29,6 @@ const ViewAll = () => {
 
   const showModal_assign = (id) => {
     setIsModal_assignOpen(true);
-
     setTripId(id);
   };
 
@@ -43,16 +42,9 @@ const ViewAll = () => {
     setTripId(id);
   };
 
-  const handleOk_assign = () => {
-    setIsModal_assignOpen(false);
-  };
-
-  const handleOk_edit = () => {
-    setIsModal_editOpen(false);
-  };
-
-  const handleOk_delete = () => {
-    setIsModal_deleteOpen(false);
+  const handleTripUpdateSuccess = () => {
+    console.log("Trip Data update successful! Refreshing data...");
+    fetchTrips(); // Call the fetch function to get the latest data
   };
 
   const handleCancel_edit = () => {
@@ -96,26 +88,30 @@ const ViewAll = () => {
 
     $(tableRef.current).DataTable({
       data: tripData?.map((item) => [
-        item.Trip.id,
+        item.id,
         `<a href="https://www.google.com/maps/dir/${
-          item.Trip.startLocation.split(",")[0]
-        },${item.Trip.startLocation.split(",")[1]}/${
-          item.Trip.endLocation.split(",")[0]
+          (item.startLocation ?? "").split(",")[0]
+        },${(item.startLocation ?? "").split(",")[1]}/${
+          (item.endLocation ?? "").split(",")[0]
         },${
-          item.Trip.endLocation.split(",")[1]
+          (item.endLocation ?? "").split(",")[1]
         }/" target="_blank" class="text-blue-500 underline">
     View Trip Route</a>`,
-        item.Trip.date,
-        `${item.Trip.suggestStartTime} | ${item.Trip.suggestEndTime}`,
-        item.Trip.status,
-        item.tripRemark,
+        item.date,
+        `${item.suggestStartTime ?? "N/A"}`,
+        item.status,
+        item.driverName ?? "Not Assigned",
+        item.vehicleId ?? "Not Assigned",
+        item.tripRemark ?? "-",
       ]),
       columns: [
         { title: "ID" },
         { title: "Trip Location" },
         { title: "Date" },
-        { title: "Suggest Start/End Time" },
+        { title: "Suggested Start" },
         { title: "Status" },
+        { title: "Driver" },
+        { title: "Vehicle" },
         { title: "Trip Remark" },
         {
           title: "Ass: Driver/Ass:Vehicle",
@@ -155,8 +151,7 @@ const ViewAll = () => {
     });
 
     $(tableRef.current).on("click", ".btn-delete", function () {
-      if (window.confirm("Are you sure you want to delete this trip?")) {
-      }
+      showModal_delete($(this).data("id"));
     });
 
     $(tableRef.current).on("click", ".assign_data", function () {
@@ -173,7 +168,7 @@ const ViewAll = () => {
   return (
     <>
       <NavBar />
-      <div className="container_custom mx-auto w-full pt-15">
+      <div className="min-h-screen container_custom mx-auto w-full pt-15">
         <div className="flex flex-row justify-start my-5">
           <span className="text-3xl text-[#0F2043] font-semibold">
             Trip &gt; View All Trip
@@ -204,8 +199,25 @@ const ViewAll = () => {
             cancelButtonProps={{ style: { display: "none" } }}
             okButtonProps={{ style: { display: "none" } }}
           >
-            {" "}
-            <PendingTripEditCard tripId={tripId} />
+            <PendingTripEditCard
+              tripId={tripId}
+              handleCancel={handleCancel_edit}
+              onUpdateSuccess={handleTripUpdateSuccess}
+            />
+          </Modal>
+
+          <Modal
+            title="Delete Trip"
+            open={isModal_deleteOpen}
+            onCancel={handleCancel_delete}
+            cancelButtonProps={{ style: { display: "none" } }}
+            okButtonProps={{ style: { display: "none" } }}
+          >
+            <PendingTripDeleteCard
+              tripId={tripId}
+              handleCancel={handleCancel_delete}
+              onUpdateSuccess={handleTripUpdateSuccess}
+            />
           </Modal>
         </div>
       </div>

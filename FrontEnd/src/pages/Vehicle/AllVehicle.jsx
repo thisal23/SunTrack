@@ -104,14 +104,21 @@ const AllVehicle = () => {
     $(tableRef.current).DataTable({
       data: vehicleData?.map((item) => [
         item.id,
-        `${item.VehicleBrand.title}/${item.vehicleTitle}`,
-        `${item.VehicleDetail.color}/${item.vehicleTypeTwo}`,
-        `<a href="${config.fileUrl}${item.VehicleDetail.licenceDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
-        `<a href="${config.fileUrl}${item.VehicleDetail.insuranceDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
-        `<a href="${config.fileUrl}${item.VehicleDetail.ecoDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
-        `${item.VehicleDetail.licenceId}`,
+        `${item.vehicleBrand.brand}/${item.vehicleModel.model}`,
+        `${item.color}/${item.category}`,
+        `<a href="${config.fileUrl}${
+          item.VehicleDetail?.licenceDocument || ""
+        }" target="_blank" class="text-blue-500 underline">View Document</a>`,
+        `<a href="${config.fileUrl}${
+          item.VehicleDetail?.insuranceDocument || ""
+        }" target="_blank" class="text-blue-500 underline">View Document</a>`,
+        `<a href="${config.fileUrl}${
+          item.VehicleDetail?.ecoDocument || ""
+        }" target="_blank" class="text-blue-500 underline">View Document</a>`,
+        `${item.VehicleDetail?.licenceId || ""}`,
         `${item.vehicleTitle}`,
       ]),
+
       columns: [
         { title: "ID" },
         { title: "Brand/Title" },
@@ -125,9 +132,12 @@ const AllVehicle = () => {
           render: function (data, type, row) {
             console.log(row);
             return `
-              <button class="btn-view" data-id="${
-                row[0]
-              }" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
+            
+    <div style="display: flex; gap: 6px;">
+
+             <button class="btn-view" data-id="${
+               row[0]
+             }" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
 
               <button class="btn-edit" data-id="${
                 row[0]
@@ -136,7 +146,7 @@ const AllVehicle = () => {
               <button class="btn-delete" data-id="${row[0]}" data-dt="${
               row[1].split("/")[0]
             }" data-licence="${row[6]}" data-model="${row[7]}" 
-            }" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
+            }" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button></div>
             `;
           },
         },

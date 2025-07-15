@@ -27,7 +27,7 @@ const TripDetail = sequelize.define("TripDetail",{
         type: DataTypes.INTEGER,
         allowNull: true,
         references:{
-            model:"UserDetail",
+            model:"driverDetail",
             key:"id"
         }
     },

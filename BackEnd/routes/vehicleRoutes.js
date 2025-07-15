@@ -12,6 +12,7 @@ const {
   deleteVehicleData,
   updateVehicleById,
   fetchVehicleInfo,
+  fetchVehicleCount,
 } = require("../controllers/vehicleController");
 const upload = require("../config/multreConfig");
 const validateVehicleFields = require("../utils/vehicleDataValidation");
@@ -52,6 +53,7 @@ router.put(
 router.get("/vehicle/all", fetchVehicle);
 router.get("/vehicle/details/:id", fetchVehicleById);
 router.delete("/vehicle/remove/:id", deleteVehicleData);
+router.get("/vehicle/count",fetchVehicleCount);
 
 //vehicleInfo routes
 router.get("/vehicleInfo/all", fetchVehicleInfo);

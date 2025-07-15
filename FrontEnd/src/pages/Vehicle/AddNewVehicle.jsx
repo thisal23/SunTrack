@@ -7,9 +7,8 @@ import AddBrandCard from "./AddBrandCard";
 import AddModelCard from "./AddModelCard";
 import { Modal } from "antd";
 
-// Sachini part
 const AddNewVehicle = () => {
-  const [vehicleTypes, setVehicelTypes] = useState([
+  const [vehicleTypes, setVehicleTypes] = useState([
     "Bike",
     "Three-Wheel",
     "Car",
@@ -35,14 +34,43 @@ const AddNewVehicle = () => {
   };
 
   const [isFocused, setIsFocused] = useState(false);
-  const [brands, setBrands] = useState([]); // creating array state to assign all the brands in db
+  const [brands, setBrands] = useState([]);
   const [titles, setModels] = useState([]);
+
+  // Override root max-width for this page only
+  useEffect(() => {
+    // Add CSS to override max-width
+    const style = document.createElement("style");
+    style.id = "addnewvehicle-root-override";
+    style.textContent = `
+      body.addnewvehicle-page #root {
+        max-width: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Add class to body
+    document.body.classList.add("addnewvehicle-page");
+
+    // Cleanup function
+    return () => {
+      document.body.classList.remove("addnewvehicle-page");
+      const styleElement = document.getElementById(
+        "addnewvehicle-root-override"
+      );
+      if (styleElement) {
+        styleElement.remove();
+      }
+    };
+  }, []);
 
   // fetching all the vehicle data in db
   const fetchVehicleData = async () => {
     try {
       const brandResponse = await apiService.get("brand/all");
       const modelResponse = await apiService.get("model/all");
+
+      console.log(modelResponse.data.data);
 
       if (brandResponse.status !== 200 || modelResponse.status !== 200) {
         toast.error("Data fetching error!!!");
@@ -55,9 +83,8 @@ const AddNewVehicle = () => {
     }
   };
 
-  // Form Input data State ~~ Assigning form input values to a state
+  // Form Input data State
   const [formData, setFormData] = useState({
-    // assigning all the vehicle input data into vehicle form data state
     vehicle_title: "",
     vehicle_type: "",
     category: "",
@@ -66,6 +93,7 @@ const AddNewVehicle = () => {
     vehicle_brand: "",
     fuel_type: "",
     register_year: "",
+    vehicle_image: "",
     lisence_id: "",
     lisence_last_date: "",
     lisence_expire_date: "",
@@ -76,18 +104,22 @@ const AddNewVehicle = () => {
     insurance_last_update: "",
     insurance_document: null,
     eco_document: null,
+    gps_id: "",
+    country_code: "",
+    device_sim_no: "",
+    vehicle_model: "",
   });
 
-  // handling form input changes input onChange event
+  // handling form input changes
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
     setFormData({
       ...formData,
-      [name]: type === "file" ? files[0] : value, // if input type is a file getting 0 index of the value else directly assigning the value of input text
+      [name]: type === "file" ? files[0] : value,
     });
   };
 
-  // Create new vehcile with data VehicleTYpe,VehicleMode, FuelType etc:
+  // Create new vehicle with data
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -95,10 +127,11 @@ const AddNewVehicle = () => {
       const fData = new FormData();
 
       fData.append("vehicleType", formData.vehicle_type);
-      fData.append("vehicleTypeTwo", formData.category);
+      fData.append("category", formData.category);
       fData.append("vehicleModel", formData.vehicle_model);
       fData.append("model", formData.register_year);
       fData.append("registerYear", formData.register_year);
+      fData.append("vehicleImage", formData.vehicle_image);
       fData.append("color", formData.vehicle_color);
       fData.append("licenseId", formData.lisence_id);
       fData.append("licenseExpireDate", formData.lisence_expire_date);
@@ -113,15 +146,16 @@ const AddNewVehicle = () => {
       fData.append("licenceDocument", formData.lisence_document);
       fData.append("insuranceDocument", formData.insurance_document);
       fData.append("ecoDocument", formData.eco_document);
+      fData.append("gpsId", formData.gps_id);
+      fData.append("countryCode", formData.country_code);
+      fData.append("deviceSimNo", formData.device_sim_no);
 
       console.log(...fData);
 
-      // Fetching vehicle data using api
       const response = await apiService.post("vehicle/create", fData);
 
       console.log(response);
 
-      // Sending an error if response status !== (not equal ) to 201/200
       if (response.status !== 201) {
         toast.error("Vehicle data creation fail");
         return;
@@ -130,7 +164,7 @@ const AddNewVehicle = () => {
       toast.success("Vehicle data creation success");
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error("Failed to create vehicle data"); // throwinf an error if vehicle creation process not successfull
+      toast.error("Failed to create vehicle data");
     }
   };
 
@@ -142,10 +176,14 @@ const AddNewVehicle = () => {
     <>
       <ToastContainer />
       <NavBar />
-      <div className="w-full p-6 bg-white shadow-md rounded-lg mt-15 mb-0 text-black">
-        <span className="text-3xl text-left underline mr-2">Vehicle</span>
-        <span className="text-3xl text-leftk">&gt;</span>
-        <span className="text-3xl text-left ml-2">Add New Vehicle</span>
+      <div className="min-h-screen w-full p-6 text-black bg-gray-100">
+        <div className="flex flex-row justify-between items-center my-5">
+          <span className="text-xl text-[#0F2043] font-semibold">
+            Vehicle &gt; Add New Vehicle
+          </span>
+        </div>
+
+        <div className="border-b-1 border-gray-300 w-full mb-5"></div>
         <form
           onSubmit={handleSubmit}
           className="lg:flex mt-10 lg:flex-col lg:justify-between lg:w-full lg:gap-5 customClassForm"
@@ -172,7 +210,7 @@ const AddNewVehicle = () => {
                           onChange={handleInputChange}
                           className="block flex-grow-3 py-2.5 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                         >
-                          <option value="" disabled selected>
+                          <option value="" disabled>
                             Select vehicle type
                           </option>
                           {vehicleTypes.map((types, idx) => (
@@ -187,7 +225,7 @@ const AddNewVehicle = () => {
                       <button
                         type="button"
                         onClick={() => setIsModal_typeOpen(true)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded"
+                        className="bg-{#0F2043}-600 text-white px-4 py-2 rounded"
                       >
                         +
                       </button>
@@ -211,13 +249,17 @@ const AddNewVehicle = () => {
                             onChange={handleInputChange}
                             className="block w-full py-2.5 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                           >
-                            <option value="" disabled selected>
+                            <option value="" disabled>
                               Select vehicle brand
                             </option>
                             {Array.isArray(brands) &&
                               brands.map((item, idx) => {
                                 return (
-                                  <option value={item.id} key={idx}>
+                                  <option
+                                    value={item.id}
+                                    key={idx}
+                                    className="text-black"
+                                  >
                                     {item.title}
                                   </option>
                                 );
@@ -254,13 +296,17 @@ const AddNewVehicle = () => {
                             onChange={handleInputChange}
                             className="block w-full py-2.5 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                           >
-                            <option value="" disabled selected>
+                            <option value="" disabled>
                               Select vehicle model
                             </option>
                             {Array.isArray(titles) &&
                               titles.map((item, idx) => {
                                 return (
-                                  <option value={item.id} key={idx}>
+                                  <option
+                                    value={item.id}
+                                    key={idx}
+                                    className="text-black"
+                                  >
                                     {item.title}
                                   </option>
                                 );
@@ -291,9 +337,7 @@ const AddNewVehicle = () => {
                         onChange={handleInputChange}
                         className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                       >
-                        <option value="Petrol" selected>
-                          Petrol
-                        </option>
+                        <option value="Petrol">Petrol</option>
                         <option value="Diesel">Diesel</option>
                         <option value="Electric">Electric</option>
                       </select>
@@ -323,9 +367,8 @@ const AddNewVehicle = () => {
                         value={formData.category}
                         onChange={handleInputChange}
                         className="block w-full py-2.5 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
-                        // defaultValue="H"
                       >
-                        <option value="" selected disabled>
+                        <option value="" disabled>
                           Select vehicle category
                         </option>
                         <option value="H">Heavy</option>
@@ -358,6 +401,20 @@ const AddNewVehicle = () => {
                       name="register_year"
                       value={formData.register_year}
                       onChange={handleInputChange}
+                      className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="font-medium text-gray-700">
+                      Upload Vehicle Image <small>(.jpg, .jpeg)</small>
+                    </label>
+                    <input
+                      type="file"
+                      name="vehicle_image"
+                      value={formData.vehicle_image}
+                      onChange={handleInputChange}
+                      accept=".jpg,.jpeg,.png"
                       className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                     />
                   </div>
@@ -510,6 +567,52 @@ const AddNewVehicle = () => {
                       className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                     />
                   </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset className="border border-gray-300 p-4 rounded-md w-full">
+              <legend className="text-lg font-semibold px-2 text-gray-700">
+                GPS Device Data
+              </legend>
+
+              <div className="space-y-4">
+                <div className="flex flex-col">
+                  <label className="font-medium text-gray-700">
+                    GPS Device ID:
+                  </label>
+                  <input
+                    type="text"
+                    name="gps_id"
+                    value={formData.gps_id}
+                    onChange={handleInputChange}
+                    className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-medium text-gray-700">
+                    Country Code:
+                  </label>
+                  <input
+                    type="text"
+                    name="country_code"
+                    value={formData.country_code}
+                    onChange={handleInputChange}
+                    className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-medium text-gray-700">
+                    Device Sim Number:
+                  </label>
+                  <input
+                    type="text"
+                    name="device_sim_no"
+                    value={formData.device_sim_no}
+                    onChange={handleInputChange}
+                    className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                  />
                 </div>
               </div>
             </fieldset>

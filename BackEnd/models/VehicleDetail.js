@@ -22,7 +22,28 @@ const VehicleDetail = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    licenceLastUpdate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
     licenseExpireDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    licenceDocument: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    insuranceNo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    insuranceLastUpdate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    insuranceExpireDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
@@ -30,43 +51,22 @@ const VehicleDetail = sequelize.define(
       type: DataTypes.STRING, // Full Insurance, Third Party
       allowNull: false,
     },
-    insuranceNo: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    insuranceExpireDate: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    },
-    chassieNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    fuelType: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    registerYear: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    licenceLastUpdate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    insuranceLastUpdate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    licenceDocument: {
-      type: DataTypes.STRING(500),
-      allowNull: true,
-    },
     insuranceDocument: {
       type: DataTypes.STRING(500),
       allowNull: true,
+    },
+    ecoId:{
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    ecoLastUpdate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    ecoExpireDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
     },
     ecoDocument: {
       type: DataTypes.STRING(500),

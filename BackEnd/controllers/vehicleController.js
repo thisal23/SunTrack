@@ -1,14 +1,14 @@
-const { Op } = require("sequelize");
+const { Op, sequelize} = require("sequelize");
 const {
   Vehicle,
   VehicleDetail,
   VehicleBrand,
   VehicleModel,
   gpsdata,
+  gpsDevice,
+  TripDetail,
+  Trip
 } = require("../models");
-
-// 200 - success, 201 - created, 400 -bad request, 404 - not found, 500 - internal server error
-// 401 - unauthorized, 403 - forbidden/deny access/Not granted
 
 // Creating new vehicle brands
 const createBrand = async (req, res) => {
@@ -333,37 +333,44 @@ const updateVehicleById = async (req, res) => {
 const fetchVehicle = async (req, res) => {
   try {
     const data = await Vehicle.findAll({
+      attributes: [
+        'id', 'brandId', 'vehicleType', 'fuelType', 'category', 'registeredYear', 
+        'chassieNo', 'status', 'color', 'image', 'createdAt', 'updatedAt'
+      ],
       include: [
         {
-          model: VehicleDetail,
-          required: true,
+          model: VehicleModel,
+          as: 'vehicleModel',  // alias must match association
+          attributes: ['model']
         },
         {
           model: VehicleBrand,
-          required: true,
+          as: 'vehicleBrand',
+          attributes: ['brand']
         },
-        // {
-        //   model: VehicleModel,
-        //   required: true,
-        // },
-      ],
+        {
+          model: VehicleDetail,
+          as: 'vehicleDetail',  // alias must match association
+          attributes: [
+            'licenseId', 'licenceLastUpdate', 'licenseExpireDate', 'licenceDocument',
+            'insuranceNo', 'insuranceLastUpdate', 'insuranceExpireDate',
+            'insuranceType', 'insuranceDocument', 'ecoId', 'ecoLastUpdate', 'ecoExpireDate', 'ecoDocument'
+          ]
+        }
+      ]
     });
 
-    if (data.length == 0) {
-      res.status(404).json({ status: true, message: "Vehicle data not found" });
-    }
-
-    res.status(200).json({
+    return res.status(200).json({
       status: true,
-      message: "Vehicle data successfully fetched",
-      data: data,
+      message: "Vehicles data fetched successfully",
+      data
     });
   } catch (error) {
-    res
-      .status(400)
-      .json({ status: false, message: error.message, stack: error.stack });
+    return res.status(400).json({ status: false, message: error.message });
   }
 };
+
+
 
 // Fetch single vehicle details
 const fetchVehicleById = async (req, res) => {
@@ -473,49 +480,163 @@ const fetchModels = async (req, res) => {
   }
 };
 
+//fetchVehicleCount
+const fetchVehicleCount = async (req,res) => {
+    try {
+      const [total,available,outOfService] = await Promise.all([
+        Vehicle.count(),
+        Vehicle.count({ where: { status: "available" } }),
+        Vehicle.count({ where: { status: "outOfService" } }),
+      ]);
 
-
-// fetch data for info table
-const fetchVehicleInfo = async (req, res) => {
-  try {
-    const data = await Vehicle.findAll({
-      include: [
-        {
-          model: VehicleDetail,
-          required: true,
-        },
-        {
-          model: gpsdata,
-          required: true,
-        }
-      ],
-    });
-
-    if (data.length == 0) {
-      res.status(404).json({ status: true, message: "Vehicle data not found" });
+      return res.json({
+        total,
+        available,
+        outOfService,
+      });
+    } catch (error) {
+      console.error("Error fetching vehicle counts:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
+  };
 
-    res.status(200).json({
-      status: true,
-      message: "Vehicle data successfully fetched",
-      data: data,
+
+//fetch vehicle Info with location name
+const axios = require("axios");
+
+const reverseGeocode = async (lat, lon) => {
+  try {
+    const response = await axios.get("https://nominatim.openstreetmap.org/reverse", {
+      params: {
+        lat,
+        lon,
+        format: "json",
+        addressdetails: 1
+      },
+      headers: {
+        "User-Agent": "SunTrackFleetSystem/1.0 (contact@yourdomain.com)"
+      }
     });
+
+    const address = response.data.address;
+
+    // Only use parts you need: street, suburb, city
+    const parts = [
+      address.road || address.street || "",
+      address.suburb || "",
+      address.city || address.town || address.village || ""
+    ].filter(Boolean);
+
+    return parts.join(", ") || `${lat} | ${lon}`;
   } catch (error) {
-    res
-      .status(400)
-      .json({ status: false, message: error.message, stack: error.stack });
+    console.error("Reverse geocoding failed:", error.message);
+    return `${lat} | ${lon}`;
   }
 };
 
-// const fetchVehicleCount = async (res,req) => {
-//   try{
-//     const [total,available, outofservice] = await Promise.all([
-//       Vehicle.count(),
-//       Vehicle.count(),
-//       Vehicle.count(),
-//     ]);
-//   };
-// };
+const fetchVehicleInfo = async (req, res) => {
+  try {
+    // Step 1: Get all vehicles with their GPS devices and trip details
+    const vehicles = await Vehicle.findAll({
+      attributes: ['id', 'plateNo'],
+      include: [
+        {
+          model: gpsDevice,
+          as: 'gpsDevice',
+          required: true,
+          attributes: ['deviceId']
+        },
+        {
+          model: TripDetail,
+          as: 'tripDetails',
+          required: false,
+          attributes: ['tripId'],
+          include: [
+            {
+              model: Trip,
+              as: 'trip',
+              attributes: ['endLocation', 'driverStartTime'],
+            }
+          ],
+        }
+      ]
+    });
+
+    if (!vehicles.length) {
+      return res.status(404).json({
+        status: false,
+        message: "Vehicle data not found"
+      });
+    }
+
+    const result = [];
+
+    for (const vehicle of vehicles) {
+      const deviceId = vehicle.gpsDevice.deviceId;
+
+      // Find latest GPS data
+      const latestGpsData = await gpsdata.findOne({
+        where: { deviceId },
+        order: [['recDate', 'DESC'], ['recTime', 'DESC']],
+        attributes: ['deviceId', 'recDate', 'recTime', 'latitude', 'longitude', 'speed', 'direction', 'acc', 'door']
+      });
+
+      const tripDetail = vehicle.tripDetails?.[0];
+      const tripLocation = tripDetail?.trip?.endLocation || "Null";
+
+      if (latestGpsData) {
+        const { latitude, longitude } = latestGpsData;
+        const locationName = latitude && longitude
+          ? await reverseGeocode(latitude, longitude)
+          : "Unknown";
+
+        result.push({
+          plateNo: vehicle.plateNo,
+          gpsDevice: {
+            deviceId: vehicle.gpsDevice.deviceId,
+            gpsData: {
+              deviceId: latestGpsData.deviceId,
+              recDate: latestGpsData.recDate,
+              recTime: latestGpsData.recTime,
+              latitude,
+              longitude,
+              speed: latestGpsData.speed,
+              direction: latestGpsData.direction,
+              acc: latestGpsData.acc,
+              door: latestGpsData.door
+            }
+          },
+          tripLocation: tripLocation,
+          lastLocation: locationName   // 👈 new field added
+        });
+      }
+    }
+
+    if (!result.length) {
+      return res.status(404).json({
+        status: false,
+        message: "No GPS data found for vehicles"
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Vehicle data successfully fetched",
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Error fetching vehicle info:', error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+
+
+
 
 
 
@@ -531,5 +652,6 @@ module.exports = {
   deleteVehicleData,
   createModel,
   fetchModels,
-  fetchVehicleInfo
+  fetchVehicleInfo,
+  fetchVehicleCount
 };

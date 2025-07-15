@@ -1,4 +1,4 @@
-const { User, Role, UserDetail } = require('../models');
+const { User, Role, driverDetail } = require('../models');
 
 const getAllUsers = async (req, res) => {
   try {
@@ -8,7 +8,7 @@ const getAllUsers = async (req, res) => {
     const users = await User.findAll({
       include: [
         { model: Role, as: 'role' },
-        { model: UserDetail, as: 'detail' }
+        { model: driverDetail, as: 'detail' }
       ]
     });
 
@@ -30,7 +30,7 @@ const getUserById = async (req, res) => {
     const user = await User.findByPk(req.params.id, {
       include: [
         { model: Role, as: 'role' },
-        { model: UserDetail, as: 'detail' }
+        { model: driverDetail, as: 'detail' }
       ]
     });
     if (!user) {

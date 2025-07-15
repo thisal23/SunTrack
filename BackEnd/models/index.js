@@ -1,6 +1,6 @@
 const User = require('./User');
 const Role = require('./Role'); // Import the Role model
-const UserDetail = require('./UserDetail'); // Import the UserDetail model
+const driverDetail = require('./DriverDetail'); // Import the driverDetail model
 
 // Sachini work imports
 const TripDetail = require("./TripDetail");
@@ -16,6 +16,9 @@ const Service = require("./Service");
 const geoname = require("./geoname");
 const geoFenceEvent = require("./geoFenceEvent");
 const gpsdata = require("./gpsdata");
+const gpsDevice = require('./gpsDevice');
+
+
 // Define the associations
 User.belongsTo(Role, {
   foreignKey: 'roleId',
@@ -28,31 +31,47 @@ Role.hasMany(User, {
   as: 'users',
 });
 
-// User has one UserDetail
-User.hasOne(UserDetail, {
+// User has one driverDetail
+User.hasOne(driverDetail, {
   foreignKey: 'userId',
   as: 'detail',
 });
 
-// UserDetail belongs to User
-UserDetail.belongsTo(User, {
+// driverDetail belongs to User
+driverDetail.belongsTo(User, {
   foreignKey: 'userId',
   as: 'user',
 });
 
 geoFenceEvent.belongsTo(geoname, {foreignKey: 'geoId'});
-/* ################ Sachini Work ################ */
-VehicleDetail.belongsTo(Vehicle, { foreignKey: "vehicleId" });
-Vehicle.hasOne(VehicleDetail, { foreignKey: "vehicleId" });
 
-Vehicle.belongsTo(VehicleBrand, { foreignKey: "brandId" });
+// Vehicle has one GpsDevice
+Vehicle.hasOne(gpsDevice, { foreignKey: 'plateNo', sourceKey: 'plateNo', as: 'gpsDevice' });
+gpsDevice.belongsTo(Vehicle, { foreignKey: 'plateNo', targetKey: 'plateNo', as: 'vehicle'});
+
+// GpsDevice has many GpsData
+gpsDevice.hasMany(gpsdata, { foreignKey: 'deviceId', sourceKey: 'deviceId',as: 'gpsData' });
+gpsdata.belongsTo(gpsDevice, { foreignKey: 'deviceId', targetKey: 'deviceId',as: 'gpsDevice' });
+
+
+
+VehicleDetail.belongsTo(Vehicle, { foreignKey: "vehicleId",as:"vehicle" });
+Vehicle.hasOne(VehicleDetail, { foreignKey: "vehicleId", as: "vehicleDetail" });
+
+Vehicle.belongsTo(VehicleBrand, { foreignKey: "brandId", as: "vehicleBrand" });
 VehicleBrand.hasMany(Vehicle, { foreignKey: "brandId" });
 
-Vehicle.belongsTo(VehicleModel, { foreignKey: "model" });
-VehicleModel.hasMany(Vehicle, { foreignKey: "model" });
+Vehicle.belongsTo(VehicleModel, { foreignKey: "modelId", as: "vehicleModel" });
+VehicleModel.hasMany(Vehicle, { foreignKey: "modelId", as:"vehicles" });
 
-TripDetail.belongsTo(Trip, { foreignKey: "tripId" });
-Trip.hasOne(TripDetail, { foreignKey: "tripId" });
+TripDetail.belongsTo(Trip, {foreignKey: 'tripId',as: 'trip'});
+Trip.hasOne(TripDetail, {foreignKey: 'tripId',as: 'tripDetail', onDelete: 'CASCADE'});
+
+TripDetail.belongsTo(driverDetail, { foreignKey: 'driverId', as: 'driver' });
+driverDetail.belongsTo(User, { foreignKey: 'userId', as: 'driverUser' });
+
+Vehicle.hasMany(TripDetail, {foreignKey: 'vehicleId',sourceKey: 'plateNo',as: 'tripDetails'});
+TripDetail.belongsTo(Vehicle, {foreignKey: 'vehicleId',targetKey: 'plateNo', as: 'vehicle'});
 
 ServiceInfo.belongsTo(Service, { foreignKey: "serviceId" });
 Service.hasMany(ServiceInfo, { foreignKey: "serviceId" });
@@ -64,14 +83,10 @@ ServiceInfo.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(ServiceInfo, { foreignKey: "userId" });
 
 
-/* ################ Sachini Work ################ */
-
-
-
 module.exports = {
   User,
   Role,
-  UserDetail,
+  driverDetail,
   Vehicle,
   VehicleBrand,
   VehicleModel,
@@ -82,5 +97,6 @@ module.exports = {
   ServiceInfo,
   geoname,
   geoFenceEvent,
-  gpsdata
+  gpsdata,
+  gpsDevice
 }; // Export the models
