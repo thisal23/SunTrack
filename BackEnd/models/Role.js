@@ -18,10 +18,10 @@ const Role = sequelize.define('Role', {
     allowNull: false,
   },
 
-
 }, {
   timestamps: false,
 });
 
+// Remove any insertRole function or auto-insert code
+
 module.exports = Role;
-// The code above defines a Role model using Sequelize. The Role model has three fields: id, roleName, and displayName. The id field is the primary key and auto-increments. The roleName and displayName fields are of type STRING and cannot be null. The timestamps option is set to false to disable the default timestamps (createdAt and updatedAt) that Sequelize adds to each record.

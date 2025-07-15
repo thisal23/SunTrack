@@ -7,11 +7,10 @@ const Register = () => {
         firstName: "",
         lastName: "",
         userName: "",
-        birthday: "",
         email: "",
         password: "",
         confirmPassword: "",
-        roleId: "2",  // Default role (e.g., User)
+        roleId: "",  // Default role (e.g., User)
         isActive: true // ✅ By default, new users are active
     });
 
@@ -40,7 +39,6 @@ const Register = () => {
                     firstName: formData.firstName,
                     lastName: formData.lastName,
                     userName: formData.userName,
-                    birthday: formData.birthday,
                     email: formData.email,
                     password: formData.password,
                     roleId: formData.roleId,
@@ -55,11 +53,10 @@ const Register = () => {
                     firstName: "",
                     lastName: "",
                     userName: "",
-                    birthday: "",
                     email: "",
                     password: "",
                     confirmPassword: "",
-                    roleId: "2",
+                    roleId: "3", // Default role for new users
                     isActive: true
                 });
                 setError("");
@@ -78,6 +75,19 @@ const Register = () => {
             </div>
             <div className="register-box">
                 <h1>SunTrack</h1>
+                {success && (
+                  <div className="success-message" style={{
+                    background: '#d4edda',
+                    color: '#155724',
+                    border: '1px solid #c3e6cb',
+                    borderRadius: '5px',
+                    padding: '10px',
+                    marginBottom: '1rem',
+                    textAlign: 'center',
+                  }}>
+                    {success}
+                  </div>
+                )}
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
                         <label htmlFor="firstName">First Name</label>
@@ -102,17 +112,6 @@ const Register = () => {
                             onChange={handleChange}
                             required
                         />
-                        </div>
-                    <div className="input-group">   
-                        <label htmlFor="birthday">Birthday</label>
-                        <input
-                            type="date"
-                            id="birthday"
-                            name="birthday"
-                            value={formData.birthday}
-                            onChange={handleChange}
-                            required
-                        />  
                     </div>
                     <div className="input-group">
                         <label htmlFor="userName">Username</label>
@@ -164,7 +163,8 @@ const Register = () => {
                     </div>
                     <div className="input-group">
                         <label htmlFor="roleId">Role</label>
-                        <select id="roleId" name="roleId" value={formData.roleId} onChange={handleChange}>
+                        <select id="roleId" name="roleId" value={formData.roleId} onChange={handleChange} required>
+                            <option value="">Select Role</option>
                             <option value="1">FleetManager</option>
                             <option value="2">User</option>
                         </select>
@@ -181,8 +181,7 @@ const Register = () => {
                             />
                         </div>
                     </div>
-                    {error && <p className="error-message">{error}</p>}
-                    {success && <p className="success-message">{success}</p>}
+                    {error && <p className="error-message" style={{color:'#dc3545',marginBottom:'1rem'}}>{error}</p>}
                     <button type="submit">Register</button>
                 </form>
                 <p>Already have an account? <a href="/">Login here</a></p>

@@ -57,7 +57,7 @@ const User = sequelize.define('User', {
   // },
 
 }, {
-  timestamps: false,
+  timestamps: true, // <-- change this to true
 });
 
 // Hash the user's password before saving it to the database
