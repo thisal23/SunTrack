@@ -117,11 +117,20 @@ const ViewAll = () => {
           title: "Ass: Driver/Ass:Vehicle",
           data: null,
           render: function (data, type, row) {
-            return `<div class="flex flex-row justify-center"><button type="button" class="assign_data cursor-pointer px-3 py-1 rounded-full text-xs bg-green-600 hover:bg-green-800 text-white" data-id="${row[0]}">
-            Assign Driver/Vehicle
-            </button></div>`;
+            const tripStatus = row[4]; // Index of 'status' column
+            const disabled =
+              tripStatus !== "pending"
+                ? 'disabled style="background:gray;cursor:not-allowed;"'
+                : 'class="assign_data cursor-pointer px-3 py-1 rounded-full text-xs bg-green-600 hover:bg-green-800 text-white"';
+
+            return `<div class="flex flex-row justify-center">
+      <button type="button" data-id="${row[0]}" ${disabled}>
+        Assign Driver/Vehicle
+      </button>
+    </div>`;
           },
         },
+
         {
           title: "Action",
           data: null,

@@ -1,4 +1,5 @@
-const { Trip, TripDetail, User, Vehicle, driverDetail } = require("../models");
+const { Trip, TripDetail, User, Vehicle, driverDetail, VehicleBrand, VehicleModel } = require("../models");
+const { Op } = require("sequelize");
 
 //create new trip
 const createTrip = async (req, res) => {
@@ -76,61 +77,69 @@ const createTrip = async (req, res) => {
 //Assign driver for trip
 const assignDriver = async (req, res) => {
   const { driverId } = req.body;
-  const { id } = req.params;
+  const { id } = req.params; // id = tripId
 
   try {
-    const tripDetail = await TripDetail.findOne({
-      where: {
-        tripId: id,
-      },
-    });
+    // ✅ Check if the driver exists
+    const driver = await driverDetail.findByPk(driverId);
+    if (!driver) {
+      return res.status(404).json({ status: false, message: "Driver not found" });
+    }
+
+    const tripDetail = await TripDetail.findOne({ where: { tripId: id } });
     if (!tripDetail) {
-      res.status(404).json({ status: false, message: "Trip detail not found" });
+      return res.status(404).json({ status: false, message: "Trip detail not found" });
     }
 
-    const data = await tripDetail.update({ driverId });
-    if (!data) {
-      res.status(500).json({ status: false, message: "Something went wrong" });
-    }
+    const updatedDetail = await tripDetail.update({ driverId });
 
+    // ✅ Also update the trip status
     const trip = await Trip.findByPk(id);
+    await trip.update({ status: "Ready" });
 
-    trip.update({ status: "Ready" });
     res.status(200).json({
       status: true,
-      message: "Trip detail updated successfully",
-      data: data,
+      message: "Driver assigned successfully",
+      data: updatedDetail,
     });
   } catch (error) {
     res.status(400).json({ status: false, message: error.message });
   }
 };
+
+
 
 //Assign vehicle for trip
 const assignVehicle = async (req, res) => {
   const { vehicleId } = req.body;
-  const { id } = req.params;
+  const { id } = req.params; // id = tripId
 
   try {
-    const tripDetail = await TripDetail.findByPk(id);
-    if (!tripDetail) {
-      res.status(404).json({ status: false, message: "Trip detail not found" });
+    // Find the plateNo from the vehicle id
+    const vehicle = await Vehicle.findByPk(vehicleId);
+    if (!vehicle) {
+      return res.status(404).json({ status: false, message: "Vehicle not found" });
     }
 
-    const data = await tripDetail.update({ vehicleId });
-    if (!data) {
-      res.status(500).json({ status: false, message: "Something went wrong" });
+    const plateNo = vehicle.plateNo;
+
+    const tripDetail = await TripDetail.findOne({ where: { tripId: id } });
+    if (!tripDetail) {
+      return res.status(404).json({ status: false, message: "Trip detail not found" });
     }
+
+    const updatedDetail = await tripDetail.update({ vehicleId: plateNo });
 
     res.status(200).json({
       status: true,
-      message: "vehicle assigned successfully",
-      data: data,
+      message: "Vehicle assigned successfully",
+      data: updatedDetail,
     });
   } catch (error) {
     res.status(400).json({ status: false, message: error.message });
   }
 };
+
 
 //fetch all trips
 const fetchAllTrips = async (req, res) => {
@@ -165,7 +174,7 @@ const fetchAllTrips = async (req, res) => {
     }
 
     const formatted = data.map(trip => {
-  const detail = trip.tripDetail;
+  const detail = trip.tripDetail;20
   const user = detail?.driver?.driverUser;
 
   const driverName = user ? `${user.firstName} ${user.lastName}` : null;
@@ -201,19 +210,31 @@ const fetchAllTrips = async (req, res) => {
 //fetch driver for trip
 const fetchDriverForTrip = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { tripId } = req.params;
 
-    const vehicle = await Vehicle.findByPk(id);
-
-    const typeData = {
-      Light: "L",
-      Heavy: "H",
-      All: "A",
-    };
-
-    if (!vehicle) {
-      return res.status(404).json({ status: true, message: "Vehicle data not found" });
+    const trip = await Trip.findByPk(tripId);
+    if (!trip) {
+      return res.status(404).json({ status: false, message: "Trip not found" });
     }
+
+    // Get already assigned driverIds for the same date
+    const assignedDrivers = await TripDetail.findAll({
+      include: [
+        {
+          model: Trip,
+          where: { date: trip.date },
+          as: 'trip'
+        },
+      ],
+      where: {
+        driverId: {
+          [Op.ne]: null,
+        },
+      },
+      attributes: ['driverId'],
+    });
+
+    const assignedDriverIds = assignedDrivers.map(d => d.driverId);
 
     const driverData = await driverDetail.findAll({
       include: [
@@ -221,31 +242,31 @@ const fetchDriverForTrip = async (req, res) => {
           model: User,
           as: 'user',
           required: true,
-          where: {
-            roleId: 11,
-          },
+          where: { roleId: 3 }, // Assuming 11 = driver
         },
       ],
       where: {
-        licenseType: typeData?.[vehicle?.vehicleTypeTwo] || null,
+        id: {
+          [Op.notIn]: assignedDriverIds,
+        },
+        licenseType: {
+          [Op.in]: ["Light", "Heavy", "All"], // Adjust based on your vehicle type filtering logic
+        },
       },
       raw: true,
       nest: true,
     });
 
-    if (!driverData) {
-      return res.status(404).json({ status: true, message: "Driver data not found" });
-    }
-
     res.status(200).json({
       status: true,
-      message: "Data successfully fetch",
+      message: "Available drivers fetched successfully",
       data: driverData,
     });
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
 
 //fetchTripCount
 const fetchTripCount = async (req,res) => {
@@ -265,7 +286,71 @@ const fetchTripCount = async (req,res) => {
       console.error("Error fetching trip counts:", error);
       return res.tatus(500).json({ error: "Internal server error" });
     }
-  };
+  }; 
+
+//fetch vehicles for trip
+const fetchVehiclesForTrip = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+
+    const trip = await Trip.findByPk(tripId);
+    if (!trip) {
+      return res.status(404).json({ status: false, message: "Trip not found" });
+    }
+
+    // Find vehicle IDs already assigned for this trip date
+    const tripDetailsOnSameDay = await TripDetail.findAll({
+      include: [
+        {
+          model: Trip,
+          where: {
+            date: trip.date,
+          },
+          as: 'trip'
+        },
+      ],
+      attributes: ['vehicleId'],
+      where: {
+        vehicleId: {
+          [Op.ne]: null,
+        },
+      },
+    });
+
+    const assignedVehicleIds = tripDetailsOnSameDay.map(td => td.vehicleId);
+
+    const availableVehicles = await Vehicle.findAll({
+      where: {
+        id: {
+          [Op.notIn]: assignedVehicleIds,
+        },
+        status: 'available',
+      },
+      include: [
+        {
+          model: VehicleBrand,
+          as: "vehicleBrand",
+        },
+        {
+          model: VehicleModel,
+          as: "vehicleModel",
+        },
+      ],
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Available vehicles fetched successfully",
+      data: availableVehicles,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 
 //fetch pending trips
 const fetchPendingTrips = async (req, res) => {
@@ -296,6 +381,7 @@ module.exports = {
   assignVehicle,
   fetchAllTrips,
   fetchDriverForTrip,
+  fetchVehiclesForTrip,
   fetchTripCount,
   fetchPendingTrips
 };

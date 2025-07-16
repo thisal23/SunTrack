@@ -104,11 +104,11 @@ const updateServiceDetails = async (req, res) => {
         // Conditionally update fields based on documentType
         switch (documentType) {
             case 'License':
-                updateFields.licenceLastUpdate = lastUpdate || null;
+                updateFields.licenseLastUpdate = lastUpdate || null;
                 updateFields.licenseExpireDate = expiryDate || null;
                 if (documentFile) {
-                    oldFilePath = vehicleDetail.licenceDocument; // Get old path
-                    updateFields.licenceDocument = `/uploads/documents/${documentFile.filename}`;
+                    oldFilePath = vehicleDetail.licenseDocument; // Get old path
+                    updateFields.licenseDocument = `/uploads/documents/${documentFile.filename}`;
                 }
                 break;
             case 'Insurance':
@@ -188,10 +188,10 @@ const fetchDocumentDetails = async (req, res) => {
       attributes: [
         "id",
         "licenseId",
-        "licenceDocument",
+        "licenseDocument",
         "insuranceDocument",
         "ecoDocument",
-        "licenceLastUpdate",
+        "licenseLastUpdate",
         "licenseExpireDate",
         "insuranceLastUpdate",
         "insuranceExpireDate"
@@ -250,11 +250,11 @@ const updateDocumentDetails = async (req, res) => {
         // Conditionally update fields based on documentType
         switch (documentType) {
             case 'License':
-                updateFields.licenceLastUpdate = lastUpdate || null;
+                updateFields.licenseLastUpdate = lastUpdate || null;
                 updateFields.licenseExpireDate = expiryDate || null;
                 if (documentFile) {
-                    oldFilePath = vehicleDetail.licenceDocument; // Get old path
-                    updateFields.licenceDocument = `/uploads/documents/${documentFile.filename}`;
+                    oldFilePath = vehicleDetail.licenseDocument; // Get old path
+                    updateFields.licenseDocument = `/uploads/documents/${documentFile.filename}`;
                 }
                 break;
             case 'Insurance':

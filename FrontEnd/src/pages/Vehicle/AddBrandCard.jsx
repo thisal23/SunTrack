@@ -1,38 +1,45 @@
 import React, { useState } from "react";
 import apiService from "../../config/axiosConfig";
 
-const AddBrandCard = ({ isOpen, onClose }) => {
+const AddBrandCard = ({ isOpen, onClose, onSuccess }) => {
   const [brandName, setBrandName] = useState("");
-
   const [isSuccess, setIsSuccess] = useState(false);
-
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(brandName);
-    const data = new FormData();
-
-    data.append("title", brandName);
-    console.log(...data);
+    if (!brandName.trim()) {
+      setIsError("Please enter a brand name");
+      setTimeout(() => setIsError(""), 3000);
+      return;
+    }
 
     try {
-      const response = await apiService.post("brand/create", data);
+      const response = await apiService.post("brand/create", {
+        brand: brandName,
+      });
 
-      if (response.status === 201 || 200) {
+      if (response.status === 201 || response.status === 200) {
+        const newBrand = response.data?.data; // assuming backend returns created object
+
+        if (onSuccess && newBrand) {
+          onSuccess(newBrand); // send back new brand to parent
+        }
+
         setIsSuccess(true);
         setTimeout(() => {
           setIsSuccess(false);
-          onClose();
-        }, 4000);
+          setBrandName("");
+          onClose(); // close modal after showing message
+        }, 1000);
       }
     } catch (error) {
-      setIsError(true);
-      setTimeout(() => {
-        setIsError(false);
-      }, 3000);
-      return error;
+      const backendMessage =
+        error.response?.data?.message || "Something went wrong";
+
+      setIsError(backendMessage);
+      setTimeout(() => setIsError(""), 4000);
     }
   };
 
@@ -47,19 +54,22 @@ const AddBrandCard = ({ isOpen, onClose }) => {
         <label className="block mb-1 text-sm">Name</label>
         <input
           type="text"
+          value={brandName}
           onChange={(e) => setBrandName(e.target.value)}
           className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter new vehicle brand"
         />
+
         {isSuccess ? (
           <span className="w-full flex justify-center mx-auto text-center px-4 py-2 bg-[#43bf64] border-2 border-[#00b530] text-white">
             Brand Data Created Successfully
           </span>
         ) : isError ? (
           <span className="w-full flex justify-center mx-auto text-center px-4 py-2 bg-[#b53f3f] border-2 border-[#b50000] text-white">
-            Brand Data Create Fail. Please check and try again
+            {isError}
           </span>
         ) : null}
+
         {/* Buttons */}
         <div className="flex justify-end space-x-2">
           <button

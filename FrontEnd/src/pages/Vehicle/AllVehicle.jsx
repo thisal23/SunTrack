@@ -25,14 +25,16 @@ const AllVehicle = () => {
   const [isModal_2_Open, setIsModal_2_Open] = useState(false);
   const [isModal_3_Open, setIsModal_3_Open] = useState(false);
   const [vehicleData, setVehicleData] = useState([]);
-  const [VehicleId, setVehicleId] = useState("");
+  const [vehicleId, setVehicleId] = useState("");
   const [vehicleName, setVehicleName] = useState("");
   const [licenseId, setLicenseId] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
+  const [refreshCount, setRefreshCount] = useState(0);
 
   const showModal_1 = (id) => {
     setIsModal_1_Open(true);
     setVehicleId(id);
+    fetchVehicleDetails(id);
   };
 
   const showModal_2 = (id) => {
@@ -44,6 +46,8 @@ const AllVehicle = () => {
     setIsModal_3_Open(true);
     setVehicleId(id);
     setVehicleName(name);
+    // setLicenseId(license);
+    // setVehicleModel(model);
   };
 
   const handleCancel_1 = () => {
@@ -76,6 +80,13 @@ const AllVehicle = () => {
     }
   };
 
+  // This handles success after vehicle edit: refresh table & info card, close edit modal
+  const handleUpdateSuccess = async () => {
+    await fetchVehicles();
+    setRefreshCount((prev) => prev + 1); // trigger remount of VehicleInfoCard
+    handleCancel_2(); // close edit modal
+  };
+
   const handleDelete = async (e) => {
     try {
       const delete_response = await apiService.delete("vehicle/remove/:${id}");
@@ -103,11 +114,11 @@ const AllVehicle = () => {
 
     $(tableRef.current).DataTable({
       data: vehicleData?.map((item) => [
-        item.id,
-        `${item.vehicleBrand.brand}/${item.vehicleModel.model}`,
-        `${item.color}/${item.category}`,
+        item.plateNo,
+        `${item.vehicleBrand.brand}-${item.vehicleModel.model}`,
+        `${item.vehicleType}-${item.category}`,
         `<a href="${config.fileUrl}${
-          item.VehicleDetail?.licenceDocument || ""
+          item.VehicleDetail?.licenseDocument || ""
         }" target="_blank" class="text-blue-500 underline">View Document</a>`,
         `<a href="${config.fileUrl}${
           item.VehicleDetail?.insuranceDocument || ""
@@ -115,37 +126,37 @@ const AllVehicle = () => {
         `<a href="${config.fileUrl}${
           item.VehicleDetail?.ecoDocument || ""
         }" target="_blank" class="text-blue-500 underline">View Document</a>`,
-        `${item.VehicleDetail?.licenceId || ""}`,
+        `${item.VehicleDetail?.licenseId || ""}`,
         `${item.vehicleTitle}`,
+        item.id,
       ]),
 
       columns: [
-        { title: "ID" },
-        { title: "Brand/Title" },
-        { title: "Color/Type" },
+        { title: "Vehicle No" },
+        { title: "Brand-Model" },
+        { title: "Type-Categoty" },
         { title: "License Document" },
         { title: "Insurance Document" },
         { title: "ECO Document" },
+        { title: "id", visible: false },
         {
           title: "Action",
           data: null,
           render: function (data, type, row) {
             console.log(row);
             return `
-            
-    <div style="display: flex; gap: 6px;">
-
-             <button class="btn-view" data-id="${
-               row[0]
-             }" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
+            <div style="display: flex; gap: 6px;">
+            <button class="btn-view" data-id="${
+              row[8]
+            }" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
 
               <button class="btn-edit" data-id="${
-                row[0]
+                row[8]
               }" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
               
-              <button class="btn-delete" data-id="${row[0]}" data-dt="${
+              <button class="btn-delete" data-id="${row[8]}" data-dt="${
               row[1].split("/")[0]
-            }" data-licence="${row[6]}" data-model="${row[7]}" 
+            }" data-license="${row[6]}" data-model="${row[7]}" 
             }" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button></div>
             `;
           },
@@ -164,7 +175,7 @@ const AllVehicle = () => {
     $(tableRef.current).on("click", ".btn-delete", function () {
       const id = $(this).data("id");
       const name = $(this).data("dt");
-      const license = $(this).data("licence");
+      const license = $(this).data("license");
       const model = $(this).data("model");
 
       setVehicleId(id);
@@ -175,9 +186,9 @@ const AllVehicle = () => {
       setIsModal_3_Open(true);
     });
 
-    $(tableRef.current).on("click", ".assign_data", function () {
-      showModal($(this).data("id"));
-    });
+    // $(tableRef.current).on("click", ".assign_data", function () {
+    //   showModal($(this).data("id"));
+    // });
 
     return () => {
       if ($.fn.DataTable.isDataTable(tableRef.current)) {
@@ -185,6 +196,7 @@ const AllVehicle = () => {
       }
     };
   }, [vehicleData]);
+  console.log("Modal vehicleId:", vehicleId);
 
   return (
     <>
@@ -205,30 +217,31 @@ const AllVehicle = () => {
         </div>
       </div>
 
-      <Modal
-        open={isModal_1_Open}
-        onCancel={handleCancel_1}
-        okButtonProps={{ style: { display: "none" } }}
-      >
-        <VehicleInfoCard />
+      <Modal open={isModal_1_Open} onCancel={handleCancel_1} footer={null}>
+        <VehicleInfoCard
+          key={`${vehicleId}-${refreshCount}`}
+          vehicleId={vehicleId}
+        />
       </Modal>
 
-      <Modal
-        open={isModal_2_Open}
-        onCancel={handleCancel_2}
-        okButtonProps={{ style: { display: "none" } }}
-      >
-        <VehicleEditCard vehicleId={VehicleId} />
+      <Modal open={isModal_2_Open} onCancel={handleCancel_2}>
+        <VehicleEditCard
+          vehicleId={vehicleId}
+          onClose={handleCancel_2}
+          onSuccess={handleUpdateSuccess}
+        />
       </Modal>
 
       <Modal
         open={isModal_3_Open}
         onCancel={handleCancel_3}
         onOk={handleDelete}
+        okText="Delete"
+        cancelText="Cancel"
       >
         <VehicleDeleteCard
           title={vehicleName}
-          licenceId={licenseId}
+          licenseId={licenseId}
           vehicleModel={vehicleModel}
         />
       </Modal>

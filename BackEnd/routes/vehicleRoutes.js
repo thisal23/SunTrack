@@ -17,7 +17,15 @@ const {
 const upload = require("../config/multreConfig");
 const validateVehicleFields = require("../utils/vehicleDataValidation");
 
+const uploadFields = upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'licenseDocument', maxCount: 1 },
+  { name: 'insuranceDocument', maxCount: 1 },
+  { name: 'ecoDocument', maxCount: 1 },
+]);
+
 const router = express.Router();
+router.post('/vehicle/create', uploadFields, createVehicle);
 
 // Vehicle Brand routes
 router.post("/brand/create", createBrand);
@@ -29,22 +37,11 @@ router.delete("/brand/destroy/:id", deleteBrands);
 router.post("/model/create", createModel);
 router.get("/model/all", fetchModels);
 
-// Vehicle Route
-router.post(
-  "/vehicle/create",
-  upload.fields([
-    { name: "licenceDocument", maxCount: 1 },
-    { name: "insuranceDocument", maxCount: 1 },
-    { name: "ecoDocument", maxCount: 1 },
-  ]),
-  createVehicle
-);
-
 router.put(
   "/vehicle/update/:id",
   upload.fields([
     { name: "vehicleImage", maxCount: 1 },
-    { name: "licenceDocument", maxCount: 1 },
+    { name: "licenseDocument", maxCount: 1 },
     { name: "insuranceDocument", maxCount: 1 },
     { name: "ecoDocument", maxCount: 1 },
   ]),

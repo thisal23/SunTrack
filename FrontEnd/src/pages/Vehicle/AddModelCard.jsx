@@ -1,38 +1,45 @@
 import React, { useState } from "react";
 import apiService from "../../config/axiosConfig";
 
-const AddModelCard = ({ isOpen, onClose }) => {
+const AddModelCard = ({ isOpen, onClose, onSuccess }) => {
   const [modelName, setModelName] = useState("");
-
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(modelName);
-    const data = new FormData();
-
-    data.append("title", modelName);
-    console.log(...data);
+    if (!modelName.trim()) {
+      setIsError("Please enter a model name");
+      setTimeout(() => setIsError(""), 3000);
+      return;
+    }
 
     try {
-      const response = await apiService.post("model/create", data);
+      const response = await apiService.post("model/create", {
+        model: modelName,
+      });
 
-      if (response.status === 201 || 200) {
+      if (response.status === 201 || response.status === 200) {
+        const newModel = response.data?.data; // assuming backend returns created object
+
+        if (onSuccess && newModel) {
+          onSuccess(newModel); // send back new brand to parent
+        }
+
         setIsSuccess(true);
         setTimeout(() => {
           setIsSuccess(false);
-          onclose();
-        }, 4000);
+          setModelName("");
+          onClose(); // close modal after showing message
+        }, 1000);
       }
     } catch (error) {
-      setIsError(true);
-      setTimeout(() => {
-        setIsError(false);
-        onclose();
-      }, 4000);
-      return error;
+      const backendMessage =
+        error.response?.data?.message || "Something went wrong";
+
+      setIsError(backendMessage);
+      setTimeout(() => setIsError(""), 4000);
     }
   };
 
@@ -47,18 +54,19 @@ const AddModelCard = ({ isOpen, onClose }) => {
         <label className="block mb-1 text-sm">Name</label>
         <input
           type="text"
+          value={modelName}
           onChange={(e) => setModelName(e.target.value)}
           className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter new vehicle model"
         />
 
         {isSuccess ? (
-          <span className="w-full flex justify-center mx-auto text-center px-4 py-2 bg-[#43bf64] boder-2 border-[#b50000] text-white">
+          <span className="w-full flex justify-center mx-auto text-center px-4 py-2 bg-[#43bf64] border-2 border-[#00b530] text-white">
             Model Data Created Successfully
           </span>
         ) : isError ? (
           <span className="w-full flex justify-center mx-auto text-center px-4 py-2 bg-[#b53f3f] border-2 border-[#b50000] text-white">
-            Model Data Create Fail. please check and try again
+            {isError}
           </span>
         ) : null}
 

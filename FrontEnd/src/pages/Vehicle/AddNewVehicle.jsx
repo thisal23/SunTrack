@@ -85,29 +85,32 @@ const AddNewVehicle = () => {
 
   // Form Input data State
   const [formData, setFormData] = useState({
-    vehicle_title: "",
+    plate_no: "",
     vehicle_type: "",
     category: "",
-    chassie_number: "",
-    vehicle_color: "",
+    vehicle_model: "",
     vehicle_brand: "",
     fuel_type: "",
     register_year: "",
+    chassie_number: "",
+    vehicle_color: "",
     vehicle_image: "",
-    lisence_id: "",
-    lisence_last_date: "",
-    lisence_expire_date: "",
-    lisence_document: null,
+    license_id: "",
+    lisense_last_date: "",
+    lisense_expire_date: "",
+    lisense_document: "",
     insurance_id: "",
+    insurance_last_update: "",
     insurance_expire_date: "",
     insurance_type: "",
-    insurance_last_update: "",
-    insurance_document: null,
-    eco_document: null,
-    gps_id: "",
+    insurance_document: "",
+    eco_id: "",
+    eco_last_update: "",
+    eco_expire_date: "",
+    eco_document: "",
+    device_id: "",
     country_code: "",
-    device_sim_no: "",
-    vehicle_model: "",
+    sim_no: "",
   });
 
   // handling form input changes
@@ -125,30 +128,40 @@ const AddNewVehicle = () => {
 
     try {
       const fData = new FormData();
-
+      fData.append("plateNo", formData.plate_no); // ← you're using this as plateNo
       fData.append("vehicleType", formData.vehicle_type);
       fData.append("category", formData.category);
-      fData.append("vehicleModel", formData.vehicle_model);
-      fData.append("model", formData.register_year);
-      fData.append("registerYear", formData.register_year);
-      fData.append("vehicleImage", formData.vehicle_image);
-      fData.append("color", formData.vehicle_color);
-      fData.append("licenseId", formData.lisence_id);
-      fData.append("licenseExpireDate", formData.lisence_expire_date);
-      fData.append("chassieNumber", formData.chassie_number);
-      fData.append("fuelType", formData.fuel_type);
-      fData.append("licenceLastUpdate", formData.lisence_last_date);
-      fData.append("insuranceType", formData.insurance_type);
-      fData.append("insuranceNo", formData.insurance_id);
-      fData.append("insuranceExpireDate", formData.insurance_expire_date);
-      fData.append("insuranceLastUpdate", formData.insurance_last_update);
+      fData.append("modelId", formData.vehicle_model); // your vehicle_model maps to modelId
       fData.append("brandId", formData.vehicle_brand);
-      fData.append("licenceDocument", formData.lisence_document);
-      fData.append("insuranceDocument", formData.insurance_document);
-      fData.append("ecoDocument", formData.eco_document);
-      fData.append("gpsId", formData.gps_id);
-      fData.append("countryCode", formData.country_code);
-      fData.append("deviceSimNo", formData.device_sim_no);
+      fData.append("fuelType", formData.fuel_type);
+      fData.append("registeredYear", formData.register_year);
+      fData.append("chassieNo", formData.chassie_number);
+      fData.append("color", formData.vehicle_color);
+      fData.append("image", formData.vehicle_image); // must match multer's field name
+
+      // License
+      fData.append("licenseId", formData.lisence_id);
+      fData.append("licenseLastUpdate", formData.lisence_last_date);
+      fData.append("licenseExpireDate", formData.lisence_expire_date);
+      fData.append("licenseDocument", formData.lisence_document); // multer name
+
+      // Insurance
+      fData.append("insuranceNo", formData.insurance_id);
+      fData.append("insuranceLastUpdate", formData.insurance_last_update);
+      fData.append("insuranceExpireDate", formData.insurance_expire_date);
+      fData.append("insuranceType", formData.insurance_type);
+      fData.append("insuranceDocument", formData.insurance_document); // multer name
+
+      // ECO
+      fData.append("ecoId", formData.eco_id); // placeholder or form field
+      fData.append("ecoLastUpdate", formData.eco_last_update); // if no field, add or skip
+      fData.append("ecoExpireDate", formData.eco_expire_date); // same
+      fData.append("ecoDocument", formData.eco_document); // multer name
+
+      // GPS
+      fData.append("deviceId", formData.device_id);
+      fData.append("countrycode", formData.country_code);
+      fData.append("pnumber", formData.sim_no);
 
       console.log(...fData);
 
@@ -258,9 +271,9 @@ const AddNewVehicle = () => {
                                   <option
                                     value={item.id}
                                     key={idx}
-                                    className="text-black"
+                                    style={{ color: "black" }} // <-- add this line
                                   >
-                                    {item.title}
+                                    {item.brand}
                                   </option>
                                 );
                               })}
@@ -305,9 +318,9 @@ const AddNewVehicle = () => {
                                   <option
                                     value={item.id}
                                     key={idx}
-                                    className="text-black"
+                                    style={{ color: "black" }} // <-- add this line
                                   >
-                                    {item.title}
+                                    {item.model}
                                   </option>
                                 );
                               })}
@@ -359,7 +372,7 @@ const AddNewVehicle = () => {
 
                     <div>
                       <label className="font-medium text-gray-700">
-                        Vehicle Category:
+                        Category:
                       </label>
 
                       <select
@@ -412,7 +425,6 @@ const AddNewVehicle = () => {
                     <input
                       type="file"
                       name="vehicle_image"
-                      value={formData.vehicle_image}
                       onChange={handleInputChange}
                       accept=".jpg,.jpeg,.png"
                       className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
@@ -448,7 +460,7 @@ const AddNewVehicle = () => {
                     </label>
                     <input
                       type="date"
-                      name="lisence_last_date"
+                      name="lisense_last_update"
                       value={formData.lisence_last_date}
                       onChange={handleInputChange}
                       className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
@@ -461,7 +473,7 @@ const AddNewVehicle = () => {
                     </label>
                     <input
                       type="date"
-                      name="lisence_expire_date"
+                      name="lisense_expire_date"
                       value={formData.lisence_expire_date}
                       onChange={handleInputChange}
                       className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
@@ -476,7 +488,7 @@ const AddNewVehicle = () => {
                   </label>
                   <input
                     type="file"
-                    name="lisence_document"
+                    name="lisenseDocument"
                     onChange={handleInputChange}
                     accept=".pdf,.jpg,.jpeg,.png"
                     className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
@@ -497,48 +509,51 @@ const AddNewVehicle = () => {
                     />
                   </div>
 
-                  <div className="">
-                    <label className="font-medium text-gray-700">
-                      Insurance Expiry Date:
-                    </label>
-                    <input
-                      type="date"
-                      name="insurance_expire_date"
-                      value={formData.insurance_expire_date}
-                      onChange={handleInputChange}
-                      className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
-                      placeholder="2026/**/**"
-                    />
-                  </div>
-                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Insurance Type:
+                      </label>
+                      <select
+                        name="insurance_type"
+                        value={formData.insurance_type}
+                        onChange={handleInputChange}
+                        className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                      >
+                        <option value="third-party">
+                          Third Party Insurance
+                        </option>
+                        <option value="full">Full Insurance</option>
+                      </select>
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-medium text-gray-700">
-                      Insurance Type:
-                    </label>
-                    <select
-                      name="insurance_type"
-                      value={formData.insurance_type}
-                      onChange={handleInputChange}
-                      className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
-                    >
-                      <option value="third-party">Third Party Insurance</option>
-                      <option value="full">Full Insurance</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="font-medium text-gray-700">
-                      Insurance Last Update:
-                    </label>
-                    <input
-                      type="date"
-                      name="insurance_last_update"
-                      value={formData.insurance_last_update}
-                      onChange={handleInputChange}
-                      className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
-                      placeholder="2020/**/**"
-                    />
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Insurance Last Update:
+                      </label>
+                      <input
+                        type="date"
+                        name="insurance_last_update"
+                        value={formData.insurance_last_update}
+                        onChange={handleInputChange}
+                        className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                        placeholder="2020/**/**"
+                      />
+                    </div>
+
+                    <div className="">
+                      <label className="font-medium text-gray-700">
+                        Insurance Expiry Date:
+                      </label>
+                      <input
+                        type="date"
+                        name="insurance_expire_date"
+                        value={formData.insurance_expire_date}
+                        onChange={handleInputChange}
+                        className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                        placeholder="2026/**/**"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -549,23 +564,67 @@ const AddNewVehicle = () => {
                     </label>
                     <input
                       type="file"
-                      name="insurance_document"
+                      name="insuranceDocument"
                       onChange={handleInputChange}
                       accept=".pdf,.jpg,.jpeg,.png"
                       className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                     />
                   </div>
-                  <div className="">
-                    <label className="font-medium text-gray-700">
-                      Upload ECO Document <small>(.pdf, .jpg, .jpeg)</small>
-                    </label>
-                    <input
-                      type="file"
-                      name="eco_document"
-                      onChange={handleInputChange}
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
-                    />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="">
+                      <label className="font-medium text-gray-700">
+                        Eco ID:
+                      </label>
+                      <input
+                        type="text"
+                        name="eco_id"
+                        value={formData.eco_id}
+                        onChange={handleInputChange}
+                        className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Emission Test Last Update:
+                      </label>
+                      <input
+                        type="date"
+                        name="eco_last_update"
+                        value={formData.eco_last_update}
+                        onChange={handleInputChange}
+                        className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                        placeholder="2020/**/**"
+                      />
+                    </div>
+
+                    <div className="">
+                      <label className="font-medium text-gray-700">
+                        Emission Test Expiry Date:
+                      </label>
+                      <input
+                        type="date"
+                        name="eco_expire_date"
+                        value={formData.eco_expire_date}
+                        onChange={handleInputChange}
+                        className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                        placeholder="2026/**/**"
+                      />
+                    </div>
+
+                    <div className="">
+                      <label className="font-medium text-gray-700">
+                        Upload ECO Document <small>(.pdf, .jpg, .jpeg)</small>
+                      </label>
+                      <input
+                        type="file"
+                        name="ecoDocument"
+                        onChange={handleInputChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -583,8 +642,8 @@ const AddNewVehicle = () => {
                   </label>
                   <input
                     type="text"
-                    name="gps_id"
-                    value={formData.gps_id}
+                    name="device_id"
+                    value={formData.device_id}
                     onChange={handleInputChange}
                     className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                   />
@@ -608,8 +667,8 @@ const AddNewVehicle = () => {
                   </label>
                   <input
                     type="text"
-                    name="device_sim_no"
-                    value={formData.device_sim_no}
+                    name="sim_no"
+                    value={formData.sim_no}
                     onChange={handleInputChange}
                     className="block w-full py-2 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
                   />
@@ -647,6 +706,15 @@ const AddNewVehicle = () => {
         <AddModelCard
           isOpen={isModal_modelOpen}
           onClose={() => setIsModal_modelOPen(false)}
+          onSuccess={(newModel) => {
+            setFormData((prev) => ({
+              ...prev,
+              vehicle_model: newModel.id,
+            }));
+            // Optional: Refresh brands
+            fetchVehicleData();
+            setIsModal_modelOPen(false); // close modal here immediately if you prefer
+          }}
         />
       </Modal>
 
@@ -659,6 +727,15 @@ const AddNewVehicle = () => {
         <AddBrandCard
           isOpen={isModal_brandOpen}
           onClose={() => setIsModal_brandOPen(false)}
+          onSuccess={(newBrand) => {
+            setFormData((prev) => ({
+              ...prev,
+              vehicle_brand: newBrand.id,
+            }));
+            // Optional: Refresh brands
+            fetchVehicleData();
+            setIsModal_brandOPen(false); // close modal here immediately if you prefer
+          }}
         />
       </Modal>
     </>

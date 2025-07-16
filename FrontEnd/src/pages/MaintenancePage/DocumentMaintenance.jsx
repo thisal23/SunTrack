@@ -81,7 +81,7 @@ const DocumentMaintenance = () => {
         "License",
         item.licenseLastUpdate || "N/A",
         item.licenseExpireDate || "N/A",
-        item.licenceDocument || "Not Available",
+        item.licenseDocument || "Not Available",
         "Action",
       ]);
 
@@ -145,7 +145,7 @@ const DocumentMaintenance = () => {
         {
           targets: [5], // Action
           render: function (data, type, row) {
-            const licenceValue = row[6] !== undefined ? row[6] : "";
+            const licenseValue = row[6] !== undefined ? row[6] : "";
             return `
             <div style="display: flex; gap: 6px;">
             <button class="btn-edit"
@@ -158,7 +158,7 @@ const DocumentMaintenance = () => {
               <button class="btn-delete"
                       data-id="${row[0]}"
                       data-dt="${row[1]}"
-                      data-licence="${licenceValue}"
+                      data-license="${licenseValue}"
                       style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">
                 Delete
               </button>

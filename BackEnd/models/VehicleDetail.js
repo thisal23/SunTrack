@@ -22,7 +22,7 @@ const VehicleDetail = sequelize.define(
       allowNull: false,
       unique: true,
     },
-    licenceLastUpdate: {
+    licenseLastUpdate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
@@ -30,7 +30,7 @@ const VehicleDetail = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    licenceDocument: {
+    licenseDocument: {
       type: DataTypes.STRING(500),
       allowNull: true,
     },
