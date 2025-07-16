@@ -167,5 +167,93 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
+exports.verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        // Find user by email and OTP
+        const user = await User.findOne({
+            where: {
+                email,
+                resetPasswordOtp: otp,
+                resetPasswordExpires: { [Op.gt]: Date.now() } // Check if OTP hasn't expired
+            }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
+        }
+
+        // Generate a temporary token for password creation
+        const tempToken = jwt.sign(
+            { email: user.email, otpVerified: true },
+            process.env.JWT_SECRET || 'your_jwt_secret',
+            { expiresIn: '10m' }
+        );
+
+        res.json({
+            message: 'OTP verified successfully',
+            token: tempToken
+        });
+
+    } catch (error) {
+        console.error("OTP Verification Error:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.createPassword = async (req, res) => {
+    try {
+        const { email, password, token } = req.body;
+
+        // Verify the temporary token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+        } catch (err) {
+            return res.status(401).json({ message: 'Invalid or expired token' });
+        }
+
+        // Check if the token was issued for OTP verification
+        if (!decoded.otpVerified || decoded.email !== email) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+
+        // Find the user
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Validate password
+        if (!password || password.length < 8) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+        }
+
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Update user's password and clear reset fields
+        user.password = hashedPassword;
+        user.resetPasswordOtp = null;
+        user.resetPasswordExpires = null;
+        await user.save();
+
+        // Send confirmation email
+        await sendEmail(
+            user.email,
+            "Password Created Successfully",
+            "Your password has been created successfully. You can now login to your account."
+        );
+
+        res.json({ message: 'Password created successfully' });
+
+    } catch (error) {
+        console.error("Create Password Error:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 

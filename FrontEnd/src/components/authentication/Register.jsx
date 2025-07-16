@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./register.css";
 import registerImage from "../../assets/register.jpg"; // ✅ Ensure correct image path
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -169,22 +170,26 @@ const Register = () => {
                             <option value="2">User</option>
                         </select>
                     </div>
-                    <div className="input-group checkbox-group">
-                        <label htmlFor="isActive">Active</label>
-                        <div className="checkbox-container">
-                            <input
-                                type="checkbox"
-                                id="isActive"
-                                name="isActive"
-                                checked={formData.isActive}
-                                onChange={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                            />
-                        </div>
+                    <div className="input-group checkbox-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.2rem', justifyContent: 'flex-end', width: '100%' }}>
+                        <input
+                            type="checkbox"
+                            id="isActive"
+                            name="isActive"
+                            checked={formData.isActive}
+                            onChange={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                            style={{ width: '18px', height: '18px', margin: 0 }}
+                        />
+                        <label htmlFor="isActive" style={{ fontWeight: 500, margin: 0, cursor: 'pointer', minWidth: '60px', textAlign: 'left' }}>Active</label>
                     </div>
                     {error && <p className="error-message" style={{color:'#dc3545',marginBottom:'1rem'}}>{error}</p>}
                     <button type="submit">Register</button>
                 </form>
-                <p>Already have an account? <a href="/">Login here</a></p>
+                <div style={{ marginTop: '1rem', textAlign: 'center', width: '100%' }}>
+                    <span>Already have an account? </span>
+                    <Link to="/" style={{ color: '#007bff', textDecoration: 'underline', fontWeight: 500, marginLeft: '4px' }}>
+                        Login here
+                    </Link>
+                </div>
             </div>
         </div>
     );

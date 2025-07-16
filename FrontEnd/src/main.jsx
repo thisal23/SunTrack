@@ -19,7 +19,7 @@ import AddNewVehicle from "./pages/Vehicle/AddNewVehicle.jsx";
 import AllVehicle from "./pages/Vehicle/AllVehicle.jsx";
 import "./App.css";
 import Login from "./components/authentication/Login.jsx";
-import ResetPassword from "./components/authentication/resetPassword.jsx";
+import ResetPassword from "./components/authentication/ResetPassword.jsx";
 import CreatePassword from "./components/authentication/CreatePassword.jsx";
 
 import Register from "./components/authentication/Register.jsx";
@@ -42,20 +42,12 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "/",
+    path: "/login",
     element: <Login/>,
-
-    path: "/login",
-    element: <Login />,
   },
 
-  {
-    path: "/login",
-    element: <Login />,
-
-  },
-  {
-    path: "/forgot-password",
+ {
+    path: "/reset-password",
     element: <ResetPassword />,
   },
   {

@@ -44,26 +44,24 @@ const User = sequelize.define('User', {
     allowNull: false,
   },
 
-  // // Add resetPasswordOtp column
-  // resetPasswordOtp: {
-  //   type: DataTypes.STRING,
-  //   allowNull: true,
-  // },
+  resetPasswordOtp: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 
-  // // Add resetPasswordExpires column
-  // resetPasswordExpires: {
-  //   type: DataTypes.DATE,
-  //   allowNull: true,
-  // },
+  resetPasswordExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 
 }, {
   timestamps: true, // <-- change this to true
 });
 
 // Hash the user's password before saving it to the database
-User.beforeCreate(async (user) => {
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(user.password, salt);
-});
+// User.beforeCreate(async (user) => {
+//   const salt = await bcrypt.genSalt(10);
+//   user.password = await bcrypt.hash(user.password, salt);
+// });
 
 module.exports = User;
