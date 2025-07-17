@@ -8,7 +8,9 @@ const {
   fetchDriverForTrip,
   fetchTripCount,
   fetchPendingTrips,
-  fetchVehiclesForTrip
+  fetchVehiclesForTrip,
+  fetchAvailableDriversByDate,
+  fetchAvailableVehiclesByDate
 } = require("../controllers/tripController");
 
 const router = express.Router();
@@ -24,7 +26,9 @@ router.get("/trip/pending", fetchPendingTrips);
 router.post("/trip/:id/assign-driver", assignDriver);
 router.post("/trip/:id/assign-vehicle", assignVehicle);
 router.get("/trip/:tripId/available-drivers", fetchDriverForTrip);
-router.get("/trip/:tripId/available-vehicles", fetchVehiclesForTrip); // From previous message
+router.get("/trip/:tripId/available-vehicles", fetchVehiclesForTrip); 
+router.get("/available-vehicles", fetchAvailableVehiclesByDate);
+router.get("/available-drivers", fetchAvailableDriversByDate);
 
 
 module.exports = router;

@@ -413,15 +413,15 @@ const fetchVehicleById = async (req, res) => {
 // Delete vehicle details
 const deleteVehicleData = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { plateNo } = req.params;
 
-    const data = await Vehicle.findByPk(id);
+    const data = await Vehicle.findOne({where: {plateNo}});
 
     if (!data) {
-      res.status(404).json({ status: true, message: "Vehicle data not found" });
+      return res.status(404).json({ status: true, message: "Vehicle data not found" });
     }
 
-    data.destroy();
+    await data.destroy();
 
     res.status(200).json({
       status: true,

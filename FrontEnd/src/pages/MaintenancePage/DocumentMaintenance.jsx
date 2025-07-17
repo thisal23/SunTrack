@@ -21,11 +21,15 @@ const DocumentMaintenance = () => {
   const [plateNo, setPlateNo] = useState("");
   const [documentData, setDocumentData] = useState([]);
   const [currentDocumentType, setCurrentDocumentType] = useState("");
+  const [lastUpdate, setLastUpdate] = useState("");
+  const [expireDate, setExpiryDate] = useState("");
 
-  const showModal_1 = (id, documentType) => {
+  const showModal_1 = (id, documentType, expireDateVal, lastUpdateVal) => {
     setIsModal_1_Open(true);
     setPlateNo(id);
     setCurrentDocumentType(documentType);
+    setExpiryDate(expireDateVal);
+    setLastUpdate(lastUpdateVal);
   };
 
   const showModal_2 = (id) => {
@@ -37,6 +41,8 @@ const DocumentMaintenance = () => {
     setIsModal_1_Open(false);
     setPlateNo("");
     setCurrentDocumentType("");
+    setExpiryDate("");
+    setLastUpdate("");
   };
 
   const handleCancel_2 = () => {
@@ -145,12 +151,15 @@ const DocumentMaintenance = () => {
         {
           targets: [5], // Action
           render: function (data, type, row) {
+            console.log("Row:", row);
             const licenseValue = row[6] !== undefined ? row[6] : "";
             return `
             <div style="display: flex; gap: 6px;">
             <button class="btn-edit"
                       data-id="${row[0]}"
                       data-document-type="${row[1]}"
+                      data-lastupdatevalue="${row[2]}"
+                      data-expiredatevalue="${row[3]}"
                       style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">
                 Edit
               </button>
@@ -167,6 +176,7 @@ const DocumentMaintenance = () => {
           },
         },
       ],
+
       responsive: true,
       select: true, // If you want row selection
       ordering: true,
@@ -175,7 +185,12 @@ const DocumentMaintenance = () => {
     });
 
     $(tableRef.current).on("click", ".btn-edit", function () {
-      showModal_1($(this).data("id"), $(this).data("document-type").trim());
+      showModal_1(
+        $(this).data("id"),
+        $(this).data("document-type").trim(),
+        $(this).data("lastupdatevalue"),
+        $(this).data("expiredatevalue")
+      );
     });
 
     $(tableRef.current).on("click", ".btn-delete", function () {
@@ -190,6 +205,11 @@ const DocumentMaintenance = () => {
       $(tableRef.current).off("click", ".btn-delete");
     };
   }, [documentData]);
+
+  console.log("PlateNo:", $(this).data("id"));
+  console.log("DocType:", $(this).data("document-type"));
+  console.log("LastUpdate:", $(this).data("lastupdatevalue"));
+  console.log("ExpireDate:", $(this).data("expiredatevalue"));
 
   return (
     <>
@@ -215,6 +235,8 @@ const DocumentMaintenance = () => {
             <DocumentEditCard
               plateNo={plateNo}
               documentType={currentDocumentType}
+              lastUpdateProp={lastUpdate}
+              expiryDateProp={expireDate}
               handleCancel={handleCancel_1}
               onUpdateSuccess={handleDocumentUpdateSuccess}
             />

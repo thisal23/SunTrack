@@ -248,6 +248,7 @@ const ServiceMaintenance = () => {
             footer={null} // Remove default footer buttons
           >
             <ServiceAddCard
+              key={vehicleId}
               vehicleId={vehicleId}
               handleCancel={handleCancel_add}
             />

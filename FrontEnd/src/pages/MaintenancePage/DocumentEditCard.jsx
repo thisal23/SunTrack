@@ -21,6 +21,8 @@ const DocumentEditCard = ({
   documentType,
   handleCancel,
   onUpdateSuccess,
+  lastUpdateProp,
+  expiryDateProp,
 }) => {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [expiryDate, setExpiryDate] = useState(null);
@@ -45,8 +47,8 @@ const DocumentEditCard = ({
       setSelectedDocumentType("");
     }
 
-    setLastUpdate(null);
-    setExpiryDate(null);
+    setLastUpdate(lastUpdateProp ? new Date(lastUpdateProp) : null);
+    setExpiryDate(expiryDateProp ? new Date(expiryDateProp) : null);
     setDocumentFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";

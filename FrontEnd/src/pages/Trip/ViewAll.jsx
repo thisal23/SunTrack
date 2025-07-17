@@ -61,17 +61,30 @@ const ViewAll = () => {
 
   const fetchTrips = async () => {
     try {
-      const data = await apiService
-        .get("trip/all")
-        .catch((err) => console.log(`api error`, err));
+      const response = await apiService.get("trip/all");
 
-      if (data.status !== 200) {
+      if (response.status !== 200) {
         toast.error("Trip data fetching error!!!");
+        return;
       }
 
-      console.log(data);
+      // Sort by custom status order
+      const statusOrder = {
+        pending: 1,
+        ready: 2,
+        approved: 2,
+        live: 2,
+        finished: 3,
+        rejected: 3,
+      };
 
-      setTripData(data.data.data);
+      const sortedTrips = response.data.data.sort((a, b) => {
+        const statusA = statusOrder[(a.status || "").toLowerCase()] || 999;
+        const statusB = statusOrder[(b.status || "").toLowerCase()] || 999;
+        return statusA - statusB;
+      });
+
+      setTripData(sortedTrips);
     } catch (error) {
       console.log(error);
     }
@@ -104,6 +117,7 @@ const ViewAll = () => {
         item.vehicleId ?? "Not Assigned",
         item.tripRemark ?? "-",
       ]),
+      order: [],
       columns: [
         { title: "ID" },
         { title: "Trip Location" },
@@ -143,13 +157,13 @@ const ViewAll = () => {
         },
       ],
       createdRow: function (row, data, dataIndex) {
-        if (data[4] === "Pending") {
-          $(row).css("background-color", "#fff3cd"); // Yellow
-        } else if (data[4] === "Ready") {
-          $(row).css("background-color", "#ffad5f"); // Green
-        } else if (data[4] === "Approved") {
+        if (data[4].toLowerCase() === "pending") {
+          $(row).css("background-color", "#eceb8dff"); // Yellow
+        } else if (data[4].toLowerCase() === "ready") {
+          $(row).css("background-color", "#ffad5f"); // Orange
+        } else if (data[4].toLowerCase() === "live") {
           $(row).css("background-color", "#d4edda"); // Green
-        } else if (data[4] === "Rejected") {
+        } else if (data[4].toLowerCase() === "finished") {
           $(row).css("background-color", "#f8d7da"); // Red
         }
       },
@@ -177,7 +191,7 @@ const ViewAll = () => {
   return (
     <>
       <NavBar />
-      <div className="min-h-screen container_custom mx-auto w-full pt-15">
+      <div className="min-h-screen container_custom mx-auto bg-white w-full pt-15 px-4 py-6">
         <div className="flex flex-row justify-start my-5">
           <span className="text-3xl text-[#0F2043] font-semibold">
             Trip &gt; View All Trip

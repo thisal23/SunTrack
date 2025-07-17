@@ -13,7 +13,6 @@ const createTrip = async (req, res) => {
       driverEndTime,
       suggestEndTime,
       tripRemark,
-      driverRemark,
       driverId,
       vehicleId,
     } = req.body;
@@ -52,7 +51,6 @@ const createTrip = async (req, res) => {
       {
         tripId: trip.id,
         tripRemark: tripRemark || null,
-        driverRemark: driverRemark || null,
         driverId: driverId || null,
         vehicleId: vehicleId || null,
       }
@@ -106,6 +104,108 @@ const assignDriver = async (req, res) => {
     res.status(400).json({ status: false, message: error.message });
   }
 };
+
+//fetch vehicle for new trips
+const fetchAvailableVehiclesByDate = async (req, res) => {
+  const { date } = req.query;
+
+  if (!date) {
+    return res.status(400).json({ message: "Date is required" });
+  }
+
+  try {
+    const assignedVehicleIds = await TripDetail.findAll({
+      include: {
+        model: Trip,
+        where: { date },
+        as: 'trip',
+      },
+      attributes: ["vehicleId"],
+    });
+
+    const unavailable = assignedVehicleIds.map((v) => v.vehicleId);
+
+    const availableVehicles = await Vehicle.findAll({
+      where: {
+        plateNo: {
+          [Op.notIn]: unavailable,
+        },
+      },
+      include:[{
+          model:VehicleModel,
+          as:'vehicleModel'
+      },
+      {
+        model:VehicleBrand,
+        as: 'vehicleBrand'
+      },
+    ],
+    });
+
+    res.json(availableVehicles);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching available vehicles", error: err.message });
+  }
+};
+
+//fetch drivers fr new trips
+const fetchAvailableDriversByDate = async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ status: false, message: "Date is required" });
+    }
+
+    const assignedDrivers = await TripDetail.findAll({
+      include: [
+        {
+          model: Trip,
+          where: { date },
+          as: 'trip'
+        },
+      ],
+      where: {
+        driverId: {
+          [Op.ne]: null,
+        },
+      },
+      attributes: ['driverId'],
+    });
+
+    const assignedDriverIds = assignedDrivers.map(d => d.driverId);
+
+    const driverData = await driverDetail.findAll({
+      include: [
+        {
+          model: User,
+          as: 'user',
+          required: true,
+          where: { roleId: 3 },
+        },
+      ],
+      where: {
+        id: {
+          [Op.notIn]: assignedDriverIds,
+        },
+        licenseType: {
+          [Op.in]: ["Light", "Heavy", "All"],
+        },
+      },
+      raw: true,
+      nest: true,
+    });
+
+    res.status(200).json({
+      status: true,
+      message: "Available drivers fetched successfully",
+      data: driverData,
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+
 
 
 
@@ -383,5 +483,7 @@ module.exports = {
   fetchDriverForTrip,
   fetchVehiclesForTrip,
   fetchTripCount,
-  fetchPendingTrips
+  fetchPendingTrips,
+  fetchAvailableDriversByDate,
+  fetchAvailableVehiclesByDate
 };

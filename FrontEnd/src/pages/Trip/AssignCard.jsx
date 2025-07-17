@@ -41,19 +41,17 @@ const AssignCard = ({ tripId, onClose, onSuccess }) => {
   };
 
   const handleVehicleChange = (id) => {
-    setSelectedVehicle(id);
-
-    if (id) {
-      fetchDriver(id);
-    }
+    const numericId = parseInt(id, 10);
+    setSelectedVehicle(numericId);
+    if (numericId) fetchDriver(numericId);
   };
 
   const handleAssign = async () => {
     try {
-      const vehicle = await apiService.post(`trip/${tripId}/assign_vehicle`, {
+      const vehicle = await apiService.post(`trip/${tripId}/assign-vehicle`, {
         vehicleId: selectedVehicle,
       });
-      const driver = await apiService.post(`trip/${tripId}/assign_driver`, {
+      const driver = await apiService.post(`trip/${tripId}/assign-driver`, {
         driverId: selectedDriver,
       });
 
@@ -89,7 +87,9 @@ const AssignCard = ({ tripId, onClose, onSuccess }) => {
               <select
                 name="assign_vehicle"
                 id="assign_vehicle"
-                onChange={(e) => handleVehicleChange(e.target.value)}
+                onChange={(e) =>
+                  handleVehicleChange(parseInt(e.target.value), 10)
+                }
                 className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
               >
                 <option value="" disabled>
@@ -113,7 +113,9 @@ const AssignCard = ({ tripId, onClose, onSuccess }) => {
               <select
                 name="assign_driver"
                 id="assign_driver"
-                onChange={(e) => setSelectedDriver(e.target.value)}
+                onChange={(e) =>
+                  setSelectedDriver(parseInt(e.target.value), 10)
+                }
                 className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
                 disabled={selectedVehicle === "" ? true : false}
               >

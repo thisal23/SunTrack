@@ -23,6 +23,7 @@ import CreatePassword from "./components/authentication/CreatePassword.jsx";
 import Register from "./components/authentication/Register.jsx";
 import DocumentMaintenance from "./pages/MaintenancePage/DocumentMaintenance.jsx";
 import ServiceMaintenance from "./pages/MaintenancePage/ServiceMaintenance.jsx";
+import AddNew from "./pages/Trip/AddNew.jsx";
 
 const router = createBrowserRouter([
   {
@@ -106,6 +107,10 @@ const router = createBrowserRouter([
   {
     path: "/maintenance/service-maintenance",
     element: <ServiceMaintenance />,
+  },
+  {
+    path: "/trip/addNew",
+    element: <AddNew />,
   },
 ]);
 

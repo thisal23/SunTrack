@@ -17,19 +17,16 @@ import VehicleEditCard from "./VehicleEditCard";
 import VehicleDeleteCard from "./VehicleDeleteCard";
 import { none } from "ol/centerconstraint";
 
-// Sachini part
 const AllVehicle = () => {
   const tableRef = useRef(null);
-
   const [isModal_1_Open, setIsModal_1_Open] = useState(false);
   const [isModal_2_Open, setIsModal_2_Open] = useState(false);
   const [isModal_3_Open, setIsModal_3_Open] = useState(false);
   const [vehicleData, setVehicleData] = useState([]);
   const [vehicleId, setVehicleId] = useState("");
-  const [vehicleName, setVehicleName] = useState("");
-  const [licenseId, setLicenseId] = useState("");
-  const [vehicleModel, setVehicleModel] = useState("");
+  const [plateNo, setPlateNo] = useState("");
   const [refreshCount, setRefreshCount] = useState(0);
+  const [modalMessage, setModalMessage] = useState("");
 
   const showModal_1 = (id) => {
     setIsModal_1_Open(true);
@@ -42,12 +39,9 @@ const AllVehicle = () => {
     setVehicleId(id);
   };
 
-  const showModal_3 = (id, name) => {
+  const showModal_3 = (plateNo) => {
     setIsModal_3_Open(true);
-    setVehicleId(id);
-    setVehicleName(name);
-    // setLicenseId(license);
-    // setVehicleModel(model);
+    setPlateNo(plateNo);
   };
 
   const handleCancel_1 = () => {
@@ -87,19 +81,33 @@ const AllVehicle = () => {
     handleCancel_2(); // close edit modal
   };
 
-  const handleDelete = async (e) => {
+  const handleDelete = async () => {
     try {
-      const delete_response = await apiService.delete("vehicle/remove/:${id}");
-      if (res.status === 200) {
-        toast.success("Vehicle deleted successfully");
-        fetchVehicles(); //refresh the table
-        setIsModal_3_Open(false);
+      const response = await apiService.delete(`vehicle/remove/${plateNo}`);
+
+      if (response.status === 200) {
+        setModalMessage("✅ Vehicle deleted successfully!");
+        await fetchVehicles(); // refresh the table
+
+        // Auto-close the modal after 2 seconds
+        setTimeout(() => {
+          setIsModal_3_Open(false);
+          setModalMessage(""); // reset message
+        }, 2000);
       } else {
-        toast.error("Failed to delete vehicle");
+        setModalMessage("❌ Failed to delete vehicle. Try again.");
+        setTimeout(() => {
+          setIsModal_3_Open(false);
+          setModalMessage(""); // reset message
+        }, 2000);
       }
     } catch (err) {
       console.error(err);
-      toast.error("An error occured during deletion");
+      setModalMessage("❌ An error occurred during deletion.");
+      setTimeout(() => {
+        setIsModal_3_Open(false);
+        setModalMessage(""); // reset message
+      }, 2000);
     }
   };
 
@@ -146,24 +154,19 @@ const AllVehicle = () => {
             console.log(row);
             return `
             <div style="display: flex; gap: 6px;">
-            <button class="btn-view" data-id="${
-              row[8]
-            }" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
 
-              <button class="btn-edit" data-id="${
-                row[8]
-              }" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
+            <button class="btn-view" data-id="${row[8]}" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
+
+              <button class="btn-edit" data-id="${row[8]}" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
               
-              <button class="btn-delete" data-id="${row[8]}" data-dt="${
-              row[1].split("/")[0]
-            }" data-license="${row[6]}" data-model="${row[7]}" 
-            }" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button></div>
+              <button class="btn-delete" data-plateno="${row[0]}" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
+
+            </div>
             `;
           },
         },
       ],
     });
-
     $(tableRef.current).on("click", ".btn-view", function () {
       showModal_1($(this).data("id"));
     });
@@ -173,22 +176,8 @@ const AllVehicle = () => {
     });
 
     $(tableRef.current).on("click", ".btn-delete", function () {
-      const id = $(this).data("id");
-      const name = $(this).data("dt");
-      const license = $(this).data("license");
-      const model = $(this).data("model");
-
-      setVehicleId(id);
-      setVehicleName(name);
-      setLicenseId(license);
-      setVehicleModel(model);
-
-      setIsModal_3_Open(true);
+      showModal_3($(this).data("plateno"));
     });
-
-    // $(tableRef.current).on("click", ".assign_data", function () {
-    //   showModal($(this).data("id"));
-    // });
 
     return () => {
       if ($.fn.DataTable.isDataTable(tableRef.current)) {
@@ -197,6 +186,7 @@ const AllVehicle = () => {
     };
   }, [vehicleData]);
   console.log("Modal vehicleId:", vehicleId);
+  console.log("PlateNo for delete:", plateNo);
 
   return (
     <>
@@ -235,15 +225,12 @@ const AllVehicle = () => {
       <Modal
         open={isModal_3_Open}
         onCancel={handleCancel_3}
-        onOk={handleDelete}
+        onOk={!modalMessage ? handleDelete : null} // disable OK button when message is shown
         okText="Delete"
         cancelText="Cancel"
+        okButtonProps={{ disabled: !!modalMessage }} // disable delete button when showing result
       >
-        <VehicleDeleteCard
-          title={vehicleName}
-          licenseId={licenseId}
-          vehicleModel={vehicleModel}
-        />
+        <VehicleDeleteCard plateNo={plateNo} message={modalMessage} />
       </Modal>
     </>
   );

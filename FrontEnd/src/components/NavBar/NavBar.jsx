@@ -150,6 +150,14 @@ function NavBar() {
                   >
                     View All Vehicles
                   </NavLink>
+
+                  <NavLink
+                    to="/trip/addNew"
+                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left linkCustom_s"
+                    end
+                  >
+                    Add New Trip
+                  </NavLink>
                 </div>
               </div>
             </div>
