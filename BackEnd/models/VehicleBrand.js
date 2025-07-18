@@ -15,5 +15,3 @@ const VehicleBrand = sequelize.define("VehicleBrand", {
 },{timestamps: true});
 
 module.exports = VehicleBrand;
-
-// Create - Done, Read - Done, Update, Delete

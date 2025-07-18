@@ -121,6 +121,7 @@ const assignVehicle = async (req, res) => {
   }
 };
 
+//fetch all trips
 const fetchAllTrips = async (req, res) => {
   try {
     const data = await TripDetail.findAll({
@@ -129,14 +130,6 @@ const fetchAllTrips = async (req, res) => {
           model: Trip,
           required: true,
         },
-        // {
-        //   model: User,
-        //   required: false,
-        // },
-        // {
-        //   model: Vehicle,
-        //   required: false,
-        // },
       ],
     });
 
@@ -154,6 +147,8 @@ const fetchAllTrips = async (req, res) => {
   }
 };
 
+
+//fetch driver for trip
 const fetchDriverForTrip = async (req, res) => {
   try {
     const { id } = req.params;
@@ -201,6 +196,48 @@ const fetchDriverForTrip = async (req, res) => {
   }
 };
 
+//fetchTripCount
+const fetchTripCount = async (req,res) => {
+    try {
+      const [pending, live, finished] = await Promise.all([
+        Trip.count({ where: { status: "pending" } }),
+        Trip.count({ where: { status: "live" } }),
+        Trip.count({ where: { status: "finished" } }),
+      ]);
+
+      return res.json({
+        pending,
+        live,
+        finished,
+      });
+    } catch (error) {
+      console.error("Error fetching trip counts:", error);
+      return res.tatus(500).json({ error: "Internal server error" });
+    }
+  };
+
+//fetch pending trips
+const fetchPendingTrips = async (req, res) => {
+  try {
+    const data = await Trip.findAll({
+      where: {
+        status: "pending",
+      },
+    });
+
+    if (!data || data.length === 0) {
+      res.status(404).json({ status: true, message: "Data not found" });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Data successfully fetched",
+      data: data,
+    });
+  } catch (error) {
+    res.status(400).json({ status: false, message: error.message });
+  }
+};
 // 200 - success, 201 - created, 400 -bad request, 404 - not found, 500 - internal server error
 // 401 - unauthorized, 403 - forbidden/deny access/Not granted
 
@@ -210,4 +247,6 @@ module.exports = {
   assignVehicle,
   fetchAllTrips,
   fetchDriverForTrip,
+  fetchTripCount,
+  fetchPendingTrips
 };

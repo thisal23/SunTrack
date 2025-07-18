@@ -6,6 +6,8 @@ const {
   assignVehicle,
   fetchAllTrips,
   fetchDriverForTrip,
+  fetchTripCount,
+  fetchPendingTrips,
 } = require("../controllers/tripController");
 
 const router = express.Router();
@@ -13,8 +15,9 @@ const router = express.Router();
 router.post("/trip/create", createTrip);
 router.get("/trip/all", fetchAllTrips);
 router.get("/trip/driver/:id", fetchDriverForTrip);
-router.put("/trip/assign_driver/:id", assignDriver); // assign-driver // assign_driver
-// router.post('/tripdetail/create',createTripDetail)
+router.put("/trip/assign_driver/:id", assignDriver);
 router.put("/trip/assign_vehicle/:id", assignVehicle);
+router.get("/trip/count", fetchTripCount);
+router.get("/trip/pending", fetchPendingTrips)
 
 module.exports = router;

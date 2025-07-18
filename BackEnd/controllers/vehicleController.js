@@ -2,9 +2,9 @@ const { Op } = require("sequelize");
 const {
   Vehicle,
   VehicleDetail,
-  VehicleInfo,
   VehicleBrand,
   VehicleModel,
+  gpsdata,
 } = require("../models");
 
 // 200 - success, 201 - created, 400 -bad request, 404 - not found, 500 - internal server error
@@ -22,8 +22,6 @@ const createBrand = async (req, res) => {
 
   try {
     const brand = await VehicleBrand.create({ title });
-
-    // CREATE INTO table_name (title) VALUES (title)
 
     if (!brand) {
       res
@@ -45,8 +43,6 @@ const createBrand = async (req, res) => {
 const fetchBrands = async (req, res) => {
   try {
     const brands = await VehicleBrand.findAll();
-
-    // SELECT * FROM VehicleBrands
 
     if (!brands) {
       res.status(404).json({ status: false, message: "No brands found" });
@@ -129,7 +125,7 @@ const createVehicle = async (req, res) => {
     vehicleType,
     vehicleTypeTwo,
     vehicleTitle,
-    model,
+    modelId,
     color,
     licenseId,
     licenseExpireDate,
@@ -144,15 +140,15 @@ const createVehicle = async (req, res) => {
     brandId,
   } = req.body;
 
-  if (
-    !req.files["licenceDocument"] ||
-    !req.files["insuranceDocument"] ||
-    !req.files["ecoDocument"]
-  ) {
-    return res
-      .status(400)
-      .json({ status: false, message: "Image and document are required" });
-  }
+  // if (
+  //   !req.files["licenceDocument"] ||
+  //   !req.files["insuranceDocument"] ||
+  //   !req.files["ecoDocument"]
+  // ) {
+  //   return res
+  //     .status(400)
+  //     .json({ status: false, message: "Image and document are required" });
+  // }
 
   const sequelize = Vehicle.sequelize;
   const transaction = await sequelize.transaction();
@@ -164,25 +160,25 @@ const createVehicle = async (req, res) => {
     const vehicle = await Vehicle.create({
       vehicleType,
       vehicleTypeTwo,
-      vehicleTitle,
-      model,
+      vehicleTitle, 
       image: null,
       brandId,
+      modelId,
     });
 
     const vehicleDetail = await VehicleDetail.create({
       vehicleId: vehicle.id,
-      color: color,
       licenseId: licenseId,
       licenseExpireDate: licenseExpireDate,
       insuranceType: insuranceType,
       insuranceNo: insuranceNo,
       insuranceExpireDate: insuranceExpireDate,
+      licenceLastUpdate: licenceLastUpdate,
+      insuranceLastUpdate: insuranceLastUpdate,
       chassieNumber: chassieNumber,
       fuelType: fuelType,
       registerYear: registerYear,
-      licenceLastUpdate: licenceLastUpdate,
-      insuranceLastUpdate: insuranceLastUpdate,
+      color: color,
       licenceDocument: `/uploads/${req.files["licenceDocument"][0].filename}`,
       insuranceDocument: `/uploads/${req.files["insuranceDocument"][0].filename}`,
       ecoDocument: `/uploads/${req.files["ecoDocument"][0].filename}`,
@@ -211,14 +207,15 @@ const createVehicle = async (req, res) => {
   }
 };
 
-// Udpate exist vehicle
+
+
+// Update exist vehicle
 const updateVehicleById = async (req, res) => {
   const { id } = req.params; // Get the vehicle ID from the URL params
   const {
     vehicleType,
     vehicleTypeTwo,
     vehicleTitle,
-    model,
     color,
     licenseId,
     licenseExpireDate,
@@ -231,19 +228,20 @@ const updateVehicleById = async (req, res) => {
     insuranceExpireDate,
     insuranceLastUpdate,
     brandId,
+    modelId,
   } = req.body;
 
   // Check if required files are exist
-  if (
-    !req.files["vehicleImage"] ||
-    !req.files["licenceDocument"] ||
-    !req.files["insuranceDocument"] ||
-    !req.files["ecoDocument"]
-  ) {
-    return res
-      .status(400)
-      .json({ status: false, message: "Image and document are required" });
-  }
+  // if (
+  //   !req.files["vehicleImage"] ||
+  //   !req.files["licenceDocument"] ||
+  //   !req.files["insuranceDocument"] ||
+  //   !req.files["ecoDocument"]
+  // ) {
+  //   return res
+  //     .status(400)
+  //     .json({ status: false, message: "Image and document are required" });
+  // }
 
   const sequelize = Vehicle.sequelize;
   const transaction = await sequelize.transaction();
@@ -265,8 +263,12 @@ const updateVehicleById = async (req, res) => {
         vehicleType,
         vehicleTypeTwo,
         vehicleTitle,
-        model,
-        image: `/uploads/${req.files["vehicleImage"][0].filename}`,
+        chassieNumber,
+        fuelType,
+        registerYear,
+        color,
+        modelId,
+        // image: `/uploads/${req.files["vehicleImage"][0].filename}`,
         brandId,
       },
       { transaction }
@@ -285,23 +287,23 @@ const updateVehicleById = async (req, res) => {
         .json({ status: false, message: "Vehicle details not found" });
     }
 
-    // Update the VehicleDetail record
+    // Update the Vehicle Detail record
     await vehicleDetail.update(
       {
+        chassieNumber,
+        fuelType,
+        registerYear,
         color,
         licenseId,
         licenseExpireDate,
         insuranceType,
         insuranceNo,
         insuranceExpireDate,
-        chassieNumber,
-        fuelType,
-        registerYear,
         licenceLastUpdate,
         insuranceLastUpdate,
-        licenceDocument: `/uploads/${req.files["licenceDocument"][0].filename}`,
-        insuranceDocument: `/uploads/${req.files["insuranceDocument"][0].filename}`,
-        ecoDocument: `/uploads/${req.files["ecoDocument"][0].filename}`,
+        // licenceDocument: `/uploads/${req.files["licenceDocument"][0].filename}`,
+        // insuranceDocument: `/uploads/${req.files["insuranceDocument"][0].filename}`,
+        // ecoDocument: `/uploads/${req.files["ecoDocument"][0].filename}`,
       },
       { transaction }
     );
@@ -323,6 +325,10 @@ const updateVehicleById = async (req, res) => {
   }
 };
 
+
+
+
+
 // Fetch all vehicles with details
 const fetchVehicle = async (req, res) => {
   try {
@@ -336,6 +342,10 @@ const fetchVehicle = async (req, res) => {
           model: VehicleBrand,
           required: true,
         },
+        // {
+        //   model: VehicleModel,
+        //   required: true,
+        // },
       ],
     });
 
@@ -390,6 +400,7 @@ const fetchVehicleById = async (req, res) => {
   }
 };
 
+
 // Delete vehicle details
 const deleteVehicleData = async (req, res) => {
   try {
@@ -414,6 +425,100 @@ const deleteVehicleData = async (req, res) => {
   }
 };
 
+
+
+// Creating new vehicle model
+const createModel = async (req, res) => {
+  const { title } = req.body;
+
+  if (!title) {
+    return res
+      .status(400)
+      .json({ status: false, message: "Model title is required! (*)" });
+  }
+
+  try {
+    const model = await VehicleModel.create({ title });
+
+    if (!model) {
+      res
+        .status(400)
+        .json({ status: false, message: "New model creation failed!!" });
+    }
+
+    res.status(201).json({
+      status: true,
+      message: "New model creation success",
+      data: model,
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+
+
+// Fetch all Models
+const fetchModels = async (req, res) => {
+  try {
+    const models = await VehicleModel.findAll();
+
+    if (!models) {
+      res.status(404).json({ status: false, message: "No models found" });
+    }
+
+    res.status(200).json({ status: true, message: "success", data: models });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+
+
+// fetch data for info table
+const fetchVehicleInfo = async (req, res) => {
+  try {
+    const data = await Vehicle.findAll({
+      include: [
+        {
+          model: VehicleDetail,
+          required: true,
+        },
+        {
+          model: gpsdata,
+          required: true,
+        }
+      ],
+    });
+
+    if (data.length == 0) {
+      res.status(404).json({ status: true, message: "Vehicle data not found" });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Vehicle data successfully fetched",
+      data: data,
+    });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ status: false, message: error.message, stack: error.stack });
+  }
+};
+
+// const fetchVehicleCount = async (res,req) => {
+//   try{
+//     const [total,available, outofservice] = await Promise.all([
+//       Vehicle.count(),
+//       Vehicle.count(),
+//       Vehicle.count(),
+//     ]);
+//   };
+// };
+
+
+
 module.exports = {
   createBrand,
   fetchBrands,
@@ -424,4 +529,7 @@ module.exports = {
   fetchVehicle,
   fetchVehicleById,
   deleteVehicleData,
+  createModel,
+  fetchModels,
+  fetchVehicleInfo
 };

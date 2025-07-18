@@ -4,15 +4,14 @@ const {
   fetchBrands,
   updateBrands,
   deleteBrands,
-  //   createModel,
-  //   fetchModels,
-  //   updateModels,
-  //   deleteModels,
+  createModel,
+  fetchModels,
   createVehicle,
   fetchVehicle,
   fetchVehicleById,
   deleteVehicleData,
   updateVehicleById,
+  fetchVehicleInfo,
 } = require("../controllers/vehicleController");
 const upload = require("../config/multreConfig");
 const validateVehicleFields = require("../utils/vehicleDataValidation");
@@ -25,10 +24,13 @@ router.get("/brand/all", fetchBrands);
 router.put("/brand/update/:id", updateBrands);
 router.delete("/brand/destroy/:id", deleteBrands);
 
+// Vehicle Model routes
+router.post("/model/create", createModel);
+router.get("/model/all", fetchModels);
+
 // Vehicle Route
 router.post(
   "/vehicle/create",
-  //   validateVehicleFields,
   upload.fields([
     { name: "licenceDocument", maxCount: 1 },
     { name: "insuranceDocument", maxCount: 1 },
@@ -50,5 +52,8 @@ router.put(
 router.get("/vehicle/all", fetchVehicle);
 router.get("/vehicle/details/:id", fetchVehicleById);
 router.delete("/vehicle/remove/:id", deleteVehicleData);
+
+//vehicleInfo routes
+router.get("/vehicleInfo/all", fetchVehicleInfo);
 
 module.exports = router;

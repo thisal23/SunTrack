@@ -81,7 +81,7 @@ const Info = () => {
         { title: "Lcn: Plate No", data: 2 },
         { title: "Last Location", data: 3 },
         { title: "Trip Location", data: 4 },
-        { title: "Date/Time", data: 5 },
+        { title: "Last Updated Date/Time", data: 5 },
         {
           title: "Vehicle Status",
           data: 6,
@@ -153,14 +153,14 @@ const Info = () => {
   return (
     <>
       <NavBar />
-      <div className="container mx-auto w-full">
+      <div className="container_custom mx-auto w-full py-15">
         <div className="flex flex-row justify-start my-5">
           <span className="text-3xl text-[#0F2043] font-semibold">
             Info Page
           </span>
         </div>
         <div className="border-b-1 border-[#000] w-full mb-5"></div>
-        <div className="flex flex-row w-full mx-auto custom_table justify-center">
+        <div className="text-black flex flex-row w-full mx-auto custom_table justify-center">
           <table
             ref={tableRef}
             className="display justify-center"

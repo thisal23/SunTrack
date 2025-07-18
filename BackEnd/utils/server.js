@@ -2,6 +2,8 @@ require('dotenv').config();
 
 require('../shedulers/geoFenceSheduler');
 const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 8000;
 const connectDB = require('../config/db'); // Assuming you have a database connection file
 const { User, Role, UserDetail } = require('../models');
 const liveTrackingRoutes = require('../routes/liveTrackingRoutes');
@@ -12,12 +14,13 @@ const { isVehicleInGeoFence } = require('../controllers/geoFenceEventController'
 const mapRouteHistory = require('../routes/routeHistoryRoute');
 const geoFenceReportRoutes = require('../routes/geoFenceReportRoutes');
 const idleReportRoutes = require('../routes/idleReportRoutes');
-
-const app = express();
-const PORT = process.env.PORT || 8000;
+const vehicleRoutes = require('../routes/vehicleRoutes');
+const userRoutes = require('../routes/tripRoutes');
+const tripRoutes = require('../routes/tripRoutes');
 const dailySummaryRoutes = require('../routes/DailySumreports');
 const dailydetailRoutes = require('../routes/Dailydetail');
 const distanceRoutes = require('../routes/distanceRoutes');
+const maintenanceRoutes = require('../routes/maintenanceRoutes')
 connectDB;
 
 
@@ -30,13 +33,14 @@ app.use(cors({
   allowedHeaders: "Content-Type,Authorization"
 }));
 
-
-
-
 // Define Routes
 app.use('/api/auth', require('../routes/authRoutes'));
 app.use('/api', liveTrackingRoutes);
 app.use('/api', geoRoutes);
+app.use('/api',maintenanceRoutes)
+app.use('/api', userRoutes)
+app.use('/api', vehicleRoutes)
+app.use('/api', tripRoutes) 
 app.use('/api',geoFenceEventRoutes);
 app.use('/api',mapRouteHistory);
 app.use('/api',geoFenceReportRoutes);

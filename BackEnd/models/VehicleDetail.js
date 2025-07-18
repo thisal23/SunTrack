@@ -17,21 +17,17 @@ const VehicleDetail = sequelize.define(
         key: "id",
       },
     },
-    color: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     licenseId: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
     licenseExpireDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     insuranceType: {
-      type: DataTypes.STRING, // Full Insurance - Third Party
+      type: DataTypes.STRING, // Full Insurance, Third Party
       allowNull: false,
     },
     insuranceNo: {
@@ -40,7 +36,7 @@ const VehicleDetail = sequelize.define(
       unique: true,
     },
     insuranceExpireDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     chassieNumber: {
