@@ -1,5 +1,4 @@
 const sequelize= require('../config/db');
-const { geoname, gpsdata, geoFenceEvent } = require('../models');
 
 const getGeoReport = async (req, res) => {
     const {
@@ -40,7 +39,7 @@ const getGeoReport = async (req, res) => {
             });
 
 
-            console.log(geoReport);
+            // console.log(geoReport);
 if(geoReport.length>0){
     return res.status(200).json({status:true , message:"Geo Report fetched" , data:geoReport});
 }

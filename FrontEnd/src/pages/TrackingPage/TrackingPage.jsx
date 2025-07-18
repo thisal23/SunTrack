@@ -9,32 +9,33 @@ import { bounds } from 'leaflet';
 function TrackingPage() {
   const [coordinates, setCoordinates] = useState([7.211559,80.427956]);
   const [geoFences, setGeoFences] = useState([]);
+  const [deviceLocations, setDeviceLocations] = useState([]);
 
 
   
-  const autoGeofenceCheck = async () => {
-    try {
-      const res = await fetch('http://localhost:8000/api/check',{
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      });
-      console.log('Geofence checked');
-    } catch (err) {
-      console.error('Error checking geofence:', err);
-    }
-  };
+  // const autoGeofenceCheck = async () => {
+  //   try {
+  //     const res = await fetch('http://localhost:8000/api/check',{
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //     });
+  //     console.log('Geofence checked');
+  //   } catch (err) {
+  //     console.error('Error checking geofence:', err);
+  //   }
+  // };
 
-  useEffect(() => {
-    // autoGeofenceCheck();
+  // useEffect(() => {
+  //   // autoGeofenceCheck();
 
-    const interval = setInterval(() => {
-      autoGeofenceCheck();
-    }, 30000);
+  //   const interval = setInterval(() => {
+  //     autoGeofenceCheck();
+  //   }, 30000);
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 
 
 
@@ -42,19 +43,21 @@ function TrackingPage() {
 
   const displayMap = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/track', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await apiService.get(`/track`);
 
-      const data = await response.json();
+      const data =  response.data;
       console.log(data);
 
-      if (data.status) {
-        const location = data.data;
-        setCoordinates([location.latitude, location.longitude]);
+      if (data.status && Array.isArray(data.data)) {
+        const locations = data.data;
+        console.log(data.data);
+        setDeviceLocations(locations);
+        if(locations.length > 0) {
+          setCoordinates([locations[0].latitude, locations[0].longitude]);
+
+        }
+        
+        
       } else {
         console.log('Error fetching data');
       }
@@ -128,11 +131,11 @@ catch (error) {
           </div>
 
           <div className="horizon">
-            <div className="vehicleNo">
+            {/* <div className="vehicleNo">
               <label htmlFor="vehicleno">Vehicle No</label><br />
               <input className="vehicleno" type="text" name="vehicleno" id="vehicleno" />
               <button type="submit" className='search-btn'>Search</button>
-            </div>
+            </div> */}
             <div className="maps">
               <MapContainer center={coordinates} zoom={8} style={{ height: "700px", width: "100%" }}>
                 <TileLayer
@@ -199,11 +202,15 @@ catch (error) {
                   //   )}
                   // </>
     })}
-                <Marker position={coordinates}>
+              {deviceLocations.map((device, index)=> (
+                  <Marker key={index} position={[device.latitude, device.longitude]}>
                   <Popup>
-                    Latest location
+                    {device.plateNo}
                   </Popup>
                 </Marker>
+
+              ))}
+                
               </MapContainer>
             </div>
           </div>
