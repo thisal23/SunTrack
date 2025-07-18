@@ -11,8 +11,10 @@ const Service = sequelize.define("Service", {
         type: DataTypes.STRING,
         allowNull: false
     }
+}, {
+  tableName: 'services',
+  timestamps: true
 })
-
 
 
 module.exports = Service;

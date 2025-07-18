@@ -41,6 +41,9 @@ const TripDetail = sequelize.define("TripDetail",{
         // },
         
     },
-},{timestamps:true})
+},{
+  tableName: 'tripdetails',
+  timestamps: true
+})
 
 module.exports = TripDetail;

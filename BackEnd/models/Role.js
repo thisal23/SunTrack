@@ -19,6 +19,7 @@ const Role = sequelize.define('Role', {
   },
 
 }, {
+  tableName: 'roles',
   timestamps: false,
 });
 
@@ -50,7 +51,5 @@ async function seedRoles() {
   }
 }
 
-// Initialize roles when this module is imported
-seedRoles();
-
 module.exports = Role;
+module.exports.seedRoles = seedRoles;

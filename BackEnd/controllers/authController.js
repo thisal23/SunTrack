@@ -39,6 +39,37 @@ exports.register = async (req, res) => {
     }
 };
 
+exports.registerAdmin = async (req, res) => {
+    try {
+        const { firstName, lastName, userName, email, password, isActive } = req.body;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // Hash the password before saving
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = await User.create({
+            firstName,
+            lastName,
+            userName,
+            email,
+            password: hashedPassword,
+            roleId: 1, // Always Admin
+            isActive
+        });
+
+        res.status(201).json({ message: 'Admin registered successfully', user: newUser });
+    } catch (error) {
+        console.error("Admin Registration Error:", error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;

@@ -43,6 +43,7 @@ const DriverDetails = sequelize.define('DriverDetails', {
         allowNull: false,
     }
     }, {
+    tableName: 'driverdetails',
     timestamps: false,
     });
 

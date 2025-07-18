@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const connectDB = require('../config/db'); // Assuming you have a database connection file
-const { User, Role, UserDetail } = require('../models');
+const { User, Role, UserDetail, sequelize } = require('../models');
 const liveTrackingRoutes = require('../routes/liveTrackingRoutes');
 const geoRoutes = require('../routes/geoRoutes');
 const geoFenceEventRoutes = require('../routes/geoFenceEventRoutes');
@@ -32,6 +32,17 @@ app.use('/api', liveTrackingRoutes);
 app.use('/api', geoRoutes);
 app.use('/api',geoFenceEventRoutes);
 app.use('/api',mapRouteHistory);
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
+(async () => {
+  try {
+    await sequelize.sync(); // Ensure all tables are created
+    if (Role.seedRoles) {
+      await Role.seedRoles(); // Seed roles after tables exist
+    }
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Error syncing database or seeding roles:', err);
+  }
+})();

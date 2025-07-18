@@ -42,7 +42,7 @@ const Vehicle = sequelize.define(
       },
     },
   },
-  { timestamps: true }
+  { tableName: 'vehicles', timestamps: true }
 );
 
 module.exports = Vehicle;

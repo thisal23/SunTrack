@@ -12,7 +12,10 @@ const VehicleBrand = sequelize.define("VehicleBrand", {
         allowNull: false,
         unique: true
     }
-},{timestamps: true});
+},{
+  tableName: 'vehiclebrands',
+  timestamps: true
+});
 
 module.exports = VehicleBrand;
 

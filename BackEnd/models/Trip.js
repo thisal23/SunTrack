@@ -39,7 +39,10 @@ const Trip = sequelize.define("Trip",{
         type:DataTypes.TIME,
         allowNull:true
     }
-},{timestamps:true})
+},{
+  tableName: 'trips',
+  timestamps: true
+})
 
 module.exports = Trip;
 

@@ -77,7 +77,7 @@ const VehicleDetail = sequelize.define(
       allowNull: true,
     },
   },
-  { timestamps: true }
+  { tableName: 'vehicledetails', timestamps: true }
 );
 
 module.exports = VehicleDetail;

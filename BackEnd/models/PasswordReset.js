@@ -26,6 +26,7 @@ const PasswordReset = sequelize.define('PasswordReset', {
     allowNull: false,
   },
 }, {
+  tableName: 'password_resets',
   timestamps: true, // createdAt and updatedAt will be handled automatically
 });
 

@@ -11,6 +11,7 @@ const VehicleBrand = require("./VehicleBrand");
 const VehicleDetail = require("./VehicleDetail");
 const ServiceInfo = require("./ServiceInfo");
 const Service = require("./Service");
+const sequelize = require('../config/db');
 
 // Thisal work imports
 const geoname = require("./geoname");
@@ -69,4 +70,5 @@ module.exports = {
   Role,
   DriverDetails,
   PasswordReset,
+  sequelize,
 };

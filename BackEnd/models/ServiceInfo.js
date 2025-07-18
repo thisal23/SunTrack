@@ -36,7 +36,10 @@ const ServiceInfo = sequelize.define("ServiceInfo",{
         allowNull:true
     }
 
-},{timestamps:true})
+},{
+  tableName: 'serviceinfos',
+  timestamps: true
+})
 
 module.exports = ServiceInfo;
 

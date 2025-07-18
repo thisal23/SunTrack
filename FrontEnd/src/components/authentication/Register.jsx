@@ -166,8 +166,8 @@ const Register = () => {
                         <label htmlFor="roleId">Role</label>
                         <select id="roleId" name="roleId" value={formData.roleId} onChange={handleChange} required>
                             <option value="">Select Role</option>
-                            <option value="1">FleetManager</option>
-                            <option value="2">User</option>
+                            <option value="2">FleetManager</option>
+                            <option value="3">User</option>
                         </select>
                     </div>
                     <div className="input-group checkbox-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.2rem', justifyContent: 'flex-end', width: '100%' }}>
