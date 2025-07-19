@@ -20,7 +20,7 @@ const checkGeofence = async () => {
             
             raw: true
         });
-        console.log("Latest Locations: ", latestLocations);
+        // console.log("Latest Locations: ", latestLocations);
         for (let loc of latestLocations) {
             const latest = await gpsdata.findOne({
                 where: { deviceId: loc.deviceId,  },
@@ -57,7 +57,7 @@ const checkGeofence = async () => {
                 order: [['eDate', 'DESC'], ['eTime', 'DESC']],
                 raw: true
             });
-            console.log("Last Event: ", lastEvent);
+            // console.log("Last Event: ", lastEvent);
             const now = new Date();
             const eTime = now.toTimeString().split(' ')[0];
 
