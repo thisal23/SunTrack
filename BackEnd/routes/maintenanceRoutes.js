@@ -12,3 +12,12 @@ router.get('/document/detailFetch', fetchDocumentDetails);
 router.put('/document/update/:licenseId', upload.single("document"), updateDocumentDetails);
 
 module.exports = router;
+
+
+// PORT=8000
+// DB_HOST=62.171.129.214
+// DB_NAME=suntrack_meta
+// DB_USERNAME=rootadmin
+// DB_PASSWORD=root@123
+// DB_PORT=3306
+// JWT_SECRET=supersecretkey

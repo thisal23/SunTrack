@@ -232,7 +232,7 @@ const ServiceMaintenance = () => {
       <NavBar />
       <div className="container_custom mx-auto w-full mt-20 text-black">
         <div className="flex flex-row justify-between items-center my-5">
-          <span className="text-xl text-[#0F2043] font-semibold">
+          <span className="text-3xl text-[#0F2043] font-semibold">
             Maintenance &gt; Service Maintenance
           </span>
         </div>
