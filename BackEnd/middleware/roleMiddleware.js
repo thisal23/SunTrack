@@ -1,5 +1,3 @@
-// 
-
 const { User } = require('../models');
 
 const roleMiddleware = (requiredRole) => {
