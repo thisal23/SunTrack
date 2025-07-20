@@ -22,9 +22,11 @@ import { formatTimeToHoursMinutes } from "../../utils/timeFormatter";
 const ViewAll = () => {
   const tableRef = useRef(null);
 
+
   const [isModal_assignOpen, setIsModal_assignOpen] = useState(false);
   const [isModal_editOpen, setIsModal_editOpen] = useState(false);
   const [isModal_deleteOpen, setIsModal_deleteOpen] = useState(false);
+
   const [tripData, setTripData] = useState([]);
   const [tripId, setTripId] = useState("");
 

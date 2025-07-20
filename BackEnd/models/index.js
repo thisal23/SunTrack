@@ -1,6 +1,8 @@
 const User = require('./User');
-const Role = require('./Role'); // Import the Role model
-const driverDetail = require('./DriverDetail'); // Import the driverDetail model
+
+const Role = require('./Role');
+const DriverDetails = require('./driverDetails'); // Updated to match DriverDetails.js
+const PasswordReset = require('./PasswordReset');
 
 // Sachini work imports
 const TripDetail = require("./TripDetail");
@@ -11,19 +13,41 @@ const VehicleModel = require("./VehicleModel");
 const VehicleDetail = require("./VehicleDetail");
 const ServiceInfo = require("./ServiceInfo");
 const Service = require("./Service");
+const sequelize = require('../config/db');
 
 // Thisal work imports
 const geoname = require("./geoname");
 const geoFenceEvent = require("./geoFenceEvent");
 const gpsdata = require("./gpsdata");
+
+
+// Define associations
+
 const gpsDevice = require('./gpsDevice');
 
 
-// Define the associations
+
 User.belongsTo(Role, {
   foreignKey: 'roleId',
   as: 'role',
 });
+
+
+
+// PasswordReset association
+PasswordReset.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
+User.hasMany(PasswordReset, {
+  foreignKey: 'userId',
+  as: 'passwordResets',
+});
+
+geoFenceEvent.belongsTo(geoname, { foreignKey: 'geoId' });
+
+VehicleDetail.belongsTo(Vehicle, { foreignKey: "vehicleId" });
+Vehicle.hasOne(VehicleDetail, { foreignKey: "vehicleId" });
 
 // Role has many Users
 Role.hasMany(User, {
@@ -44,6 +68,7 @@ driverDetail.belongsTo(User, {
 });
 
 geoFenceEvent.belongsTo(geoname, {foreignKey: 'geoId'});
+
 
 // Vehicle has one GpsDevice
 Vehicle.hasOne(gpsDevice, { foreignKey: 'plateNo', sourceKey: 'plateNo', as: 'gpsDevice',onDelete: 'CASCADE', hooks: true });
@@ -87,6 +112,7 @@ User.hasMany(ServiceInfo, { foreignKey: "userId" });
 module.exports = {
   User,
   Role,
+
   driverDetail,
   Vehicle,
   VehicleBrand,
@@ -101,3 +127,4 @@ module.exports = {
   gpsdata,
   gpsDevice
 }; // Export the models
+

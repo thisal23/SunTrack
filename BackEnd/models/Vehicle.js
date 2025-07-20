@@ -65,8 +65,9 @@ const Vehicle = sequelize.define(
       type: DataTypes.STRING(500),
       allowNull: true,
     },
+
   },
-  { timestamps: true }
+  { tableName: 'vehicles', timestamps: true }
 );
 
 module.exports = Vehicle;

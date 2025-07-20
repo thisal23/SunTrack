@@ -36,6 +36,6 @@ const geoname = sequelize.define('geoname', {
         type: DataTypes.INTEGER,
         allowNull: true
     }
-}, {timestamps: false});
+}, {tableName: 'geonames', timestamps: false});
 
 module.exports = geoname;

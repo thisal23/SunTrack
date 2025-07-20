@@ -5,7 +5,9 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 8000;
 const connectDB = require('../config/db'); // Assuming you have a database connection file
-const { User, Role, driverDetail } = require('../models');
+
+const { User, Role, driverDetail, sequelize } = require('../models');
+
 const liveTrackingRoutes = require('../routes/liveTrackingRoutes');
 const geoRoutes = require('../routes/geoRoutes');
 const geoFenceEventRoutes = require('../routes/geoFenceEventRoutes');
@@ -38,6 +40,21 @@ app.use(cors({
 app.use('/api/auth', require('../routes/authRoutes'));
 app.use('/api', liveTrackingRoutes);
 app.use('/api', geoRoutes);
+
+(async () => {
+  try {
+    await sequelize.sync(); // Ensure all tables are created
+    if (Role.seedRoles) {
+      await Role.seedRoles(); // Seed roles after tables exist
+    }
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Error syncing database or seeding roles:', err);
+  }
+})();
+
 app.use('/api', maintenanceRoutes)
 app.use('/api', userRoutes)
 app.use('/api', vehicleRoutes)

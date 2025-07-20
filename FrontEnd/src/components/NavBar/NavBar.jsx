@@ -120,8 +120,11 @@ function NavBar() {
                   }`}
                 >
                   <NavLink
-                    to=""
-                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left linkCustom_s"
+
+
+                    to="/register"
+                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left"
+
                     end
                   >
                     Add New Driver

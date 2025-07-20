@@ -29,6 +29,6 @@ const geoFenceEvent = sequelize.define('geofenceevent', {
         type: DataTypes.TIME,
         allowNull: true
     }
-}, {timestamps: true});
+}, {tableName: 'geofenceevents', timestamps: true});
 
 module.exports = geoFenceEvent;

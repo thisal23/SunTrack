@@ -12,6 +12,8 @@ const VehicleBrand = sequelize.define("vehiclebrand", {
         allowNull: false,
         unique: true
     }
+
 }, { timestamps: true });
+
 
 module.exports = VehicleBrand;

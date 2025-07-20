@@ -1,34 +1,42 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
+
 const ServiceInfo = sequelize.define("serviceinfo", {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
+
     },
     serviceId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+
         references: {
             model: "service",
             key: "id"
+
         }
     },
     vehicleId: {
         type: DataTypes.INTEGER,
+
         allowNull: false,
         references: {
             model: "Vehicles",
             key: "id"
+
         }
     },
     userId: {
         type: DataTypes.INTEGER,
+
         allowNull: true,
         references: {
             model: "Users",
             key: "id"
+
         }
     },
     serviceRemark: {
@@ -36,7 +44,9 @@ const ServiceInfo = sequelize.define("serviceinfo", {
         allowNull: true
     }
 
+
 }, { timestamps: true })
+
 
 module.exports = ServiceInfo;
 

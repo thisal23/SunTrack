@@ -102,7 +102,7 @@ const Login = () => {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem("token", data.token); // Store JWT token
-                alert("Login Successful");
+
                 navigate("/dashboard"); // Navigate to dashboard after successful login
             } else {
                 setError(data.message || "Invalid Credentials");
@@ -149,7 +149,7 @@ const Login = () => {
                     {error && <p className="error-message">{error}</p>}
                     <button type="submit">Login</button>
                 </form>
-                <a href="/forgot-password">Forgot Your Password?</a>
+                <a href="/reset-password">Forgot Your Password?</a>
             </div>
         </div>
     );

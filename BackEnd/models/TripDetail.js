@@ -18,9 +18,11 @@ const TripDetail = sequelize.define("tripdetail", {
     tripId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+
         references: {
             model: "trip",
             key: "id"
+
         }
     },
     driverId: {
@@ -39,6 +41,8 @@ const TripDetail = sequelize.define("tripdetail", {
             key: "id"
         }
     },
+
 }, { timestamps: true })
+
 
 module.exports = TripDetail;
