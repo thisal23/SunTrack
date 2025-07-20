@@ -32,11 +32,11 @@ const DriverUpdateCard = ({ driverName, destination, time }) => {
             <button
               type="button"
               onClick={showModal}
-              className="p-0 m-0 text-left"
+              className="p-0 m-0 text-left btn_custom_s"
             >
               <Link
                 to={"#"}
-                className="text-lg sm:text-xl text-[#0F2043] font-normal hover:underline"
+                className="text-lg sm:text-xl font-normal hover:underline"
               >
                 {driverName}
               </Link>
@@ -65,5 +65,4 @@ const DriverUpdateCard = ({ driverName, destination, time }) => {
     </>
   );
 };
-
 export default DriverUpdateCard;

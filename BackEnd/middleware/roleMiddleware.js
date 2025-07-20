@@ -1,6 +1,7 @@
 const { User } = require('../models');
 
 const roleMiddleware = (requiredRole) => {
+
   return async (req, res, next) => {
     try {
       const user = await User.findByPk(req.user.id, { include: 'role' });
@@ -17,6 +18,7 @@ const roleMiddleware = (requiredRole) => {
       res.status(500).json({ message: err.message });
     }
   };
+
 };
 
 module.exports = roleMiddleware;

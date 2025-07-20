@@ -44,9 +44,9 @@ function NavBar() {
             </div>
 
             <div className="w-full flex flex-row justify-end gap-4">
-              <NavLink
+              {/* <NavLink
                 to="/dashboard"
-                className="text-white hover:underline"
+                className="text-white hover:underline nav_custom_s"
                 end
               >
                 Dashboard
@@ -54,12 +54,22 @@ function NavBar() {
 
               <NavLink
                 to="/vehicle/info"
-                className="text-white hover:underline"
+                className="text-white hover:underline linkCustom_s"
                 end
               >
                 Vehicle Info
-              </NavLink>
+              </NavLink> */}
 
+              <MenuLink
+                className="menuLink"
+                url="/dashboard"
+                name="Dashboard"
+              />
+              <MenuLink
+                className="menuLink"
+                url="/vehicle/info"
+                name="InfoPage"
+              />
               <MenuLink className="menuLink" url="/tracking" name="Tracking" />
               <MenuLink className="menuLink" url="/reports" name="Reports" />
 
@@ -79,15 +89,15 @@ function NavBar() {
                 >
                   <NavLink
                     to="/maintenance/document-maintenance"
-                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left"
-                    endcd
+                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left linkCustom_s"
+                    end
                   >
                     Document Maintenance
                   </NavLink>
 
                   <NavLink
                     to="/maintenance/service-maintenance"
-                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left"
+                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left linkCustom_s"
                     end
                   >
                     Service Maintenance
@@ -110,16 +120,19 @@ function NavBar() {
                   }`}
                 >
                   <NavLink
+
+
                     to="/register"
                     className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left"
+
                     end
                   >
                     Add New Driver
                   </NavLink>
 
                   <NavLink
-                    to="/vehicle/info"
-                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left"
+                    to=""
+                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left linkCustom_s"
                     end
                   >
                     View All Drivers
@@ -127,7 +140,7 @@ function NavBar() {
 
                   <NavLink
                     to="/vehicle/add-new"
-                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left"
+                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left linkCustom_s"
                     end
                   >
                     Add New Vehicle
@@ -135,10 +148,18 @@ function NavBar() {
 
                   <NavLink
                     to="/vehicle/all"
-                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left"
+                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left linkCustom_s"
                     end
                   >
                     View All Vehicles
+                  </NavLink>
+
+                  <NavLink
+                    to="/trip/addNew"
+                    className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left linkCustom_s"
+                    end
+                  >
+                    Add New Trip
                   </NavLink>
                 </div>
               </div>
