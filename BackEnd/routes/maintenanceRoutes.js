@@ -4,7 +4,7 @@ const router = express.Router();
 const upload = require("../config/multreConfig"); // Or your custom config
 
 
-router.post('/service/create', createServiceType);
+router.post('/service/type_create', createServiceType);
 router.get('/service/serviceType/all', fetchServiceType);
 router.get('/service/detailFetch', fetchServiceDetails);
 router.post('/service/create', createServiceInfo);

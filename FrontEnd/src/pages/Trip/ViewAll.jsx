@@ -17,6 +17,7 @@ import PendingTripDeleteCard from "./PendingTripDeleteCard";
 import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 import NavBar from "../../components/NavBar/NavBar";
+import { formatTimeToHoursMinutes } from "../../utils/timeFormatter";
 
 const ViewAll = () => {
   const tableRef = useRef(null);
@@ -111,7 +112,7 @@ const ViewAll = () => {
         }/" target="_blank" class="text-blue-500 underline">
     View Trip Route</a>`,
         item.date,
-        `${item.suggestStartTime ?? "N/A"}`,
+        `${formatTimeToHoursMinutes(item.suggestStartTime) ?? "N/A"}`,
         item.status,
         item.driverName ?? "Not Assigned",
         item.vehicleId ?? "Not Assigned",

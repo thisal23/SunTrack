@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaLocationDot } from "react-icons/fa6";
 import apiService from "../../config/axiosConfig";
+import { formatTimeToHoursMinutes } from "../../utils/timeFormatter";
 
 // Sachini part
 const PendingTripCard = ({ tripData }) => {
@@ -36,7 +37,7 @@ const PendingTripCard = ({ tripData }) => {
           </span>
 
           <span className="text-right text-[#0F2043] text-sm">
-            {tripData.suggestStartTime}
+            {formatTimeToHoursMinutes(tripData.suggestStartTime)}
           </span>
         </div>
         <div className="flex flex-row justify-between">
@@ -44,7 +45,7 @@ const PendingTripCard = ({ tripData }) => {
             Suggest End Time:
           </span>
           <span className="text-right text-[#0F2043] text-sm">
-            {tripData.suggestEndTime}
+            {formatTimeToHoursMinutes(tripData.suggestEndTime)}
           </span>
         </div>
       </div>

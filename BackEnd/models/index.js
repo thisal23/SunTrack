@@ -46,14 +46,15 @@ driverDetail.belongsTo(User, {
 geoFenceEvent.belongsTo(geoname, {foreignKey: 'geoId'});
 
 // Vehicle has one GpsDevice
-Vehicle.hasOne(gpsDevice, { foreignKey: 'plateNo', sourceKey: 'plateNo', as: 'gpsDevice' });
+Vehicle.hasOne(gpsDevice, { foreignKey: 'plateNo', sourceKey: 'plateNo', as: 'gpsDevice',onDelete: 'CASCADE', hooks: true });
 gpsDevice.belongsTo(Vehicle, { foreignKey: 'plateNo', targetKey: 'plateNo', as: 'vehicle'});
 
 // GpsDevice has many GpsData
-gpsDevice.hasMany(gpsdata, { foreignKey: 'deviceId', sourceKey: 'deviceId',as: 'gpsData' });
+gpsDevice.hasMany(gpsdata, { foreignKey: 'deviceId', sourceKey: 'deviceId',as: 'gpsData', onDelete: 'CASCADE',hooks: true, });
 gpsdata.belongsTo(gpsDevice, { foreignKey: 'deviceId', targetKey: 'deviceId',as: 'gpsDevice' });
 
-
+gpsDevice.hasMany(geoFenceEvent, { foreignKey: 'deviceId',onDelete: 'CASCADE',hooks: true});
+geoFenceEvent.belongsTo(gpsDevice, {foreignKey: 'deviceId'})
 
 VehicleDetail.belongsTo(Vehicle, { foreignKey: "vehicleId",as:"vehicle" });
 Vehicle.hasOne(VehicleDetail, { foreignKey: "vehicleId", as: "vehicleDetail" });

@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 // const roleMiddleware = require('../middleware/roleMiddleware');
 
 router.get('/users', userController.getAllUsers);
+router.get('/users/driver-count', userController.fetchDriverCount);
 router.get('/users/:id', userController.getUserById);
 router.put('/users/:id', authMiddleware, userController.updateUser); //roleMiddleware('admin')
 

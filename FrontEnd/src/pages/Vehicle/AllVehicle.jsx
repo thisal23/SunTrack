@@ -214,7 +214,7 @@ const AllVehicle = () => {
         />
       </Modal>
 
-      <Modal open={isModal_2_Open} onCancel={handleCancel_2}>
+      <Modal open={isModal_2_Open} onCancel={handleCancel_2} footer={null}>
         <VehicleEditCard
           vehicleId={vehicleId}
           onClose={handleCancel_2}

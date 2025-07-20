@@ -15,7 +15,7 @@ const mapRouteHistory = require('../routes/routeHistoryRoute');
 const geoFenceReportRoutes = require('../routes/geoFenceReportRoutes');
 const idleReportRoutes = require('../routes/idleReportRoutes');
 const vehicleRoutes = require('../routes/vehicleRoutes');
-const userRoutes = require('../routes/tripRoutes');
+const userRoutes = require('../routes/userRoutes');
 const tripRoutes = require('../routes/tripRoutes');
 const dailySummaryRoutes = require('../routes/DailySumreports');
 const dailydetailRoutes = require('../routes/Dailydetail');
@@ -38,15 +38,15 @@ app.use(cors({
 app.use('/api/auth', require('../routes/authRoutes'));
 app.use('/api', liveTrackingRoutes);
 app.use('/api', geoRoutes);
-app.use('/api',maintenanceRoutes)
+app.use('/api', maintenanceRoutes)
 app.use('/api', userRoutes)
 app.use('/api', vehicleRoutes)
-app.use('/api', tripRoutes) 
-app.use('/api',geoFenceEventRoutes);
-app.use('/api',mapRouteHistory);
-app.use('/api',geoFenceReportRoutes);
-app.use('/api',dailySummaryRoutes);
-app.use('/api',dailydetailRoutes);
+app.use('/api', tripRoutes)
+app.use('/api', geoFenceEventRoutes);
+app.use('/api', mapRouteHistory);
+app.use('/api', geoFenceReportRoutes);
+app.use('/api', dailySummaryRoutes);
+app.use('/api', dailydetailRoutes);
 app.use('/api', distanceRoutes);
 app.use('/api', idleReportRoutes);
 

@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
 const VehicleDetail = sequelize.define(
-  "VehicleDetail",
+  "vehicledetail",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,7 +13,7 @@ const VehicleDetail = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Vehicles",
+        model: "vehicle",
         key: "id",
       },
     },
@@ -55,7 +55,7 @@ const VehicleDetail = sequelize.define(
       type: DataTypes.STRING(500),
       allowNull: true,
     },
-    ecoId:{
+    ecoId: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,

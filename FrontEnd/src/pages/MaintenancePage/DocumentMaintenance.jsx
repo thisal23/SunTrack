@@ -165,18 +165,19 @@ const DocumentMaintenance = () => {
                 Edit
               </button>
 
-              <button class="btn-delete"
-                      data-id="${row[0]}"
-                      data-dt="${row[1]}"
-                      data-license="${licenseValue}"
-                      style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">
-                Delete
-              </button>
               </div>
             `;
           },
         },
       ],
+
+      // <button class="btn-delete"
+      //                 data-id="${row[0]}"
+      //                 data-dt="${row[1]}"
+      //                 data-license="${licenseValue}"
+      //                 style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">
+      //           Delete
+      //         </button>
 
       responsive: true,
       select: true, // If you want row selection
@@ -243,7 +244,7 @@ const DocumentMaintenance = () => {
             />
           </Modal>
 
-          <Modal
+          {/* <Modal
             title="Delete Document Services"
             open={isModal_2_Open}
             onCancel={handleCancel_2}
@@ -254,7 +255,7 @@ const DocumentMaintenance = () => {
               handleCancel={handleCancel_2}
               onDeleteSuccess={fetchDocumentDetails}
             />
-          </Modal>
+          </Modal> */}
         </div>
       </div>
     </>

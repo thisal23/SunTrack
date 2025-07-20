@@ -9,13 +9,13 @@ console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
 console.log('DB_HOST:', process.env.DB_HOST);
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME || "suntrack_meta", 
-  process.env.DB_USERNAME || "root", 
-  process.env.DB_PASSWORD || "root", {
-  host: process.env.DB_HOST ||  "127.0.0.1",
-  port: process.env.DB_PORT || "3307",
+  process.env.DB_NAME || "suntrack_meta",
+  process.env.DB_USERNAME || "rootadmin",
+  process.env.DB_PASSWORD || "root@123", {
+  host: process.env.DB_HOST || "62.171.129.214",
+  port: process.env.DB_PORT || "3306",
   dialect: 'mysql',
-  
+
 });
 
 

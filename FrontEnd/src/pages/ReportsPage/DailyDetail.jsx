@@ -6,6 +6,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { FaSearch } from 'react-icons/fa';
 import './DailyDetail.css';
 import { format } from 'date-fns'; // Import the format function
+import { formatTimeToHoursMinutes, formatDurationToHoursMinutes } from '../../utils/timeFormatter';
 
 function DailyDetail() {
   const [startDate, setStartDate] = useState(null);
@@ -140,10 +141,10 @@ function DailyDetail() {
                       <td>{row.tripId}</td>
                       <td>{row.startLocation}</td>
                       <td>{row.endLocation}</td>
-                      <td>{row.driverStartTime}</td>
-                      <td>{row.driverEndTime}</td>
+                      <td>{formatTimeToHoursMinutes(row.driverStartTime)}</td>
+                      <td>{formatTimeToHoursMinutes(row.driverEndTime)}</td>
                       <td>{row.date}</td>
-                      <td>{row.duration}</td>
+                      <td>{formatDurationToHoursMinutes(row.duration)}</td>
                     </tr>
                   ))}
                 </tbody>

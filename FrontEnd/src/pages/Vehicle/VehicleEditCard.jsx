@@ -128,14 +128,16 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
   return (
     <div className="justify-center w-full">
       <div className="flex flex-row justify-center">
-        <span className="text-2xl text-[#0F2043]">Edit vehicle Details</span>
+        <span className="text-2xl text-[#0F2043] py-3">
+          Edit vehicle Details
+        </span>
       </div>
       <form onSubmit={handleSubmit}>
         <table>
           <tbody>
             <tr>
               <td className="px-4 py-2 font-bold">Plate No:</td>
-              <td>
+              <td className="pb-2">
                 <input
                   type="text"
                   name="plateNo"
@@ -147,7 +149,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Vehicle Type:</td>
-              <td>
+              <td className="pb-2">
                 <select
                   name="vehicleType"
                   value={formData.vehicleType}
@@ -165,7 +167,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Category:</td>
-              <td>
+              <td className="pb-2">
                 <select
                   name="category"
                   value={formData.category}
@@ -180,7 +182,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Brand:</td>
-              <td>
+              <td className="pb-2">
                 <select
                   name="brandId"
                   value={formData.brandId}
@@ -198,7 +200,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Model:</td>
-              <td>
+              <td className="pb-2">
                 <select
                   name="modelId"
                   value={formData.modelId}
@@ -217,7 +219,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
 
             <tr>
               <td className="px-4 py-2 font-bold">Fuel Type:</td>
-              <td>
+              <td className="pb-2">
                 <select
                   name="fuelType"
                   value={formData.fuelType}
@@ -231,7 +233,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Chassie No:</td>
-              <td>
+              <td className="pb-2">
                 <input
                   type="text"
                   name="chassieNo"
@@ -243,7 +245,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Registered Year:</td>
-              <td>
+              <td className="pb-2">
                 <input
                   type="text"
                   name="registeredYear"
@@ -255,7 +257,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Color:</td>
-              <td>
+              <td className="pb-2">
                 <input
                   type="text"
                   name="color"
@@ -267,7 +269,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Status:</td>
-              <td>
+              <td className="pb-2">
                 <select
                   name="status"
                   value={formData.status}
@@ -282,7 +284,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">GPS Device ID:</td>
-              <td>
+              <td className="pb-2">
                 <input
                   type="text"
                   name="deviceId"
@@ -294,7 +296,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Country Code:</td>
-              <td>
+              <td className="pb-2">
                 <input
                   type="text"
                   name="countrycode"
@@ -306,7 +308,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Phone Number:</td>
-              <td>
+              <td className="pb-2">
                 <input
                   type="text"
                   name="pnumber"
@@ -318,7 +320,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             </tr>
             <tr>
               <td className="px-4 py-2 font-bold">Image:</td>
-              <td>
+              <td className="pb-2">
                 <input
                   type="file"
                   name="image"
@@ -331,7 +333,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
           </tbody>
         </table>
 
-        <div className="flex justify-center mt-4">
+        {/* <div className="flex justify-center mt-4">
           <button
             type="submit"
             disabled={isFocused}
@@ -340,6 +342,26 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
             }`}
           >
             {isFocused ? "Updating..." : "Update Vehicle"}
+          </button>
+        </div> */}
+
+        <div className="flex justify-center space-x-4 mt-4">
+          <button
+            type="submit"
+            disabled={isFocused}
+            className={`px-6 py-2 bg-blue-600 text-white rounded-md ${
+              isFocused ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
+          >
+            {isFocused ? "Updating..." : "Update Vehicle"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onClose} // use your onClose prop callback
+            className="px-6 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
+          >
+            Cancel
           </button>
         </div>
       </form>

@@ -1,8 +1,8 @@
-const {DataTypes} = require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const bcrypt = require('bcrypt');
 
-const User = sequelize.define('User', {
+const User = sequelize.define('user', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -24,10 +24,10 @@ const User = sequelize.define('User', {
     allowNull: false,
   },
 
-    email: {
+  email: {
     type: DataTypes.STRING,
     allowNull: false,
-    },
+  },
 
   password: {
     type: DataTypes.STRING,
@@ -38,9 +38,9 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-        model: "Role",
-        key: "id",
-      },
+      model: "Role",
+      key: "id",
+    },
   },
   isActive: {
     type: DataTypes.BOOLEAN,

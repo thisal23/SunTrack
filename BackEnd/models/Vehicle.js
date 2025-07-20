@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
 const Vehicle = sequelize.define(
-  "Vehicle",
+  "vehicle",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -10,24 +10,24 @@ const Vehicle = sequelize.define(
       primaryKey: true,
     },
     plateNo: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
     brandId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "VehicleBrands",
+        model: "vehiclebrand",
         key: "id",
       },
     },
-    modelId:{
+    modelId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references:{
+      references: {
         model: "VehicleModels",
-        key:"id",
+        key: "id",
       },
     },
     vehicleType: {
@@ -52,11 +52,11 @@ const Vehicle = sequelize.define(
       allowNull: false,
       unique: true,
     },
-    status:{
+    status: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    color:{
+    color: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -64,7 +64,7 @@ const Vehicle = sequelize.define(
       // image url saving
       type: DataTypes.STRING(500),
       allowNull: true,
-    },  
+    },
   },
   { timestamps: true }
 );

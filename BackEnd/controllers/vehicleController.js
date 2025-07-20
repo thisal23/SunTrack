@@ -409,30 +409,55 @@ const fetchVehicleById = async (req, res) => {
 
 
 
-
-// Delete vehicle details
 const deleteVehicleData = async (req, res) => {
   try {
     const { plateNo } = req.params;
 
-    const data = await Vehicle.findOne({where: {plateNo}});
+    // Find the vehicle
+    const vehicle = await Vehicle.findOne({ where: { plateNo } });
 
-    if (!data) {
-      return res.status(404).json({ status: true, message: "Vehicle data not found" });
+    if (!vehicle) {
+      return res.status(404).json({ status: false, message: "Vehicle data not found" });
     }
 
-    await data.destroy();
+    // Find all GPS devices linked to this vehicle
+    const gpsDevices = await gpsDevice.findAll({ where: { plateNo } });
+
+    for (const device of gpsDevices) {
+      // Delete all GPS data related to this device
+      // Since gpsdatas has composite PK (deviceId, recDate, recTime), we must delete all rows by deviceId
+      // We can delete all rows for this deviceId without specifying recDate and recTime (bulk delete)
+      await sequelize.query(
+  'DELETE FROM gpsdatas WHERE deviceId = :deviceId',
+  {
+    replacements: { deviceId: device.deviceId },
+    type: sequelize.QueryTypes.DELETE
+  }
+);
+
+
+      // Delete the GPS device itself
+      await device.destroy();
+    }
+
+    // Delete the vehicle
+    await vehicle.destroy();
 
     res.status(200).json({
       status: true,
-      message: "Vehicle data deleted successfully",
+      message: "Vehicle and related GPS data deleted successfully",
     });
   } catch (error) {
-    res
-      .status(400)
-      .json({ status: false, message: error.message, stack: error.stack });
+    res.status(400).json({
+      status: false,
+      message: error.message,
+      stack: error.stack,
+    });
   }
 };
+
+module.exports = { deleteVehicleData };
+
 
 
 

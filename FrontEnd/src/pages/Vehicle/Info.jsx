@@ -12,20 +12,24 @@ import NavBar from "../../components/NavBar/NavBar";
 import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { formatTimeToHoursMinutes } from "../../utils/timeFormatter";
 
 const Info = () => {
   const tableRef = useRef(null);
   const roots = new Map();
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const fetchVehicleInfo = async () => {
     try {
+      setLoading(true); // Set loading to true when fetching starts
       const data = await apiService
         .get("vehicleInfo/all")
         .catch((err) => console.log(`api error`, err));
 
       if (data?.status !== 200) {
         toast.error("Vehicle Info fetching error!!!");
+        setLoading(false);
         return;
       }
 
@@ -33,6 +37,8 @@ const Info = () => {
       setData(data.data.data || []);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false); // Set loading to false when fetching ends
     }
   };
 
@@ -57,7 +63,7 @@ const Info = () => {
       lastLocation: item?.lastLocation || "N/A",
       tripLocation: item?.tripLocation || "N/A",
       lastUpdate: `${item?.gpsDevice?.gpsData?.recDate || "N/A"} | ${
-        item?.gpsDevice?.gpsData?.recTime || "N/A"
+        formatTimeToHoursMinutes(item?.gpsDevice?.gpsData?.recTime) || "N/A"
       }`,
       acc: item?.gpsDevice?.gpsData?.acc || "N/A",
       speed: item?.gpsDevice?.gpsData?.speed || "N/A",
@@ -75,7 +81,7 @@ const Info = () => {
         {
           title: "Direction",
           data: "direction",
-          defaultContent: "N/A",
+          defaultContent: "-",
           render: function (data, type, row, meta) {
             return `<span class="assign_data" id="icon-${meta.row}" data-type="${data}"></span>`;
           },
@@ -96,24 +102,24 @@ const Info = () => {
           defaultContent: "N/A",
         },
         {
-          title: "Last Updated Date/Time",
+          title: "Last Updated Date|Time",
           data: "lastUpdate",
-          defaultContent: "N/A",
+          defaultContent: "-",
         },
         {
           title: "Vehicle Status",
           data: "acc",
-          defaultContent: "N/A",
+          defaultContent: "-",
         },
         {
           title: "Speed",
           data: "speed",
-          defaultContent: "N/A",
+          defaultContent: "-",
         },
         {
           title: "Ignition Status",
           data: "door",
-          defaultContent: "N/A",
+          defaultContent: "-",
         },
       ],
       createdRow: function (row, data, dataIndex) {
@@ -240,11 +246,15 @@ const Info = () => {
         </div>
         <div className="border-b-1 border-[#000] w-full mb-5"></div>
         <div className="text-black flex flex-row w-full mx-auto custom_table justify-center">
-          <table
-            ref={tableRef}
-            className="display justify-center"
-            style={{ width: "100%" }}
-          ></table>
+          {loading ? (
+            <div className="text-center w-full py-10 text-lg font-semibold text-blue-600">Info is loading...</div>
+          ) : (
+            <table
+              ref={tableRef}
+              className="display justify-center"
+              style={{ width: "100%" }}
+            ></table>
+          )}
         </div>
       </div>
     </>

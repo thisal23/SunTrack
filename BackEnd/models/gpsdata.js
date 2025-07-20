@@ -52,7 +52,7 @@ const gpsdata = sequelize.define('gpsdata', {
         type: DataTypes.STRING,
         allowNull: true
     }
-}, {tableName: 'gpsdatas', timestamps: false, createdAt: false,
+}, {tableName: 'gpsdatas', timestamps: false, createdAt: false, id: false,
   updatedAt: false, indexes: [
     {
       unique: true,

@@ -67,18 +67,18 @@ const ServiceMaintenance = () => {
       const grouped = {};
 
       fetchedData.forEach((entry) => {
-        const vehicleId = entry.Vehicle.id;
+        const vehicleId = entry.vehicle.id;
 
         if (!grouped[vehicleId]) {
           grouped[vehicleId] = [];
         }
 
         grouped[vehicleId].push({
-          serviceType: entry.Service.serviceType,
+          serviceType: entry.service.serviceType,
           remark: entry.serviceRemark,
           updatedAt: entry.updatedAt,
           addedBy: entry.User.firstName + " " + entry.User.lastName,
-          serviceId: entry.Service.id,
+          serviceId: entry.service.id,
         });
       });
 

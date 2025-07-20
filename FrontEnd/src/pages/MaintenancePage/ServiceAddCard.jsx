@@ -55,13 +55,20 @@ const ServiceAddCard = ({ vehicleId, handleCancel, onUpdateSuccess }) => {
       const data = new FormData();
       data.append("serviceType", formDataToSend.service_type);
       data.append("remark", formDataToSend.remark);
-      data.append("addedBy", formDataToSend.added_by);
+      if (formDataToSend.added_by) {
+        data.append("addedBy", formDataToSend.added_by);
+      }
+      data.append("vehicleId", vehicleId);
+
+      for (let pair of data.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
 
       const response = await apiService.post(`/service/create`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      if (response.status === 200 && response.data.status) {
+      if ((response.status === 200 || response.status === 201) && response.data.status) {
         setStatusMessage(response.data.message);
         setIsSuccess(true);
         setTimeout(() => {

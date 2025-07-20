@@ -17,7 +17,13 @@ const Dashboard = () => {
   const [fetchVehicleCount, setFetchVehicleCount] = useState({
     total: 0,
     available: 0,
-    outofservice: 0,
+    outOfService: 0,
+  });
+
+  const [fetchDriverCount, setFetchDriverCount] = useState({
+    total: 0,
+    active: 0,
+    outOfService: 0,
   });
 
   const [pendingTrips, setPendingTrips] = useState([]);
@@ -63,10 +69,25 @@ const Dashboard = () => {
       setFetchVehicleCount({
         total: data.total,
         available: data.available,
-        outofservice: data.outofservice,
+        outOfService: data.outOfService,
       });
     } catch (error) {
       console.error("Error fetchinf vehicle counts:", error);
+    }
+  };
+
+  const fetchDriverCounts = async () => {
+    try {
+      const response = await apiService.get("users/driver-count");
+      console.log(response);
+      const data = response.data;
+      setFetchDriverCount({
+        total: data.total,
+        active: data.active,
+        outOfService: data.outOfService,
+      });
+    } catch (error) {
+      console.error("Error fetching driver counts:", error);
     }
   };
 
@@ -74,6 +95,7 @@ const Dashboard = () => {
     fetchTripCounts();
     fetchVehicleCounts();
     fetchPendingTrips();
+    fetchDriverCounts();
   }, []);
 
   return (
@@ -87,16 +109,16 @@ const Dashboard = () => {
           count_name_3="Out of Service"
           count_1={fetchVehicleCount.total}
           count_2={fetchVehicleCount.available}
-          count_3={fetchVehicleCount.outofservice}
+          count_3={fetchVehicleCount.outOfService}
         />
         <InfoCard
           CardName="Drivers"
           count_name_1="Total"
           count_name_2="Available"
           count_name_3="Out of Service"
-          count_1="100"
-          count_2="20"
-          count_3="13"
+          count_1={fetchDriverCount.total}
+          count_2={fetchDriverCount.active}
+          count_3={fetchDriverCount.outOfService}
         />
         <InfoCard
           CardName="Trips"

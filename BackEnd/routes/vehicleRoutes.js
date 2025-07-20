@@ -49,7 +49,7 @@ router.put(
 );
 router.get("/vehicle/all", fetchVehicle);
 router.get("/vehicle/details/:id", fetchVehicleById);
-router.delete("/vehicle/remove/:id", deleteVehicleData);
+router.delete("/vehicle/remove/:plateNo", deleteVehicleData);
 router.get("/vehicle/count",fetchVehicleCount);
 
 //vehicleInfo routes
