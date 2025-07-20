@@ -1,47 +1,136 @@
 .search-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  .date-label {
-    font-size: 16px;
-    font-weight: bold;
-    position: relative;
-    left: 10px;
-  }
-  
-  .custom-datepicker {
-    width: 150px;
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  .vehicle-input {
-    width: 144px;
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    height: 30px;
-    position: relative;
-    left: 50px;
-  }
-  
-  .search-button2 {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    color:#0F2043;
-    position: relative;
-    left: 6px; 
-  }
-  
-  .search-button:hover {
-    color: #007bff; /* Change color on hover */
-  }
-  
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.date-label1 {
+  font-size: 16px;
+  font-weight: bold;
+  position: relative;
+  display: flex;
+  white-space: nowrap;
+  right: 0px;
+}
+
+.custom-datepicker {
+  width: 150px;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.vehicle-input {
+  width: 144px;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 30px;
+  position: relative;
+  left: 5px;
+}
+
+.search-button2 {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color:#0F2043;
+  position: relative;
+  left: 6px; 
+  bottom: 5px;
+}
+
+
+
+.boxReport{
+  width: 1200px;
+  height: 860px;
+  display: flex;
+  flex-direction: column;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  background-color: #d7e1f4;
+  justify-content: center;
+  align-items: center;
+  margin-top: 80px; 
+
+}
+
+.bodyReport{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  place-content: center;
+  height: 100%; 
+  width: 100%;
+}
+
+
+Distance.css
+.search-container3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.search-label3 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #0F2043;
+  margin-left: 15px;
+  white-space: nowrap;
+}
+
+.vehicle-input3 {
+  width: 140px;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 30px;
+}
+
+.search-button3 {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #0F2043;
+  position: relative;
+  right: 48px;
+  top: 5px;
+}
+
+.search-button3:hover {
+  color: #007bff; /* Change color on hover */
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+}
+.boxReport{
+  width: 1200px;
+  height: 860px;
+  display: flex;
+  flex-direction: column;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  background-color: #d7e1f4;
+  justify-content: center;
+  align-items: center;
+  margin-top: 80px; 
+
+}
+
+.no-data-message2 {
+  text-align: center;
+  color: #0F2043;
+  font-size: 16px;
+  margin-top: 20px;
+}

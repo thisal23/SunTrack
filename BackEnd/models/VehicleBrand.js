@@ -1,22 +1,19 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
-const VehicleBrand = sequelize.define("VehicleBrand", {
-    id:{
+const VehicleBrand = sequelize.define("vehiclebrand", {
+    id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    title:{
+    brand: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     }
-},{
-  tableName: 'vehiclebrands',
-  timestamps: true
-});
+
+}, { timestamps: true });
+
 
 module.exports = VehicleBrand;
-
-// Create - Done, Read - Done, Update, Delete

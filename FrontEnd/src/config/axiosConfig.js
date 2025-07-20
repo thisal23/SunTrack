@@ -1,7 +1,7 @@
 import axios from "axios";
 import { config } from "./config";
 
-const API_BASE_URL = config.apiEndpoint || "http://127.0.0.1:8000/api/";
+const API_BASE_URL = config.apiEndpoint ||"http://localhost:8000/api/";
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -1,45 +1,52 @@
-const {DataTypes} = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
-const ServiceInfo = sequelize.define("serviceInfo",{
-    id:{
-        type:DataTypes.INTEGER,
-        autoIncrement:true,
-        primaryKey:true
+
+const ServiceInfo = sequelize.define("serviceinfo", {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+
     },
-    serviceId:{
-        type:DataTypes.INTEGER,
+    serviceId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        references:{
-            model:"services",
-            key:"id"
+
+        references: {
+            model: "service",
+            key: "id"
+
         }
     },
-    vehicleId:{
+    vehicleId: {
         type: DataTypes.INTEGER,
-        allowNull:false,
-        references:{
-            model:"vehicles",
-            key:"id"
+
+        allowNull: false,
+        references: {
+            model: "Vehicles",
+            key: "id"
+
         }
     },
-    userId:{
+    userId: {
         type: DataTypes.INTEGER,
-        allowNull:false,
-        references:{
-            model:"users",
-            key:"id"
+
+        allowNull: true,
+        references: {
+            model: "Users",
+            key: "id"
+
         }
     },
-    serviceRemark:{
+    serviceRemark: {
         type: DataTypes.STRING,
-        allowNull:true
+        allowNull: true
     }
 
-},{
-  tableName: 'serviceinfos',
-  timestamps: true
-})
+
+}, { timestamps: true })
+
 
 module.exports = ServiceInfo;
 
