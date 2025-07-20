@@ -37,8 +37,11 @@ const User = sequelize.define('user', {
   roleId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references: {
+      model: "Role",
+      key: "id",
+    },
   },
-
   isActive: {
     type: DataTypes.BOOLEAN,
     allowNull: false,

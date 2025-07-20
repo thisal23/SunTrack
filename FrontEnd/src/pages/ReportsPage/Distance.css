@@ -21,23 +21,30 @@
     height: 30px;
   }
   
-  .search-button3 {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    color: #0F2043;
-    position: relative;
-    right: 48px;
-    top: 5px;
-  }
   
-  .search-button3:hover {
-    color: #007bff; /* Change color on hover */
-  }
+  
+ 
   
   .search-icon {
     width: 20px;
     height: 20px;
   }
   
+
+  .year-month-container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .year-select,
+  .month-select {
+    padding: 5px;
+    font-size: 14px;
+  }
+  
+  .year-label,
+  .month-label {
+    font-weight: bold;
+  }

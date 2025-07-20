@@ -8,7 +8,7 @@ const validateVehicleFields = (req, res, next) => {
     color,
     licenseId,
     licenseExpireDate,
-    licenceLastUpdate,
+    licenseLastUpdate,
     insuranceNo,
     insuranceExpireDate,
     insuranceLastUpdate,
@@ -31,7 +31,7 @@ const validateVehicleFields = (req, res, next) => {
       message: "License expired date is required!",
     },
     {
-      field: licenceLastUpdate,
+      field: licenseLastUpdate,
       message: "License last update date is required!",
     },
     { field: insuranceNo, message: "Insurance no is required!" },

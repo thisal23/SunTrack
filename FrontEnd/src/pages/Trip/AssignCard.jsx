@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 
-// Sachini part
-const AssignCard = ({ tripId }) => {
+const AssignCard = ({ tripId, onClose, onSuccess }) => {
   const [vehicleData, setVehicleData] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [driverData, setDriverData] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState("");
 
+  //Fetch vehicle data
   const fetchVehicleData = async () => {
     try {
-      const data = await apiService.get("vehicle/vehicle/all");
+      const data = await apiService.get(`/trip/${tripId}/available-vehicles`);
 
       if (data.status !== 200) {
         toast.error("Trip data fetching error!!!");
@@ -23,9 +23,10 @@ const AssignCard = ({ tripId }) => {
     }
   };
 
-  const fetchDriver = async () => {
+  //fetch driver data
+  const fetchDriver = async (vehicleId) => {
     try {
-      const data = await apiService.get(`trip/trip/driver/${selectedVehicle}`);
+      const data = await apiService.get(`trip/${tripId}/available-drivers`);
 
       if (data.status !== 200) {
         toast.error("Driver data fetching error!!!");
@@ -40,34 +41,30 @@ const AssignCard = ({ tripId }) => {
   };
 
   const handleVehicleChange = (id) => {
-    setSelectedVehicle(id);
-
-    if (id) {
-      fetchDriver();
-    }
+    const numericId = parseInt(id, 10);
+    setSelectedVehicle(numericId);
+    if (numericId) fetchDriver(numericId);
   };
 
   const handleAssign = async () => {
     try {
-      const vehicle = await apiService.put(
-        `trip/trip/assign_vehicle/${tripId}`,
-        { vehicleId: selectedVehicle }
-      );
-      const driver = await apiService.put(`trip/trip/assign_driver/${tripId}`, {
+      const vehicle = await apiService.post(`trip/${tripId}/assign-vehicle`, {
+        vehicleId: selectedVehicle,
+      });
+      const driver = await apiService.post(`trip/${tripId}/assign-driver`, {
         driverId: selectedDriver,
       });
 
-      console.log(vehicle);
-      console.log(driver);
-
-      if (vehicle.status !== 200 || driver.status !== 200) {
+      if (vehicle.status === 200 && driver.status === 200) {
+        toast.success("Driver & Vehicle assigned successfully");
+        if (onSuccess) onSuccess();
+        if (onClose) onClose();
+      } else {
         toast.error("Something went wrong");
       }
-
-      toast.success("Driver/Vehicle assigned successfully");
-      fetchVehicleData();
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      toast.error("Failed to assign driver or vehicle");
     }
   };
 
@@ -88,19 +85,22 @@ const AssignCard = ({ tripId }) => {
             <td className=" px-4 py-2 font-bold">Select Vehicle</td>
             <td className=" text-right px-4 py-2">
               <select
-                name="assign_driver"
-                id="assign_driver"
-                onChange={(e) => handleVehicleChange(e.target.value)}
+                name="assign_vehicle"
+                id="assign_vehicle"
+                onChange={(e) =>
+                  handleVehicleChange(parseInt(e.target.value), 10)
+                }
                 className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
               >
-                <option value="" disabled selected>
+                <option value="" disabled>
                   --select vehicle--
                 </option>
                 {Array.isArray(vehicleData) &&
                   vehicleData.map((item, index) => {
                     return (
                       <option value={item.id} key={index}>
-                        {item.vehicleTitle} {item.model} | {item.vehicleTypeTwo}
+                        {item.vehicleBrand?.brand} {item.vehicleModel?.model} |{" "}
+                        {item.category}
                       </option>
                     );
                   })}
@@ -113,18 +113,21 @@ const AssignCard = ({ tripId }) => {
               <select
                 name="assign_driver"
                 id="assign_driver"
-                onChange={(e) => setSelectedDriver(e.target.value)}
+                onChange={(e) =>
+                  setSelectedDriver(parseInt(e.target.value), 10)
+                }
                 className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700"
                 disabled={selectedVehicle === "" ? true : false}
               >
-                <option value="" disabled selected>
+                <option value="" disabled>
                   --select driver--
                 </option>
                 {Array.isArray(driverData) &&
                   driverData.map((item, index) => {
                     return (
-                      <option value={item.User.id} key={index}>
-                        {item.User.firstName} {item.User.lastName}
+                      <option value={item.id} key={index}>
+                        {item.user.firstName} {item.user.lastName} |{" "}
+                        {item.licenseType}
                       </option>
                     );
                   })}
@@ -138,7 +141,12 @@ const AssignCard = ({ tripId }) => {
             <button
               type="button"
               onClick={handleAssign}
-              className="px-2 mt-5 cursor-pointer w-full  py-2 bg-amber-400 hover:bg-amber-600 text-white rounded-full mx-auto text-center"
+              disabled={!selectedVehicle || !selectedDriver}
+              className={`px-2 mt-5 cursor-pointer w-full py-2 ${
+                selectedVehicle && selectedDriver
+                  ? "bg-amber-400 hover:bg-amber-600"
+                  : "bg-gray-400 cursor-not-allowed"
+              } text-white rounded-full mx-auto text-center`}
             >
               Assign & Update
             </button>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import CreatePassword from './components/authentication/CreatePassword';
@@ -22,6 +23,7 @@ function App() {
             {/* Add other routes here */}
         </Routes>
     );
+
 }
 
 export default App;

@@ -1,7 +1,9 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
+
 const PasswordReset = sequelize.define('passwordreset', {
+
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -11,7 +13,9 @@ const PasswordReset = sequelize.define('passwordreset', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
+
       model: 'users', // Table name (case-sensitive)
+
       key: 'id',
     },
     onDelete: 'CASCADE',
@@ -26,8 +30,10 @@ const PasswordReset = sequelize.define('passwordreset', {
     allowNull: false,
   },
 }, {
+
   tableName: 'password_resets',
   timestamps: true, // createdAt and updatedAt will be handled automatically
 });
 
 module.exports = PasswordReset;
+
