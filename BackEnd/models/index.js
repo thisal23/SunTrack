@@ -1,6 +1,6 @@
 const User = require('./User');
 const Role = require('./Role');
-const DriverDetails = require('./DriverDetails'); // Updated to match DriverDetails.js
+const DriverDetails = require('./driverDetails'); // Updated to match DriverDetails.js
 const PasswordReset = require('./PasswordReset');
 
 // Sachini work imports
