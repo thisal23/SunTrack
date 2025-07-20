@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/db');
 
-const DriverDetails = sequelize.define('driverdetails', {
+const DriverDetails = sequelize.define('driverdetail', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,

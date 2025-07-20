@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const connectDB = require('../config/db'); // Assuming you have a database connection file
-const { User, Role, UserDetail, sequelize } = require('../models');
+const { User, Role, DriverDetails, sequelize } = require('../models');
 const liveTrackingRoutes = require('../routes/liveTrackingRoutes');
 const geoRoutes = require('../routes/geoRoutes');
 const geoFenceEventRoutes = require('../routes/geoFenceEventRoutes');
