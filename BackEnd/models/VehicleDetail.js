@@ -13,7 +13,7 @@ const VehicleDetail = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Vehicles",
+        model: "vehicles",
         key: "id",
       },
     },

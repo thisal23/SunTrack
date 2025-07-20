@@ -1,7 +1,7 @@
 const {DataTypes} = require("sequelize");
 const sequelize = require("../config/db");
 
-const ServiceInfo = sequelize.define("ServiceInfo",{
+const ServiceInfo = sequelize.define("serviceInfo",{
     id:{
         type:DataTypes.INTEGER,
         autoIncrement:true,
@@ -11,7 +11,7 @@ const ServiceInfo = sequelize.define("ServiceInfo",{
         type:DataTypes.INTEGER,
         allowNull: false,
         references:{
-            model:"Services",
+            model:"services",
             key:"id"
         }
     },
@@ -19,7 +19,7 @@ const ServiceInfo = sequelize.define("ServiceInfo",{
         type: DataTypes.INTEGER,
         allowNull:false,
         references:{
-            model:"Vehicles",
+            model:"vehicles",
             key:"id"
         }
     },
@@ -27,7 +27,7 @@ const ServiceInfo = sequelize.define("ServiceInfo",{
         type: DataTypes.INTEGER,
         allowNull:false,
         references:{
-            model:"Users",
+            model:"users",
             key:"id"
         }
     },

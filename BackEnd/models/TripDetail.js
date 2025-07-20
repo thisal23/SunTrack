@@ -19,7 +19,7 @@ const TripDetail = sequelize.define("TripDetail",{
         type: DataTypes.INTEGER,
         allowNull: false,
         references:{
-            model:"Trips",
+            model:"trips",
             key:"id"
         }
     },
