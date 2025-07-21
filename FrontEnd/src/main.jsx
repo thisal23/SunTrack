@@ -3,11 +3,9 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App.jsx";
-import InfoPage from "./pages/InfoPage/InfoPage.jsx";
 import Dashboard from "./pages/Dashboard/Dashboard.jsx";
 import TrackingPage from "./pages/TrackingPage/TrackingPage.jsx";
 import ReportsPage from "./pages/ReportsPage/ReportsPage.jsx";
-import MaintenancePage from "./pages/MaintenancePage/MaintenancePage.jsx";
 import HistoryPage from "./pages/TrackingPage/HistoryPage.jsx";
 import GeoFencePage from "./pages/TrackingPage/GeoFencePage.jsx";
 import Idle from "./pages/ReportsPage/Idle.jsx";
@@ -20,9 +18,12 @@ import AddNewVehicle from "./pages/Vehicle/AddNewVehicle.jsx";
 import AllVehicle from "./pages/Vehicle/AllVehicle.jsx";
 import "./App.css";
 import Login from "./components/authentication/Login.jsx";
-import ResetPassword from "./components/authentication/resetPassword.jsx";
+import ResetPassword from "./components/authentication/ResetPassword.jsx";
 import CreatePassword from "./components/authentication/CreatePassword.jsx";
-
+import Register from "./components/authentication/Register.jsx";
+import DocumentMaintenance from "./pages/MaintenancePage/DocumentMaintenance.jsx";
+import ServiceMaintenance from "./pages/MaintenancePage/ServiceMaintenance.jsx";
+import AddNew from "./pages/Trip/AddNew.jsx";
 
 const router = createBrowserRouter([
   {
@@ -31,30 +32,28 @@ const router = createBrowserRouter([
   },
 
   {
+    path: "/register",
+    element: <Register />,
+  },
+  {
     path: "/login",
     element: <Login/>,
   },
 
-  {
-    path: "/login",
-    element: <Login/>,
-  },
-  {
-    path: "/forgot-password",
-    element: <ResetPassword/>,
+
+ {
+    path: "/reset-password",
+
+    element: <ResetPassword />,
   },
   {
     path: "/create-password",
-    element: <CreatePassword/>,
+    element: <CreatePassword />,
   },
 
   {
     path: "/dashboard",
     element: <Dashboard />,
-  },
-  {
-    path: "/info",
-    element: <InfoPage />,
   },
   {
     path: "/tracking",
@@ -64,11 +63,6 @@ const router = createBrowserRouter([
     path: "/reports",
     element: <ReportsPage />,
   },
-  {
-    path: "/maintenance",
-    element: <MaintenancePage />,
-  },
-
   {
     path: "/history",
     element: <HistoryPage />,
@@ -108,6 +102,18 @@ const router = createBrowserRouter([
   {
     path: "/vehicle/all",
     element: <AllVehicle />,
+  },
+  {
+    path: "/maintenance/document-maintenance",
+    element: <DocumentMaintenance />,
+  },
+  {
+    path: "/maintenance/service-maintenance",
+    element: <ServiceMaintenance />,
+  },
+  {
+    path: "/trip/addNew",
+    element: <AddNew />,
   },
 ]);
 

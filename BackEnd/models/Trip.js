@@ -1,45 +1,47 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
-const Trip = sequelize.define("Trip",{
-    id:{
-        type:DataTypes.INTEGER,
-        autoIncrement:true,
-        primaryKey:true
+
+const Trip = sequelize.define("trip", {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
     },
-    startLocation:{
-        type:DataTypes.STRING,
-        allowNull:false
+    startLocation: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    endLocation:{
-        type:DataTypes.STRING,
-        allowNull:false
+    endLocation: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    date:{
-        type:DataTypes.DATE,
-        allowNull:false
+    date: {
+        type: DataTypes.DATE,
+        allowNull: false
     },
-    suggestStartTime:{
-        type:DataTypes.TIME,
-        allowNull:false
+    suggestStartTime: {
+        type: DataTypes.TIME,
+        allowNull: false
     },
-    suggestEndTime:{
-        type:DataTypes.TIME,
-        allowNull:false
+    suggestEndTime: {
+        type: DataTypes.TIME,
+        allowNull: true
     },
-    status:{
-        type:DataTypes.STRING,
-        allowNull:false
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    driverStartTime:{
-        type:DataTypes.TIME,
-        allowNull:true
+    driverStartTime: {
+        type: DataTypes.TIME,
+        allowNull: true
     },
-    driverEndTime:{
-        type:DataTypes.TIME,
-        allowNull:true
+    driverEndTime: {
+        type: DataTypes.TIME,
+        allowNull: true
     }
-},{timestamps:true})
+}, { timestamps: true })
+
 
 module.exports = Trip;
 

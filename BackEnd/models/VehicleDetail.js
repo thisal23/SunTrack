@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
 const VehicleDetail = sequelize.define(
-  "VehicleDetail",
+  "vehicledetail",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,71 +13,69 @@ const VehicleDetail = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Vehicles",
+
+        model: "vehicle",
+
         key: "id",
       },
-    },
-    color: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     licenseId: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
-    licenseExpireDate: {
-      type: DataTypes.DATE,
+    licenseLastUpdate: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    insuranceType: {
-      type: DataTypes.STRING, // Full Insurance - Third Party
+    licenseExpireDate: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
+    },
+    licenseDocument: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
     },
     insuranceNo: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
-    insuranceExpireDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    chassieNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    fuelType: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    registerYear: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    licenceLastUpdate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
     insuranceLastUpdate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    licenceDocument: {
-      type: DataTypes.STRING(500),
-      allowNull: true,
+    insuranceExpireDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    insuranceType: {
+      type: DataTypes.STRING, // Full Insurance, Third Party
+      allowNull: false,
     },
     insuranceDocument: {
       type: DataTypes.STRING(500),
       allowNull: true,
+    },
+    ecoId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    ecoLastUpdate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    ecoExpireDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
     },
     ecoDocument: {
       type: DataTypes.STRING(500),
       allowNull: true,
     },
   },
-  { timestamps: true }
+  { tableName: 'vehicledetails', timestamps: true }
 );
 
 module.exports = VehicleDetail;

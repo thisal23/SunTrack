@@ -1,43 +1,52 @@
-const { Op } = require("sequelize");
+const { Op, sequelize} = require("sequelize");
 const {
   Vehicle,
   VehicleDetail,
-  VehicleInfo,
   VehicleBrand,
   VehicleModel,
+  gpsdata,
+  gpsDevice,
+  TripDetail,
+  Trip
 } = require("../models");
-
-// 200 - success, 201 - created, 400 -bad request, 404 - not found, 500 - internal server error
-// 401 - unauthorized, 403 - forbidden/deny access/Not granted
 
 // Creating new vehicle brands
 const createBrand = async (req, res) => {
-  const { title } = req.body;
+  const { brand } = req.body;
 
-  if (!title) {
+  if (!brand) {
     return res
       .status(400)
-      .json({ status: false, message: "Brand title is required! (*)" });
+      .json({ status: false, message: "Brand title is required!" });
   }
 
   try {
-    const brand = await VehicleBrand.create({ title });
+    const createdBrand = await VehicleBrand.create({ brand });
 
-    // CREATE INTO table_name (title) VALUES (title)
-
-    if (!brand) {
-      res
-        .status(400)
-        .json({ status: false, message: "New brand creation failed!!" });
+    if (createdBrand) {
+      return res.status(201).json({
+        status: true,
+        message: "New brand creation success",
+        data: createdBrand,
+      });
+    } else {
+      return res.status(400).json({
+        status: false,
+        message: "Brand creation failed!",
+      });
+    }
+  } catch (error) {
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({
+        status: false,
+        message: "Brand already exists",
+      });
     }
 
-    res.status(201).json({
-      status: true,
-      message: "New brand creation success",
-      data: brand,
-    });
-  } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    console.error("Error creating brand:", error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Internal server error" });
   }
 };
 
@@ -45,8 +54,6 @@ const createBrand = async (req, res) => {
 const fetchBrands = async (req, res) => {
   try {
     const brands = await VehicleBrand.findAll();
-
-    // SELECT * FROM VehicleBrands
 
     if (!brands) {
       res.status(404).json({ status: false, message: "No brands found" });
@@ -126,195 +133,321 @@ const deleteBrands = async (req, res) => {
 // Creating new vehicle
 const createVehicle = async (req, res) => {
   const {
-    vehicleType,
-    vehicleTypeTwo,
-    vehicleTitle,
-    model,
-    color,
-    licenseId,
-    licenseExpireDate,
-    chassieNumber,
-    fuelType,
-    registerYear,
-    licenceLastUpdate,
-    insuranceType,
-    insuranceNo,
-    insuranceExpireDate,
-    insuranceLastUpdate,
+    plateNo,
     brandId,
+    modelId,
+    vehicleType,
+    category,
+    fuelType,
+    registeredYear,
+    chassieNo,
+    status,
+    color,
+
+    licenseId,
+    licenseLastUpdate,
+    licenseExpireDate,
+
+    insuranceNo,
+    insuranceLastUpdate,
+    insuranceExpireDate,
+    insuranceType,
+
+    ecoId,
+    ecoLastUpdate,
+    ecoExpireDate,
+
+    deviceId,
+    countrycode,
+    pnumber,
   } = req.body;
 
   if (
-    !req.files["licenceDocument"] ||
+    !req.files["image"] ||
+    !req.files["licenseDocument"] ||
     !req.files["insuranceDocument"] ||
     !req.files["ecoDocument"]
   ) {
-    return res
-      .status(400)
-      .json({ status: false, message: "Image and document are required" });
+    return res.status(400).json({ status: false, message: "Required documents missing" });
   }
 
   const sequelize = Vehicle.sequelize;
   const transaction = await sequelize.transaction();
-  // creating data to table
-  // `/uploads/${req.files["vehicleImage"][0].filename}`
-  // `/uploads/${req.files["licenseDocument"][0].filename}`
 
   try {
+    // Create Vehicle
     const vehicle = await Vehicle.create({
-      vehicleType,
-      vehicleTypeTwo,
-      vehicleTitle,
-      model,
-      image: null,
+      plateNo,
       brandId,
-    });
+      modelId,
+      vehicleType,
+      category,
+      fuelType,
+      registeredYear,
+      chassieNo,
+      status,
+      color,
+      image: `/uploads/${req.files["image"][0].filename}`,
+    }, { transaction });
 
+    // Create Vehicle Details
     const vehicleDetail = await VehicleDetail.create({
       vehicleId: vehicle.id,
-      color: color,
-      licenseId: licenseId,
-      licenseExpireDate: licenseExpireDate,
-      insuranceType: insuranceType,
-      insuranceNo: insuranceNo,
-      insuranceExpireDate: insuranceExpireDate,
-      chassieNumber: chassieNumber,
-      fuelType: fuelType,
-      registerYear: registerYear,
-      licenceLastUpdate: licenceLastUpdate,
-      insuranceLastUpdate: insuranceLastUpdate,
-      licenceDocument: `/uploads/${req.files["licenceDocument"][0].filename}`,
+      licenseId,
+      licenseLastUpdate,
+      licenseExpireDate,
+      licenseDocument: `/uploads/${req.files["licenseDocument"][0].filename}`,
+      insuranceNo,
+      insuranceLastUpdate,
+      insuranceExpireDate,
+      insuranceType,
       insuranceDocument: `/uploads/${req.files["insuranceDocument"][0].filename}`,
+      ecoId,
+      ecoLastUpdate,
+      ecoExpireDate,
       ecoDocument: `/uploads/${req.files["ecoDocument"][0].filename}`,
-    });
+    }, { transaction });
 
-    // const vehicleInfo = await VehicleInfo.create({ vehicleId: vehicle.id, licenceLastUpdate, insuranceLastUpdate });
+    // Create GPS Device info
+    const gpsDeviceData = await gpsDevice.create({
+      deviceId,
+      plateNo,        // Should match vehicle plateNo
+      countrycode,
+      pnumber,
+    }, { transaction });
 
-    let array = [vehicle, vehicleDetail];
-
-    if (!vehicle) {
-      res.status(500).json({ status: false, message: "Something went wrong" });
-    }
-
-    await transaction.commit();
+    
 
     res.status(201).json({
       status: true,
-      message: "New vehicle added successfully",
-      data: array,
+      message: "Vehicle, details, and GPS device created successfully",
+      data: { vehicle, vehicleDetail, gpsDeviceData },
     });
+    await transaction.commit();
   } catch (error) {
     await transaction.rollback();
-    res
-      .status(400)
-      .json({ status: false, message: error.message, stack: error.stack });
+    res.status(500).json({ status: false, message: error.message, error:error, });
   }
 };
 
-// Udpate exist vehicle
-const updateVehicleById = async (req, res) => {
-  const { id } = req.params; // Get the vehicle ID from the URL params
-  const {
-    vehicleType,
-    vehicleTypeTwo,
-    vehicleTitle,
-    model,
-    color,
-    licenseId,
-    licenseExpireDate,
-    chassieNumber,
-    fuelType,
-    registerYear,
-    licenceLastUpdate,
-    insuranceType,
-    insuranceNo,
-    insuranceExpireDate,
-    insuranceLastUpdate,
-    brandId,
-  } = req.body;
 
-  // Check if required files are exist
-  if (
-    !req.files["vehicleImage"] ||
-    !req.files["licenceDocument"] ||
-    !req.files["insuranceDocument"] ||
-    !req.files["ecoDocument"]
-  ) {
-    return res
-      .status(400)
-      .json({ status: false, message: "Image and document are required" });
-  }
+
+
+const updateVehicleById = async (req, res) => {
+  const { id } = req.params;
+
+  const {
+    plateNo,
+    brandId,
+    modelId,
+    vehicleType,
+    category,
+    fuelType,
+    registeredYear,
+    chassieNo,
+    status,
+    color,
+
+    deviceId,
+    countrycode,
+    pnumber,
+  } = req.body;
 
   const sequelize = Vehicle.sequelize;
   const transaction = await sequelize.transaction();
 
   try {
-    // Find the vehicle by ID
     const vehicle = await Vehicle.findByPk(id, { transaction });
 
     if (!vehicle) {
       await transaction.rollback();
-      return res
-        .status(404)
-        .json({ status: false, message: "Vehicle not found" });
+      return res.status(404).json({ status: false, message: "Vehicle not found" });
     }
 
-    // Update the Vehicle record
     await vehicle.update(
       {
-        vehicleType,
-        vehicleTypeTwo,
-        vehicleTitle,
-        model,
-        image: `/uploads/${req.files["vehicleImage"][0].filename}`,
+        plateNo,
         brandId,
+        modelId,
+        vehicleType,
+        category,
+        fuelType,
+        registeredYear,
+        chassieNo,
+        status,
+        color,
+        ...(req.files["image"] && {
+          image: `/uploads/${req.files["image"][0].filename}`,
+        }),
       },
       { transaction }
     );
 
-    // Find the foriegn VehicleDetail record
-    const vehicleDetail = await VehicleDetail.findOne({
-      where: { vehicleId: id },
+    // Try to fetch GPS device
+    let gpsData = await gpsDevice.findOne({
+      where: { plateNo: plateNo.trim() },
       transaction,
     });
 
-    if (!vehicleDetail) {
-      await transaction.rollback();
-      return res
-        .status(404)
-        .json({ status: false, message: "Vehicle details not found" });
+    if (gpsData) {
+      await gpsData.update(
+        {
+          deviceId,
+          countrycode,
+          pnumber,
+        },
+        { transaction }
+      );
+    } else {
+      // No GPS data found, assign null
+      gpsData = null;
     }
-
-    // Update the VehicleDetail record
-    await vehicleDetail.update(
-      {
-        color,
-        licenseId,
-        licenseExpireDate,
-        insuranceType,
-        insuranceNo,
-        insuranceExpireDate,
-        chassieNumber,
-        fuelType,
-        registerYear,
-        licenceLastUpdate,
-        insuranceLastUpdate,
-        licenceDocument: `/uploads/${req.files["licenceDocument"][0].filename}`,
-        insuranceDocument: `/uploads/${req.files["insuranceDocument"][0].filename}`,
-        ecoDocument: `/uploads/${req.files["ecoDocument"][0].filename}`,
-      },
-      { transaction }
-    );
 
     await transaction.commit();
 
-    res.status(200).json({
+    return res.status(200).json({
       status: true,
-      message: "Vehicle updated successfully",
-      data: { vehicle, vehicleDetail },
+      message: gpsData
+        ? "Vehicle and GPS updated successfully"
+        : "Vehicle updated; GPS device not found",
+      data: { vehicle, gpsData }, // gpsData will be null if not found
     });
   } catch (error) {
     await transaction.rollback();
+    return res.status(400).json({
+      status: false,
+      message: error.message,
+      stack: error.stack,
+    });
+  }
+};
+
+
+
+
+
+// Fetch all vehicles with details
+const fetchVehicle = async (req, res) => {
+  try {
+    const data = await Vehicle.findAll({
+      attributes: [
+        'id', 
+        'plateNo',
+        'brandId', 
+        'vehicleType', 
+        'fuelType', 
+        'category', 
+        'registeredYear', 
+        'chassieNo', 
+        'status', 
+        'color', 
+        'image',
+      ],
+      include: [
+        {
+          model: VehicleModel,
+          as: 'vehicleModel',  // alias must match association
+          attributes: ['model']
+        },
+        {
+          model: VehicleBrand,
+          as: 'vehicleBrand',
+          attributes: ['brand']
+        },
+        {
+          model: VehicleDetail,
+          as: 'vehicleDetail',  // alias must match association
+          attributes: [
+            'licenseId', 'licenseLastUpdate', 'licenseExpireDate', 'licenseDocument',
+            'insuranceNo', 'insuranceLastUpdate', 'insuranceExpireDate',
+            'insuranceType', 'insuranceDocument', 'ecoId', 'ecoLastUpdate', 'ecoExpireDate', 'ecoDocument'
+          ]
+        }
+      ]
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Vehicles data fetched successfully",
+      data
+    });
+  } catch (error) {
+    return res.status(400).json({ status: false, message: error.message });
+  }
+};
+
+
+
+const fetchVehicleById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const vehicle = await Vehicle.findOne({
+      where: { id },
+      include: [
+        {
+          model: gpsDevice,
+          as: "gpsDevice", // must match association alias
+          required: false, // allow null
+        },
+      ],
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({ status: false, message: "Vehicle data not found" });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Vehicle data successfully fetched",
+      data: vehicle,
+    });
+  } catch (error) {
+    res.status(400).json({ status: false, message: error.message, stack: error.stack });
+  }
+};
+
+
+
+const deleteVehicleData = async (req, res) => {
+  try {
+    const { plateNo } = req.params;
+
+    // Find the vehicle
+    const vehicle = await Vehicle.findOne({ where: { plateNo } });
+
+    if (!vehicle) {
+      return res.status(404).json({ status: false, message: "Vehicle data not found" });
+    }
+
+    // Find all GPS devices linked to this vehicle
+    const gpsDevices = await gpsDevice.findAll({ where: { plateNo } });
+
+    for (const device of gpsDevices) {
+      // Delete all GPS data related to this device
+      // Since gpsdatas has composite PK (deviceId, recDate, recTime), we must delete all rows by deviceId
+      // We can delete all rows for this deviceId without specifying recDate and recTime (bulk delete)
+      await sequelize.query(
+  'DELETE FROM gpsdatas WHERE deviceId = :deviceId',
+  {
+    replacements: { deviceId: device.deviceId },
+    type: sequelize.QueryTypes.DELETE
+  }
+);
+
+
+      // Delete the GPS device itself
+      await device.destroy();
+    }
+
+    // Delete the vehicle
+    await vehicle.destroy();
+
+    res.status(200).json({
+      status: true,
+      message: "Vehicle and related GPS data deleted successfully",
+    });
+  } catch (error) {
     res.status(400).json({
       status: false,
       message: error.message,
@@ -323,96 +456,226 @@ const updateVehicleById = async (req, res) => {
   }
 };
 
-// Fetch all vehicles with details
-const fetchVehicle = async (req, res) => {
-  try {
-    const data = await Vehicle.findAll({
-      include: [
-        {
-          model: VehicleDetail,
-          required: true,
-        },
-        {
-          model: VehicleBrand,
-          required: true,
-        },
-      ],
-    });
+module.exports = { deleteVehicleData };
 
-    if (data.length == 0) {
-      res.status(404).json({ status: true, message: "Vehicle data not found" });
+
+
+
+// Creating new vehicle model
+const createModel = async (req, res) => {
+  const { model } = req.body;
+
+  if (!model) {
+    return res
+      .status(400)
+      .json({ status: false, message: "Model title is required!" });
+  }
+
+  try {
+    const createdModel= await VehicleModel.create({ model });
+
+    if (createdModel) {
+      return res.status(201).json({
+        status: true,
+        message: "New model creation success",
+        data: createdModel,
+      });
+    } else {
+      return res.status(400).json({
+        status: false,
+        message: "Model creation failed!",
+      });
+    }
+  } catch (error) {
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({
+        status: false,
+        message: "Model already exists",
+      });
     }
 
-    res.status(200).json({
-      status: true,
-      message: "Vehicle data successfully fetched",
-      data: data,
-    });
-  } catch (error) {
-    res
-      .status(400)
-      .json({ status: false, message: error.message, stack: error.stack });
+    console.error("Error creating model:", error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Internal server error" });
   }
 };
 
-// Fetch single vehicle details
-const fetchVehicleById = async (req, res) => {
-  const { id } = req.params;
 
+// Fetch all Models
+const fetchModels = async (req, res) => {
   try {
-    const data = await Vehicle.findAll({
-      include: [
-        {
-          model: VehicleDetail,
-          required: true,
-        },
-      ],
-      where: {
-        id: {
-          [Op.eq]: id,
-        },
+    const models = await VehicleModel.findAll();
+
+    if (!models) {
+      res.status(404).json({ status: false, message: "No models found" });
+    }
+
+    res.status(200).json({ status: true, message: "success", data: models });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+//fetchVehicleCount
+const fetchVehicleCount = async (req,res) => {
+    try {
+      const [total,available,outOfService] = await Promise.all([
+        Vehicle.count(),
+        Vehicle.count({ where: { status: "available" } }),
+        Vehicle.count({ where: { status: "outOfService" } }),
+      ]);
+
+      return res.json({
+        total,
+        available,
+        outOfService,
+      });
+    } catch (error) {
+      console.error("Error fetching vehicle counts:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  };
+
+
+//fetch vehicle Info with location name
+const axios = require("axios");
+
+const reverseGeocode = async (lat, lon) => {
+  try {
+    const response = await axios.get("https://nominatim.openstreetmap.org/reverse", {
+      params: {
+        lat,
+        lon,
+        format: "json",
+        addressdetails: 1
       },
+      headers: {
+        "User-Agent": "SunTrackFleetSystem/1.0 (contact@yourdomain.com)"
+      }
     });
 
-    if (data.length == 0) {
-      res.status(404).json({ status: true, message: "Vehicle data not found" });
+    const address = response.data.address;
+
+    // Only use parts you need: street, suburb, city
+    const parts = [
+      address.road || address.street || "",
+      address.suburb || "",
+      address.city || address.town || address.village || ""
+    ].filter(Boolean);
+
+    return parts.join(", ") || `${lat} | ${lon}`;
+  } catch (error) {
+    console.error("Reverse geocoding failed:", error.message);
+    return `${lat} | ${lon}`;
+  }
+};
+
+const fetchVehicleInfo = async (req, res) => {
+  try {
+    // Step 1: Get all vehicles with their GPS devices and trip details
+    const vehicles = await Vehicle.findAll({
+      attributes: ['id', 'plateNo'],
+      include: [
+        {
+          model: gpsDevice,
+          as: 'gpsDevice',
+          required: true,
+          attributes: ['deviceId']
+        },
+        {
+          model: TripDetail,
+          as: 'tripDetails',
+          required: false,
+          attributes: ['tripId'],
+          include: [
+            {
+              model: Trip,
+              as: 'trip',
+              attributes: ['endLocation', 'driverStartTime'],
+            }
+          ],
+        }
+      ]
+    });
+
+    if (!vehicles.length) {
+      return res.status(404).json({
+        status: false,
+        message: "Vehicle data not found"
+      });
     }
 
-    res.status(200).json({
+    const result = [];
+
+    for (const vehicle of vehicles) {
+      const deviceId = vehicle.gpsDevice.deviceId;
+
+      // Find latest GPS data
+      const latestGpsData = await gpsdata.findOne({
+        where: { deviceId },
+        order: [['recDate', 'DESC'], ['recTime', 'DESC']],
+        attributes: ['deviceId', 'recDate', 'recTime', 'latitude', 'longitude', 'speed', 'direction', 'acc', 'door']
+      });
+
+      const tripDetail = vehicle.tripDetails?.[0];
+      const tripLocation = tripDetail?.trip?.endLocation || "Null";
+
+      if (latestGpsData) {
+        const { latitude, longitude } = latestGpsData;
+        const locationName = latitude && longitude
+          ? await reverseGeocode(latitude, longitude)
+          : "Unknown";
+
+        result.push({
+          plateNo: vehicle.plateNo,
+          gpsDevice: {
+            deviceId: vehicle.gpsDevice.deviceId,
+            gpsData: {
+              deviceId: latestGpsData.deviceId,
+              recDate: latestGpsData.recDate,
+              recTime: latestGpsData.recTime,
+              latitude,
+              longitude,
+              speed: latestGpsData.speed,
+              direction: latestGpsData.direction,
+              acc: latestGpsData.acc,
+              door: latestGpsData.door
+            }
+          },
+          tripLocation: tripLocation,
+          lastLocation: locationName   // 👈 new field added
+        });
+      }
+    }
+
+    if (!result.length) {
+      return res.status(404).json({
+        status: false,
+        message: "No GPS data found for vehicles"
+      });
+    }
+
+    return res.status(200).json({
       status: true,
       message: "Vehicle data successfully fetched",
-      data: data,
+      data: result
     });
+
   } catch (error) {
-    res
-      .status(400)
-      .json({ status: false, message: error.message, stack: error.stack });
+    console.error('Error fetching vehicle info:', error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message
+    });
   }
 };
 
-// Delete vehicle details
-const deleteVehicleData = async (req, res) => {
-  try {
-    const { id } = req.params;
 
-    const data = await Vehicle.findByPk(id);
 
-    if (!data) {
-      res.status(404).json({ status: true, message: "Vehicle data not found" });
-    }
 
-    data.destroy();
 
-    res.status(200).json({
-      status: true,
-      message: "Vehicle data deleted successfully",
-    });
-  } catch (error) {
-    res
-      .status(400)
-      .json({ status: false, message: error.message, stack: error.stack });
-  }
-};
 
 module.exports = {
   createBrand,
@@ -424,4 +687,8 @@ module.exports = {
   fetchVehicle,
   fetchVehicleById,
   deleteVehicleData,
+  createModel,
+  fetchModels,
+  fetchVehicleInfo,
+  fetchVehicleCount
 };

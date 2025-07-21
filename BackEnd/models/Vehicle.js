@@ -2,29 +2,61 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
 const Vehicle = sequelize.define(
-  "Vehicle",
+  "vehicle",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
+    plateNo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    brandId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "vehiclebrand",
+        key: "id",
+      },
+    },
+    modelId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "VehicleModels",
+        key: "id",
+      },
+    },
     vehicleType: {
       type: DataTypes.STRING, // Car, Bike, Van
       allowNull: false,
     },
-    vehicleTypeTwo: {
+    fuelType: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    category: {
       // Heavy, Light
       type: DataTypes.STRING,
       allowNull: false,
     },
-    vehicleTitle: {
-      // Toyota Corolla
+    registeredYear: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    model: {
-      // 2021, 2022, 2023 - Laurel Spirit / X5 / z5
+    chassieNo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    color: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -33,16 +65,9 @@ const Vehicle = sequelize.define(
       type: DataTypes.STRING(500),
       allowNull: true,
     },
-    brandId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "VehicleBrands",
-        key: "id",
-      },
-    },
+
   },
-  { timestamps: true }
+  { tableName: 'vehicles', timestamps: true }
 );
 
 module.exports = Vehicle;

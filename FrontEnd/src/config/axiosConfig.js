@@ -1,7 +1,7 @@
 import axios from "axios";
 import { config } from "./config";
 
-const API_BASE_URL = config.apiEndpoint || "http://127.0.0.1:8000/api/";
+const API_BASE_URL = config.apiEndpoint ||"http://localhost:8000/api/";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -26,8 +26,7 @@ api.interceptors.request.use(
 
 const apiService = {
   get: (url, params = {}) => api.get(url, { params }),
-  post: (url, data = {}) =>
-    api.post(url, data, ),
+  post: (url, data = {}) => api.post(url, data,{ headers: { "Content-Type": "application/json" } }),
   put: (url, data = {}) =>
     api.put(url, data, { headers: { "Content-Type": "multipart/form-data" } }),
   delete: (url) => api.delete(url),
