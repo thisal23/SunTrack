@@ -1,21 +1,24 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const gpsdata = sequelize.define('LiveTracking', {
+const gpsdata = sequelize.define('gpsdata', {
     deviceId: {
         type: DataTypes.STRING,
         allowNull: false,
-        primaryKey: true
+        references: {
+            model: 'gpsDevice',
+            key: 'deviceId',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
     },
-    date: {
-        type: DataTypes.DATE,
+    recDate: {
+        type: DataTypes.DATEONLY,
         allowNull: false,
-        primaryKey: true
     },
-    time: {
+    recTime: {
         type: DataTypes.TIME,
         allowNull: false,
-        primaryKey: true
     },
     keyword: {
         type: DataTypes.STRING,
@@ -26,11 +29,11 @@ const gpsdata = sequelize.define('LiveTracking', {
         allowNull: false
     },
     latitude: {
-        type: DataTypes.STRING,
+        type: DataTypes.DOUBLE,
         allowNull: false
     },
     longitude: {
-        type: DataTypes.STRING,
+        type: DataTypes.DOUBLE,
         allowNull: false
     },
     speed: {
@@ -49,6 +52,12 @@ const gpsdata = sequelize.define('LiveTracking', {
         type: DataTypes.STRING,
         allowNull: true
     }
-}, {timestamps: true})
+}, {tableName: 'gpsdatas', timestamps: false, createdAt: false, id: false,
+  updatedAt: false, indexes: [
+    {
+      unique: true,
+      fields: ['deviceId', 'recDate', 'recTime'], // composite unique index works as composite PK
+    },
+  ],})
 
 module.exports = gpsdata;
