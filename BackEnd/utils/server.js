@@ -67,7 +67,4 @@ app.use('/api', dailydetailRoutes);
 app.use('/api', distanceRoutes);
 app.use('/api', idleReportRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 

@@ -249,11 +249,11 @@ const Info = () => {
           {loading ? (
             <div className="text-center w-full py-10 text-lg font-semibold text-blue-600">Info is loading...</div>
           ) : (
-            <table
-              ref={tableRef}
-              className="display justify-center"
-              style={{ width: "100%" }}
-            ></table>
+          <table
+            ref={tableRef}
+            className="display justify-center"
+            style={{ width: "100%" }}
+          ></table>
           )}
         </div>
       </div>
