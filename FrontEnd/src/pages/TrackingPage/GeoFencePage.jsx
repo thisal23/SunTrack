@@ -3,14 +3,15 @@ import NavBar from "../../components/NavBar/NavBar";
 import "./GeoFencePage.css";
 import TrackingNavBar from "../../components/TrackingNavBar/TrackingNavBar";
 import apiService from "../../config/axiosConfig";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Circle } from 'react-leaflet';
 
 function GeoFencePage() {
   const [type, setType] = useState("circle");
   const [addOrDel, setAddOrDel] = useState("del");
-  const [searchLocation, setSearchLocation] = useState("");
   const [name, setName] = useState("");
   const [coordinates, setCoordinates] = useState([7.211559, 80.427956]);
+  const [latitude , setLatitude] = useState("");
+  const [longitude , setLongitude] = useState("");
   const [radius, setRadius] = useState("");
   const [width, setWidth] = useState("");
   const [length, setLength] = useState("");
@@ -19,35 +20,67 @@ function GeoFencePage() {
     useMapEvents({
       click: (e) => {
         setCoordinates([e.latlng.lat, e.latlng.lng]);
+        setLatitude(e.latlng.lat);
+        setLongitude(e.latlng.lng);
         console.log("Selected Latitude:", e.latlng.lat, "Longitude:", e.latlng.lng);
       },
     });
     return null;
   };
 
-  const addName = async () => {
-    try {
-      const jsonData = {
-        name: name,
-      };
-      console.log(jsonData);
+  // const addName = async () => {
+  //   try {
+  //     const jsonData = {
+  //       name: name,
+  //     };
+  //     console.log(jsonData);
 
-      const response = await apiService.post("/geofence/addName", jsonData,{
+  //     const response = await apiService.post("/geofence/addName", jsonData,{
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     console.log(response.data);
+  //     if (response.data.status) {
+  //       alert("Name added successfully!");
+  //     } else {
+  //       alert("Failed to add name!");
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     alert("An error occurred while adding the name.");
+  //   }
+  // };
+  const addGeoFence = async () => {
+    try {
+      const jasonData = {
+        name: name, 
+        type: type,
+        centerLatitude: latitude,
+        centerLongitude: longitude,
+        radius: parseInt(radius),
+        width: parseInt(width),
+        length: parseInt(length),
+      };
+      console.log(jasonData);
+
+      const response = await apiService.post("/geofence/addGeoFence", jasonData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
       console.log(response.data);
       if (response.data.status) {
-        alert("Name added successfully!");
+        alert("Geofence added successfully!");
       } else {
-        alert("Failed to add name!");
+        alert("Failed to add geofence!");
       }
-    } catch (error) {
-      console.log(error);
-      alert("An error occurred while adding the name.");
     }
-  };
+    catch (error) {
+      console.log(error);
+      alert("An error occurred while adding the geofence.");
+    }
+  }
 
   const handleAddOrDel = (e) => {
     setAddOrDel(e.target.value);
@@ -81,9 +114,9 @@ function GeoFencePage() {
                 id="name"
                 value={name}
               />
-              <button onClick={addName} type="submit" className="search-btn">
+              {/* <button onClick={addName} type="submit" className="search-btn">
                 Add Name
-              </button>
+              </button> */}
 
               {/* <label htmlFor="location">Location</label>
               <input
@@ -127,7 +160,8 @@ function GeoFencePage() {
 
               {addOrDel === "del" && (
                 <button
-                  onClick={handleAddOrDel}
+                  onClick={addGeoFence} 
+                  onChange={handleAddOrDel}
                   value="add"
                   className="add"
                   type="submit"
@@ -137,7 +171,8 @@ function GeoFencePage() {
               )}
               {addOrDel === "add" && (
                 <button
-                  onClick={handleAddOrDel}
+                  
+                  onChange={handleAddOrDel}
                   value="del"
                   className="add"
                   type="submit"
@@ -152,6 +187,7 @@ function GeoFencePage() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
+                <Circle center={coordinates} radius={radius} color="blue" fillColor="blue" fillOpacity={0.5} />
                 <MapClickHandler setCoordinates={setCoordinates} />
                 <Marker position={coordinates}>
                   <Popup>

@@ -4,13 +4,11 @@
 .tnav{
     display: flex;
     flex-direction: row;
-    top: 0;
     background-color: #0F2043;
     color: white;
     font-family: 'Jaldi';
     font-weight:bold ;
-    margin-top: 0;
-    margin-left: 0;
+
     font-size: 24px;
     width: 1200px;
     height: 55px;
@@ -20,6 +18,7 @@
     justify-content: left;
     position: relative; 
     padding-top: 5px;
+    margin: -120px auto;
 }
 
 .lists{

@@ -11,7 +11,31 @@ const geoname = sequelize.define('geoname', {
     name: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    type: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    centerLatitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: false
+    },
+    centerLongitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: false
+    },
+    radius: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    width: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    length: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
-}, {timestamps: false});
+}, {tableName: 'geonames', timestamps: false});
 
 module.exports = geoname;

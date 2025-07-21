@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #f0f0f0;
     margin: 0;
     padding: 0;
 }
@@ -10,7 +10,8 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f4f4f4;
+    background-color: #ffffff;
+    gap: 20px; /* Increased gap between image and login box */
 }
 
 .login-image-container {
@@ -21,18 +22,20 @@ body {
 }
 
 .login-image {
-    width: 80%;
-    height: auto;
+    max-width: 750px;
+    height: auto;   
 }
 
 .login-box {
+    margin-right: 200px;
     flex: 1;
     background-color: #fff;
     padding: 40px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     text-align: center;
+    position: relative;
 }
 
 .login-box h1 {
@@ -66,6 +69,7 @@ body {
 
 .remember-me input {
     margin-right: 10px;
+    width: fit-content;
 }
 
 .login-box button {

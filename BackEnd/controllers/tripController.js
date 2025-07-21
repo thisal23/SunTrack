@@ -1,17 +1,21 @@
-const { Trip, TripDetail, User, Vehicle, UserDetail } = require("../models");
+const { Trip, TripDetail, User, Vehicle, driverDetail, VehicleBrand, VehicleModel } = require("../models");
+const { Op } = require("sequelize");
 
 //create new trip
 const createTrip = async (req, res) => {
   const {
-    startLocation,
-    endLocation,
-    date,
-    suggestStartTime,
-    suggestEndTime,
-    driverStartTime,
-    driverEndTime,
-    tripRemark,
-  } = req.body;
+      startLocation,
+      endLocation,
+      date,
+      suggestStartTime,
+      status,
+      driverStartTime,
+      driverEndTime,
+      suggestEndTime,
+      tripRemark,
+      driverId,
+      vehicleId,
+    } = req.body;
 
   if (!startLocation || !endLocation) {
     return res
@@ -23,28 +27,34 @@ const createTrip = async (req, res) => {
       .status(400)
       .json({ status: false, message: "Trip date is required!" });
   }
-  if (!suggestStartTime || !suggestEndTime) {
+  if (!suggestStartTime) {
     return res
       .status(400)
-      .json({ status: false, message: "Suggest start/end time is required!" });
+      .json({ status: false, message: "Suggest start time is required!" });
   }
 
   try {
-    const trip = await Trip.create({
-      startLocation,
-      endLocation,
-      date,
-      suggestStartTime,
-      suggestEndTime,
-      status: "pending",
-      driverStartTime,
-      driverEndTime,
-    });
+    const trip = await Trip.create(
+      {
+        startLocation,
+        endLocation,
+        date,
+        suggestStartTime,
+        suggestEndTime: suggestEndTime || null,
+        status,
+        driverStartTime: driverStartTime || null,
+        driverEndTime: driverEndTime || null,
+      }
+    );
 
-    const tripDetail = await TripDetail.create({
-      tripRemark: tripRemark,
-      tripId: trip.id,
-    });
+    const tripDetail = await TripDetail.create(
+      {
+        tripId: trip.id,
+        tripRemark: tripRemark || null,
+        driverId: driverId || null,
+        vehicleId: vehicleId || null,
+      }
+    );
 
     let array = [trip, tripDetail];
 
@@ -65,79 +75,390 @@ const createTrip = async (req, res) => {
 //Assign driver for trip
 const assignDriver = async (req, res) => {
   const { driverId } = req.body;
-  const { id } = req.params;
+  const { id } = req.params; // id = tripId
 
   try {
-    const tripDetail = await TripDetail.findOne({
-      where: {
-        tripId: id,
-      },
-    });
+    // ✅ Check if the driver exists
+    const driver = await driverDetail.findByPk(driverId);
+    if (!driver) {
+      return res.status(404).json({ status: false, message: "Driver not found" });
+    }
+
+    const tripDetail = await TripDetail.findOne({ where: { tripId: id } });
     if (!tripDetail) {
-      res.status(404).json({ status: false, message: "Trip detail not found" });
+      return res.status(404).json({ status: false, message: "Trip detail not found" });
     }
 
-    const data = await tripDetail.update({ driverId });
-    if (!data) {
-      res.status(500).json({ status: false, message: "Something went wrong" });
-    }
+    const updatedDetail = await tripDetail.update({ driverId });
 
+    // ✅ Also update the trip status
     const trip = await Trip.findByPk(id);
+    await trip.update({ status: "Ready" });
 
-    trip.update({ status: "Ready" });
     res.status(200).json({
       status: true,
-      message: "Trip detail updated successfully",
-      data: data,
+      message: "Driver assigned successfully",
+      data: updatedDetail,
     });
   } catch (error) {
     res.status(400).json({ status: false, message: error.message });
   }
 };
+
+//fetch vehicle for new trips
+const fetchAvailableVehiclesByDate = async (req, res) => {
+  const { date } = req.query;
+
+  if (!date) {
+    return res.status(400).json({ message: "Date is required" });
+  }
+
+  try {
+    const assignedVehicleIds = await TripDetail.findAll({
+      include: {
+        model: Trip,
+        where: { date },
+        as: 'trip',
+      },
+      attributes: ["vehicleId"],
+    });
+
+    const unavailable = assignedVehicleIds.map((v) => v.vehicleId);
+
+    const availableVehicles = await Vehicle.findAll({
+      where: {
+        plateNo: {
+          [Op.notIn]: unavailable,
+        },
+      },
+      include:[{
+          model:VehicleModel,
+          as:'vehicleModel'
+      },
+      {
+        model:VehicleBrand,
+        as: 'vehicleBrand'
+      },
+    ],
+    });
+
+    res.json(availableVehicles);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching available vehicles", error: err.message });
+  }
+};
+
+//fetch drivers fr new trips
+const fetchAvailableDriversByDate = async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ status: false, message: "Date is required" });
+    }
+
+    const assignedDrivers = await TripDetail.findAll({
+      include: [
+        {
+          model: Trip,
+          where: { date },
+          as: 'trip'
+        },
+      ],
+      where: {
+        driverId: {
+          [Op.ne]: null,
+        },
+      },
+      attributes: ['driverId'],
+    });
+
+    const assignedDriverIds = assignedDrivers.map(d => d.driverId);
+
+    const driverData = await driverDetail.findAll({
+      include: [
+        {
+          model: User,
+          as: 'user',
+          required: true,
+          where: { roleId: 3 },
+        },
+      ],
+      where: {
+        id: {
+          [Op.notIn]: assignedDriverIds,
+        },
+        licenseType: {
+          [Op.in]: ["Light", "Heavy", "All"],
+        },
+      },
+      raw: true,
+      nest: true,
+    });
+
+    res.status(200).json({
+      status: true,
+      message: "Available drivers fetched successfully",
+      data: driverData,
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+
+
+
 
 //Assign vehicle for trip
 const assignVehicle = async (req, res) => {
   const { vehicleId } = req.body;
-  const { id } = req.params;
+  const { id } = req.params; // id = tripId
 
   try {
-    const tripDetail = await TripDetail.findByPk(id);
-    if (!tripDetail) {
-      res.status(404).json({ status: false, message: "Trip detail not found" });
+    // Find the plateNo from the vehicle id
+    const vehicle = await Vehicle.findByPk(vehicleId);
+    if (!vehicle) {
+      return res.status(404).json({ status: false, message: "Vehicle not found" });
     }
 
-    const data = await tripDetail.update({ vehicleId });
-    if (!data) {
-      res.status(500).json({ status: false, message: "Something went wrong" });
+    const plateNo = vehicle.plateNo;
+
+    const tripDetail = await TripDetail.findOne({ where: { tripId: id } });
+    if (!tripDetail) {
+      return res.status(404).json({ status: false, message: "Trip detail not found" });
     }
+
+    const updatedDetail = await tripDetail.update({ vehicleId: plateNo });
 
     res.status(200).json({
       status: true,
-      message: "vehicle assigned successfully",
-      data: data,
+      message: "Vehicle assigned successfully",
+      data: updatedDetail,
     });
   } catch (error) {
     res.status(400).json({ status: false, message: error.message });
   }
 };
 
+
+//fetch all trips
 const fetchAllTrips = async (req, res) => {
   try {
-    const data = await TripDetail.findAll({
+    const data = await Trip.findAll({
+      include: [
+        {
+          model: TripDetail,
+          as: 'tripDetail',
+          required: false,
+          include: [
+            {
+              model: driverDetail,
+              as: 'driver',
+              required: false,
+              include: [
+                {
+                  model: User,
+                  as: 'driverUser',
+                  attributes: ['firstName','lastName'], // or firstName, lastName depending on your schema
+                  required: false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ status: true, message: "Data not found" });
+    }
+
+    const formatted = data.map(trip => {
+  const detail = trip.tripDetail;20
+  const user = detail?.driver?.driverUser;
+
+  const driverName = user ? `${user.firstName} ${user.lastName}` : null;
+
+  return {
+    id: trip.id,
+    date: trip.date,
+    status: trip.status,
+    driverName: driverName,
+    vehicleId: detail?.vehicleId ?? null,
+    tripRemark: detail?.tripRemark ?? null,
+    startLocation: trip.startLocation ?? null,
+    endLocation: trip.endLocation ?? null,
+    suggestStartTime: trip.suggestStartTime ?? null,
+    suggestEndTime: trip.suggestEndTime ?? null,
+  };
+});
+
+
+    return res.status(200).json({
+      status: true,
+      message: "Data successfully fetched",
+      data: formatted,
+    });
+
+  } catch (error) {
+    return res.status(400).json({ status: false, message: error.message });
+  }
+};
+
+
+
+//fetch driver for trip
+const fetchDriverForTrip = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+
+    const trip = await Trip.findByPk(tripId);
+    if (!trip) {
+      return res.status(404).json({ status: false, message: "Trip not found" });
+    }
+
+    // Get already assigned driverIds for the same date
+    const assignedDrivers = await TripDetail.findAll({
       include: [
         {
           model: Trip,
-          required: true,
+          where: { date: trip.date },
+          as: 'trip'
         },
-        // {
-        //   model: User,
-        //   required: false,
-        // },
-        // {
-        //   model: Vehicle,
-        //   required: false,
-        // },
       ],
+      where: {
+        driverId: {
+          [Op.ne]: null,
+        },
+      },
+      attributes: ['driverId'],
+    });
+
+    const assignedDriverIds = assignedDrivers.map(d => d.driverId);
+
+    const driverData = await driverDetail.findAll({
+      include: [
+        {
+          model: User,
+          as: 'user',
+          required: true,
+          where: { roleId: 3 }, // Assuming 11 = driver
+        },
+      ],
+      where: {
+        id: {
+          [Op.notIn]: assignedDriverIds,
+        },
+        licenseType: {
+          [Op.in]: ["Light", "Heavy", "All"], // Adjust based on your vehicle type filtering logic
+        },
+      },
+      raw: true,
+      nest: true,
+    });
+
+    res.status(200).json({
+      status: true,
+      message: "Available drivers fetched successfully",
+      data: driverData,
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+
+//fetchTripCount
+const fetchTripCount = async (req,res) => {
+    try {
+      const [pending, live, finished] = await Promise.all([
+        Trip.count({ where: { status: "pending" } }),
+        Trip.count({ where: { status: "live" } }),
+        Trip.count({ where: { status: "finished" } }),
+      ]);
+
+      return res.json({
+        pending,
+        live,
+        finished,
+      });
+    } catch (error) {
+      console.error("Error fetching trip counts:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }; 
+
+//fetch vehicles for trip
+const fetchVehiclesForTrip = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+
+    const trip = await Trip.findByPk(tripId);
+    if (!trip) {
+      return res.status(404).json({ status: false, message: "Trip not found" });
+    }
+
+    // Find vehicle IDs already assigned for this trip date
+    const tripDetailsOnSameDay = await TripDetail.findAll({
+      include: [
+        {
+          model: Trip,
+          where: {
+            date: trip.date,
+          },
+          as: 'trip'
+        },
+      ],
+      attributes: ['vehicleId'],
+      where: {
+        vehicleId: {
+          [Op.ne]: null,
+        },
+      },
+    });
+
+    const assignedVehicleIds = tripDetailsOnSameDay.map(td => td.vehicleId);
+
+    const availableVehicles = await Vehicle.findAll({
+      where: {
+        id: {
+          [Op.notIn]: assignedVehicleIds,
+        },
+        status: 'available',
+      },
+      include: [
+        {
+          model: VehicleBrand,
+          as: "vehicleBrand",
+        },
+        {
+          model: VehicleModel,
+          as: "vehicleModel",
+        },
+      ],
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Available vehicles fetched successfully",
+      data: availableVehicles,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+
+//fetch pending trips
+const fetchPendingTrips = async (req, res) => {
+  try {
+    const data = await Trip.findAll({
+      where: {
+        status: "pending",
+      },
     });
 
     if (!data || data.length === 0) {
@@ -154,60 +475,15 @@ const fetchAllTrips = async (req, res) => {
   }
 };
 
-const fetchDriverForTrip = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const vehicle = await Vehicle.findByPk(id);
-
-    const typeData = {
-      Light: "L",
-      Heavy: "H",
-      All: "A",
-    };
-
-    if (!vehicle) {
-      res.status(404).json({ status: true, message: "Data not found" });
-    }
-
-    const driverData = await UserDetail.findAll({
-      include: [
-        {
-          model: User,
-          required: true,
-          where: {
-            roleId: 11,
-          },
-        },
-      ],
-      where: {
-        licenceType: typeData?.[vehicle?.vehicleTypeTwo] || null,
-      },
-      raw: true,
-      nest: true,
-    });
-
-    if (!driverData) {
-      res.status(404).json({ status: true, message: "Driver data not found" });
-    }
-
-    res.status(200).json({
-      status: true,
-      message: "Data successfully fetch",
-      data: driverData,
-    });
-  } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
-  }
-};
-
-// 200 - success, 201 - created, 400 -bad request, 404 - not found, 500 - internal server error
-// 401 - unauthorized, 403 - forbidden/deny access/Not granted
-
 module.exports = {
   createTrip,
   assignDriver,
   assignVehicle,
   fetchAllTrips,
   fetchDriverForTrip,
+  fetchVehiclesForTrip,
+  fetchTripCount,
+  fetchPendingTrips,
+  fetchAvailableDriversByDate,
+  fetchAvailableVehiclesByDate
 };

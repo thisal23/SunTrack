@@ -11,63 +11,56 @@ import { Modal } from "antd";
 import apiService from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 import { config } from "../../config/config";
+import NavBar from "../../components/NavBar/NavBar";
+import VehicleInfoCard from "./VehicleInfoCard";
+import VehicleEditCard from "./VehicleEditCard";
+import VehicleDeleteCard from "./VehicleDeleteCard";
+import { none } from "ol/centerconstraint";
 
-// Sachini part
 const AllVehicle = () => {
   const tableRef = useRef(null);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModal_1_Open, setIsModal_1_Open] = useState(false);
+  const [isModal_2_Open, setIsModal_2_Open] = useState(false);
+  const [isModal_3_Open, setIsModal_3_Open] = useState(false);
   const [vehicleData, setVehicleData] = useState([]);
-  const [tripId, setTripId] = useState("");
+  const [vehicleId, setVehicleId] = useState("");
+  const [plateNo, setPlateNo] = useState("");
+  const [refreshCount, setRefreshCount] = useState(0);
+  const [modalMessage, setModalMessage] = useState("");
 
-  const showModal = (id) => {
-    setIsModalOpen(true);
-
-    setTripId(id);
+  const showModal_1 = (id) => {
+    setIsModal_1_Open(true);
+    setVehicleId(id);
+    fetchVehicleDetails(id);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
+  const showModal_2 = (id) => {
+    setIsModal_2_Open(true);
+    setVehicleId(id);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  const showModal_3 = (plateNo) => {
+    setIsModal_3_Open(true);
+    setPlateNo(plateNo);
   };
 
-  const data = [
-    [
-      1,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Pending",
-      "Test Remarks",
-    ],
-    [
-      2,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Approved",
-      "Test Remarks",
-    ],
-    [
-      3,
-      "Colombo Fort to Kandy",
-      "2025-01-10",
-      "02:29pm/05:50pm",
-      "Rejected",
-      "Test Remarks",
-    ],
-  ];
+  const handleCancel_1 = () => {
+    setIsModal_1_Open(false);
+  };
+
+  const handleCancel_2 = () => {
+    setIsModal_2_Open(false);
+  };
+
+  const handleCancel_3 = () => {
+    setIsModal_3_Open(false);
+  };
 
   const fetchVehicles = async () => {
     try {
       const data = await apiService
-        .get("vehicle/vehicle/all")
+        .get("vehicle/all")
         .catch((err) => console.log(`api error`, err));
-
-      // axios.get("http://localhost:8000/api/trip/trip/all")
 
       if (data.status !== 200) {
         toast.error("Vehicle data fetching error!!!");
@@ -78,6 +71,43 @@ const AllVehicle = () => {
       setVehicleData(data.data.data);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  // This handles success after vehicle edit: refresh table & info card, close edit modal
+  const handleUpdateSuccess = async () => {
+    await fetchVehicles();
+    setRefreshCount((prev) => prev + 1); // trigger remount of VehicleInfoCard
+    handleCancel_2(); // close edit modal
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await apiService.delete(`vehicle/remove/${plateNo}`);
+
+      if (response.status === 200) {
+        setModalMessage("✅ Vehicle deleted successfully!");
+        await fetchVehicles(); // refresh the table
+
+        // Auto-close the modal after 2 seconds
+        setTimeout(() => {
+          setIsModal_3_Open(false);
+          setModalMessage(""); // reset message
+        }, 2000);
+      } else {
+        setModalMessage("❌ Failed to delete vehicle. Try again.");
+        setTimeout(() => {
+          setIsModal_3_Open(false);
+          setModalMessage(""); // reset message
+        }, 2000);
+      }
+    } catch (err) {
+      console.error(err);
+      setModalMessage("❌ An error occurred during deletion.");
+      setTimeout(() => {
+        setIsModal_3_Open(false);
+        setModalMessage(""); // reset message
+      }, 2000);
     }
   };
 
@@ -92,50 +122,61 @@ const AllVehicle = () => {
 
     $(tableRef.current).DataTable({
       data: vehicleData?.map((item) => [
+        item.plateNo,
+        `${item.vehicleBrand.brand}-${item.vehicleModel.model}`,
+        `${item.vehicleType}-${item.category}`,
+        `<a href="${config.fileUrl}${
+          item.VehicleDetail?.licenseDocument || ""
+        }" target="_blank" class="text-blue-500 underline">View Document</a>`,
+        `<a href="${config.fileUrl}${
+          item.VehicleDetail?.insuranceDocument || ""
+        }" target="_blank" class="text-blue-500 underline">View Document</a>`,
+        `<a href="${config.fileUrl}${
+          item.VehicleDetail?.ecoDocument || ""
+        }" target="_blank" class="text-blue-500 underline">View Document</a>`,
+        `${item.VehicleDetail?.licenseId || ""}`,
+        `${item.vehicleTitle}`,
         item.id,
-        `${item.vehicleTitle}/${item.vehicleTypeTwo}`,
-        `${item.VehicleBrand.title}/${item.VehicleDetail.color}`,
-        `<a href="${config.fileUrl}${item.VehicleDetail.licenceDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
-        `<a href="${config.fileUrl}${item.VehicleDetail.insuranceDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
-        `<a href="${config.fileUrl}${item.VehicleDetail.ecoDocument}" target="_blank" class="text-blue-500 underline">View Document</a>`,
       ]),
+
       columns: [
-        { title: "ID" },
-        { title: "Title/Type" },
-        { title: "Brand/Color" },
+        { title: "Vehicle No" },
+        { title: "Brand-Model" },
+        { title: "Type-Categoty" },
         { title: "License Document" },
         { title: "Insurance Document" },
         { title: "ECO Document" },
+        { title: "id", visible: false },
         {
           title: "Action",
           data: null,
           render: function (data, type, row) {
+            console.log(row);
             return `
-              <button class="btn-view" data-id="${row[0]}" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
-              <button class="btn-edit" data-id="${row[0]}" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
-              <button class="btn-delete" data-id="${row[0]}" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
+            <div style="display: flex; gap: 6px;">
+
+            <button class="btn-view" data-id="${row[8]}" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
+
+              <button class="btn-edit" data-id="${row[8]}" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
+              
+              <button class="btn-delete" data-plateno="${row[0]}" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
+
+            </div>
             `;
           },
         },
       ],
     });
-
     $(tableRef.current).on("click", ".btn-view", function () {
-      // alert(`Viewing trip ID: ${$(this).data("id")}`);
+      showModal_1($(this).data("id"));
     });
 
     $(tableRef.current).on("click", ".btn-edit", function () {
-      // alert(`Editing trip ID: ${$(this).data("id")}`);
+      showModal_2($(this).data("id"));
     });
 
     $(tableRef.current).on("click", ".btn-delete", function () {
-      if (window.confirm("Are you sure you want to delete this trip?")) {
-        // alert(`Deleted trip ID: ${$(this).data("id")}`);
-      }
-    });
-
-    $(tableRef.current).on("click", ".assign_data", function () {
-      showModal($(this).data("id"));
+      showModal_3($(this).data("plateno"));
     });
 
     return () => {
@@ -144,23 +185,54 @@ const AllVehicle = () => {
       }
     };
   }, [vehicleData]);
+  console.log("Modal vehicleId:", vehicleId);
+  console.log("PlateNo for delete:", plateNo);
 
   return (
-    <div className="container mx-auto w-full">
-      <div className="flex flex-row justify-start my-5">
-        <span className="text-3xl text-[#0F2043] font-semibold">
-          Vehicle &gt; All Vehicles
-        </span>
+    <>
+      <NavBar />
+      <div className="_custom mx-auto w-full py-15">
+        <div className="flex flex-row justify-start my-5">
+          <span className="text-3xl text-[#0F2043] font-semibold">
+            Vehicle &gt; All Vehicles
+          </span>
+        </div>
+        <div className="border-b-1 border-[#000] w-full mb-5"></div>
+        <div className="text-black flex flex-row w-full mx-auto custom_table">
+          <table
+            ref={tableRef}
+            className="display"
+            style={{ width: "100%" }}
+          ></table>
+        </div>
       </div>
-      <div className="border-b-1 border-[#000] w-full mb-5"></div>
-      <div className="flex flex-row w-full mx-auto custom_table">
-        <table
-          ref={tableRef}
-          className="display"
-          style={{ width: "100%" }}
-        ></table>
-      </div>
-    </div>
+
+      <Modal open={isModal_1_Open} onCancel={handleCancel_1} footer={null}>
+        <VehicleInfoCard
+          key={`${vehicleId}-${refreshCount}`}
+          vehicleId={vehicleId}
+        />
+      </Modal>
+
+      <Modal open={isModal_2_Open} onCancel={handleCancel_2} footer={null}>
+        <VehicleEditCard
+          vehicleId={vehicleId}
+          onClose={handleCancel_2}
+          onSuccess={handleUpdateSuccess}
+        />
+      </Modal>
+
+      <Modal
+        open={isModal_3_Open}
+        onCancel={handleCancel_3}
+        onOk={!modalMessage ? handleDelete : null} // disable OK button when message is shown
+        okText="Delete"
+        cancelText="Cancel"
+        okButtonProps={{ disabled: !!modalMessage }} // disable delete button when showing result
+      >
+        <VehicleDeleteCard plateNo={plateNo} message={modalMessage} />
+      </Modal>
+    </>
   );
 };
 
