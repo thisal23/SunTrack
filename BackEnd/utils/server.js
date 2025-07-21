@@ -72,7 +72,4 @@ app.use('/api', idleReportRoutes);
 app.use('/api', driversRoutes);
 
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 

@@ -1,4 +1,5 @@
-const { Op, sequelize} = require("sequelize");
+const { Op, sequelize } = require("sequelize");
+const axios = require("axios");
 const {
   Vehicle,
   VehicleDetail,
@@ -216,7 +217,7 @@ const createVehicle = async (req, res) => {
       pnumber,
     }, { transaction });
 
-    
+
 
     res.status(201).json({
       status: true,
@@ -226,7 +227,7 @@ const createVehicle = async (req, res) => {
     await transaction.commit();
   } catch (error) {
     await transaction.rollback();
-    res.status(500).json({ status: false, message: error.message, error:error, });
+    res.status(500).json({ status: false, message: error.message, error: error, });
   }
 };
 
@@ -331,16 +332,16 @@ const fetchVehicle = async (req, res) => {
   try {
     const data = await Vehicle.findAll({
       attributes: [
-        'id', 
+        'id',
         'plateNo',
-        'brandId', 
-        'vehicleType', 
-        'fuelType', 
-        'category', 
-        'registeredYear', 
-        'chassieNo', 
-        'status', 
-        'color', 
+        'brandId',
+        'vehicleType',
+        'fuelType',
+        'category',
+        'registeredYear',
+        'chassieNo',
+        'status',
+        'color',
         'image',
       ],
       include: [
@@ -428,12 +429,12 @@ const deleteVehicleData = async (req, res) => {
       // Since gpsdatas has composite PK (deviceId, recDate, recTime), we must delete all rows by deviceId
       // We can delete all rows for this deviceId without specifying recDate and recTime (bulk delete)
       await sequelize.query(
-  'DELETE FROM gpsdatas WHERE deviceId = :deviceId',
-  {
-    replacements: { deviceId: device.deviceId },
-    type: sequelize.QueryTypes.DELETE
-  }
-);
+        'DELETE FROM gpsdatas WHERE deviceId = :deviceId',
+        {
+          replacements: { deviceId: device.deviceId },
+          type: sequelize.QueryTypes.DELETE
+        }
+      );
 
 
       // Delete the GPS device itself
@@ -472,7 +473,7 @@ const createModel = async (req, res) => {
   }
 
   try {
-    const createdModel= await VehicleModel.create({ model });
+    const createdModel = await VehicleModel.create({ model });
 
     if (createdModel) {
       return res.status(201).json({
@@ -518,28 +519,25 @@ const fetchModels = async (req, res) => {
 };
 
 //fetchVehicleCount
-const fetchVehicleCount = async (req,res) => {
-    try {
-      const [total,available,outOfService] = await Promise.all([
-        Vehicle.count(),
-        Vehicle.count({ where: { status: "available" } }),
-        Vehicle.count({ where: { status: "outOfService" } }),
-      ]);
+const fetchVehicleCount = async (req, res) => {
+  try {
+    const [total, available, outOfService] = await Promise.all([
+      Vehicle.count(),
+      Vehicle.count({ where: { status: "available" } }),
+      Vehicle.count({ where: { status: "outOfService" } }),
+    ]);
 
-      return res.json({
-        total,
-        available,
-        outOfService,
-      });
-    } catch (error) {
-      console.error("Error fetching vehicle counts:", error);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  };
+    return res.json({
+      total,
+      available,
+      outOfService,
+    });
+  } catch (error) {
+    console.error("Error fetching vehicle counts:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
-
-//fetch vehicle Info with location name
-const axios = require("axios");
 
 const reverseGeocode = async (lat, lon) => {
   try {

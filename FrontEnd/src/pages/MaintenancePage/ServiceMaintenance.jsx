@@ -77,7 +77,7 @@ const ServiceMaintenance = () => {
           serviceType: entry.service.serviceType,
           remark: entry.serviceRemark,
           updatedAt: entry.updatedAt,
-          addedBy: entry.User.firstName + " " + entry.User.lastName,
+          addedBy: entry.user.firstName + " " + entry.User.lastName,
           serviceId: entry.service.id,
         });
       });
