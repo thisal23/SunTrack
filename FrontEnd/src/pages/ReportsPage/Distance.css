@@ -48,3 +48,25 @@
   .month-label {
     font-weight: bold;
   }
+
+
+ .year-select{
+  color: #0F2043;
+ }
+.month-select {
+  color: #0F2043;
+}
+
+.no-data-message {
+  color: #0F2043;
+  text-align: center;
+  margin-top: 20px;
+}
+
+
+.chart-container1 {
+  width: 100%;
+  max-width: 1000px;
+  height: 500px;     
+  margin: 0 auto;
+}

@@ -134,3 +134,22 @@ Distance.css
   font-size: 16px;
   margin-top: 20px;
 }
+
+
+input::placeholder {
+  color: #010114;
+  opacity: 1;
+}
+
+
+.custom-datepicker {
+  color: #0F2043; 
+}
+
+.vehicle-input {
+  color: #0F2043; 
+}
+
+.vehicle-input3 {
+  color: #0F2043; 
+}

@@ -141,10 +141,10 @@ function DailyDetail() {
                       <td>{row.tripId}</td>
                       <td>{row.startLocation}</td>
                       <td>{row.endLocation}</td>
-                      <td>{formatTimeToHoursMinutes(row.driverStartTime)}</td>
-                      <td>{formatTimeToHoursMinutes(row.driverEndTime)}</td>
-                      <td>{row.date}</td>
-                      <td>{formatDurationToHoursMinutes(row.duration)}</td>
+                      <td>{row.driverStartTime}</td>
+                      <td>{row.driverEndTime}</td>
+                      <td>{row.tripDate}</td>
+                      <td>{row.duration}</td>
                     </tr>
                   ))}
                 </tbody>

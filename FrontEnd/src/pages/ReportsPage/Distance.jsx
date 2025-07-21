@@ -56,7 +56,7 @@ function Distance() {
             label: 'Distance Traveled (km)',
             data: distances,
             borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            backgroundColor: 'rgba(31, 184, 107, 0.2)',
             borderWidth: 2,
             tension: 0.4, // Smooth curve
           },
@@ -161,7 +161,7 @@ function Distance() {
 
           {/* Conditional Rendering */}
           {isDataAvailable ? (
-            <div className="chart-container">
+            <div className="chart-container1">
               <Line data={chartData} />
             </div>
           ) : (

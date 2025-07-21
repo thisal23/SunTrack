@@ -1,6 +1,6 @@
 .repoNav{
   position: fixed;
-  bottom: 750px;
+  bottom: 780px;
 
 
 
@@ -130,4 +130,10 @@
   color: #0F2043;
   font-size: 16px;
   margin-top: 20px;
+}
+
+.report-table table,
+
+.report-table td {
+  color: #0F2043; /* Or any color you prefer */
 }

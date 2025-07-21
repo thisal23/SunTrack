@@ -24,6 +24,9 @@ import Register from "./components/authentication/Register.jsx";
 import DocumentMaintenance from "./pages/MaintenancePage/DocumentMaintenance.jsx";
 import ServiceMaintenance from "./pages/MaintenancePage/ServiceMaintenance.jsx";
 import AddNew from "./pages/Trip/AddNew.jsx";
+import Maintenance from "./pages/MaintenancePage/Maintenance.jsx";
+import Alldriver from "./pages/Driver/Alldriver.jsx";
+
 
 const router = createBrowserRouter([
   {
@@ -103,6 +106,12 @@ const router = createBrowserRouter([
     path: "/vehicle/all",
     element: <AllVehicle />,
   },
+
+{
+  path: "/driver/all",
+  element: <Alldriver />,
+},
+
   {
     path: "/maintenance/document-maintenance",
     element: <DocumentMaintenance />,

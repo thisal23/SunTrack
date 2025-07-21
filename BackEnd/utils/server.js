@@ -23,6 +23,9 @@ const dailySummaryRoutes = require('../routes/DailySumreports');
 const dailydetailRoutes = require('../routes/Dailydetail');
 const distanceRoutes = require('../routes/distanceRoutes');
 const maintenanceRoutes = require('../routes/maintenanceRoutes')
+const driversRoutes = require('../routes/drivers'); // New driver routes
+
+
 connectDB;
 
 
@@ -66,6 +69,8 @@ app.use('/api', dailySummaryRoutes);
 app.use('/api', dailydetailRoutes);
 app.use('/api', distanceRoutes);
 app.use('/api', idleReportRoutes);
+app.use('/api', driversRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

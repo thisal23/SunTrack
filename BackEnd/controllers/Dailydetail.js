@@ -2,38 +2,43 @@ const sequelize = require('../config/db');
 const { QueryTypes } = require('sequelize');
 
 const getDailydetail = async (req, res) => {
-  const { startDate, endDate, plateNo } = req.query; // Extract query parameters
-  console.log("Received parameters:", { startDate, endDate, plateNo });
-
-  // Validate required parameters
-  if (!startDate || !endDate || !plateNo) {
-    return res.status(400).json({ message: "Start date, end date, and plate number are required" });
-  }
-
-  try {
+    const { startDate, endDate, plateNo } = req.query; // Extract query parameters
+    console.log("Received parameters:", { startDate, endDate, plateNo });
+  
+    // Validate required parameters
+    if (!startDate || !endDate || !plateNo) {
+      return res.status(400).json({ message: "Start date, end date, and plate number are required" });
+    }
+  
+    try {
     const results = await sequelize.query(
-      `SELECT 
-          t.id AS tripId,
-          t.startLocation,
-          t.endLocation,
-          TIME_FORMAT(t.driverStartTime, '%H:%i') AS driverStartTime,
-          TIME_FORMAT(t.driverEndTime, '%H:%i') AS driverEndTime,
-          t.date,
-          TIME_FORMAT(TIMEDIFF(t.driverEndTime, t.driverStartTime), '%H:%i') AS duration
-        FROM 
-          trips t
-        JOIN 
-          tripdetails td ON t.id = td.tripId
-        JOIN 
-          vehicledetails vd ON td.vehicleId = vd.vehicleId
-        WHERE 
-          DATE(t.date) BETWEEN :startDate AND :endDate
-          AND vd.plateNo = :plateNo;`,
-      {
-        replacements: { plateNo, startDate, endDate }, // Pass dynamic values
-        type: QueryTypes.SELECT,
+  `SELECT 
+  t.id AS tripId,
+  t.startLocation,
+  t.endLocation,
+  t.driverStartTime,
+  t.driverEndTime,
+  DATE(t.date) AS tripDate,
+  TIMEDIFF(t.driverEndTime, t.driverStartTime) AS duration
+FROM 
+  trips t
+JOIN 
+  tripdetails td ON t.id = td.tripId
+JOIN 
+  vehicles v ON td.vehicleId = v.plateNo
+WHERE 
+  DATE(t.date) BETWEEN :startDate AND :endDate
+  AND v.plateNo = :plateNo;`,
+  {
+    replacements: { plateNo, startDate, endDate },
+    type: QueryTypes.SELECT,
+  }
+);
+  
+      if (results.length === 0) {
+        return res.status(404).json({ message: "No data found for the given criteria" });
       }
-    );
+    
 
     if (results.length === 0) {
       return res.status(404).json({ message: "No data found for the given criteria" });

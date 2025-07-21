@@ -102,7 +102,6 @@ const Login = () => {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem("token", data.token); // Store JWT token
-
                 navigate("/dashboard"); // Navigate to dashboard after successful login
             } else {
                 setError(data.message || "Invalid Credentials");
