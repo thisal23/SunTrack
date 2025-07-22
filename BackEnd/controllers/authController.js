@@ -278,7 +278,7 @@ exports.createPassword = async (req, res) => {
         console.error("Create Password Error:", error);
         res.status(500).json({ message: error.message });
     }
-};
+
 
 
         // Find user by email and OTP
@@ -310,7 +310,7 @@ try{
         console.error("OTP Verification Error:", error);
         res.status(500).json({ message: error.message });
     }
-
+};
 
 exports.createPassword = async (req, res) => {
     try {

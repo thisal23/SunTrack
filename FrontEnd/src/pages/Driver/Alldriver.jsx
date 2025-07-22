@@ -1,6 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
+import NavBar from '../../components/NavBar/NavBar';
 
 const Alldriver = () => {
   const [drivers, setDrivers] = useState([]);
@@ -54,9 +55,50 @@ const Alldriver = () => {
   };
 
   const handleEditClick = (driver) => {
-    setSelectedDriver({ ...driver });
-    setIsEditModalOpen(true);
-  };
+  setSelectedDriver({
+    ...driver,
+    id: driver.id,               // for users table update
+    userId: driver.id            // same value reused for driverdetails
+  });
+  setIsEditModalOpen(true);
+};
+
+
+const handleDeleteClick = async (driver) => {
+  const confirmDelete = window.confirm(`Are you sure you want to delete ${driver.driverName}?`);
+
+  if (!confirmDelete) return;
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/drivers/${driver.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Failed to delete driver');
+    }
+
+    // ✅ Remove from UI
+    setDrivers(prev => prev.filter(d => d.driverId !== driver.driverId));
+
+    alert('✅ Driver deleted successfully!');
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('❌ Failed to delete driver: ' + error.message);
+  }
+};
+
+
+
+
+
+
+
 
   const handleCloseModal = () => {
     setIsEditModalOpen(false);
@@ -64,7 +106,71 @@ const Alldriver = () => {
     setSelectedDriver(null);
   };
 
-  const filteredDrivers = drivers.filter(driver =>
+
+
+
+
+
+
+
+
+
+
+const handleUpdateDriver = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/api/drivers', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        id: selectedDriver.id,               // For users table
+        userId: selectedDriver.userId,       // For driverdetails table
+        driverUsername: selectedDriver.driverUsername,
+        driverName: selectedDriver.driverName,
+        licenseNo: selectedDriver.licenseNo,
+        contactNo: selectedDriver.contactNo
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Failed to update driver');
+    }
+
+    const updatedData = await response.json();
+    console.log(updatedData.message);
+
+    alert('✅ Driver updated successfully!');
+    // Optional: refetch driver list here instead of local update
+    setDrivers(prevDrivers =>
+      prevDrivers.map(driver =>
+        driver.driverId === selectedDriver.driverId ? selectedDriver : driver
+      )
+    );
+
+    handleCloseModal();
+  } catch (error) {
+    console.error('Update error:', error);
+    alert('Failed to update driver: ' + error.message);
+  }
+};
+
+
+
+
+
+
+  const handleInputChange = (field, value) => {
+    setSelectedDriver(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+
+const filteredDrivers = drivers.filter(driver =>
     driver.driverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     driver.driverUsername.toLowerCase().includes(searchTerm.toLowerCase()) ||
     driver.licenseNo.toLowerCase().includes(searchTerm.toLowerCase())
@@ -74,12 +180,19 @@ const Alldriver = () => {
   if (error) return <div style={styles.error}>{error}</div>;
 
   return (
+
+    
     <div style={styles.container}>
-      <div style={styles.pageHeader}>
-        <h2 style={styles.title}>Driver &gt; All Drivers</h2>
+       <div>
+        <NavBar />
       </div>
 
-      <div style={styles.tableControls}>
+      <div style={styles.mainContent}>
+    {/* Your table controls and table go here */}
+       </div>
+
+      
+       <div style={styles.tableControls}>
         <div style={styles.entriesControl}>
           <select 
             value={entriesPerPage} 
@@ -141,7 +254,7 @@ const Alldriver = () => {
                   </button>
                   <button 
                     style={styles.deleteBtn}
-                    onClick={() => console.log('Delete driver:', driver.driverId)}
+                    onClick={() => handleDeleteClick(driver)}
                   >
                     Delete
                   </button>
@@ -170,7 +283,7 @@ const Alldriver = () => {
                       <path d="M20 100 Q20 75 60 75 Q100 75 100 100 Q100 110 60 110 Q20 110 20 100 Z" fill="#6c757d"/>
                     </svg>
                   </div>
-                  <p style={styles.photoLabel}>Driver Photo</p>
+                  <p style={styles.photoLabel}></p>
                 </div>
                 
                 <div style={styles.detailsSection}>
@@ -293,6 +406,13 @@ const styles = {
     padding: '20px',
     fontFamily: 'Arial, sans-serif'
   },
+
+
+  mainContent: {
+  padding: '60px 20px 20px 20px', // Top: 60px, Right: 20px, Bottom: 20px, Left: 20px
+    },
+
+    
   pageHeader: {
     marginBottom: '20px'
   },
@@ -433,13 +553,15 @@ const styles = {
     maxWidth: '90vw',
     maxHeight: '90vh',
     overflow: 'auto'
+    
   },
   modalHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '20px',
-    borderBottom: '1px solid #dee2e6'
+    borderBottom: '1px solid #dee2e6',
+    marginTop: '50px' // Add this to push the modal down
   },
   modalTitle: {
     margin: 0,
@@ -479,7 +601,9 @@ const styles = {
     border: '1px solid #ddd',
     borderRadius: '4px',
     fontSize: '14px',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    color: '#031324ff'
+
   },
   readonlyInput: {
     width: '100%',
