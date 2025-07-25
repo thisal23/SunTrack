@@ -1,11 +1,15 @@
 const sequelize = require('../config/db');
 const { QueryTypes } = require('sequelize');
+const authMiddleware = require('../middleware/authMiddleware');
 
 const getDailySummary = async (req, res) => {
   const { date } = req.query; // Get the date from the query parameter
+  const fleetManagerId = req.user?.id; // Get from JWT
+
   console.log("Received date:", date)
 
   if (!date) return res.status(400).json({ message: "Date is required" });
+  if (!fleetManagerId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const results = await sequelize.query(
@@ -21,17 +25,20 @@ const getDailySummary = async (req, res) => {
   ) AS "activeTime"
 FROM 
   gpsdatas d
-JOIN 
-  gpsdevices gd ON gd.deviceId = d.deviceId
+JOIN gpsdevices gd ON gd.deviceId = d.deviceId
+JOIN vehicles v ON v.plateNo = gd.plateNo
+JOIN vehicledetails vd ON vd.vehicleId = v.id
+JOIN driverdetails dd ON dd.id = vd.driverId
 WHERE 
   d.recDate = :date
   AND d.acc IN ('acc on', 'acc off')
+  AND dd.fleetManagerId = :fleetManagerId
 GROUP BY 
-  d.deviceId, gd.plateNo
+  d.deviceId, gd.plateNo;
       
       `,
       {
-        replacements: { date }, // Pass the date dynamically
+        replacements: { date, fleetManagerId }, // Pass the date dynamically
         type: QueryTypes.SELECT,
       }
     );
