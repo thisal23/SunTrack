@@ -24,6 +24,8 @@ const ServiceMaintenance = () => {
   const [isModal_history_Open, setIsModal_history_Open] = useState(false);
   const [vehicleId, setVehicleId] = useState("");
   const [serviceData, setServiceData] = useState([]);
+  const [availableServiceTypes, setAvailableServiceTypes] = useState([]);
+  const [serviceHistory, setServiceHistory] = useState([]);
 
   const showModal_add = (id) => {
     setIsModal_add_Open(true);
@@ -33,11 +35,36 @@ const ServiceMaintenance = () => {
   const showModal_delete = (id) => {
     setIsModal_delete_Open(true);
     setVehicleId(id);
+    // Find the available unique service types for this vehicle
+    let found = null;
+    for (const [plate, data] of Object.entries(serviceData)) {
+      if (data.id === id) {
+        const seen = new Set();
+        found = data.services
+          .filter(s => {
+            if (seen.has(s.serviceType)) return false;
+            seen.add(s.serviceType);
+            return true;
+          })
+          .map(s => ({ serviceType: s.serviceType }));
+        break;
+      }
+    }
+    setAvailableServiceTypes(found || []);
   };
 
   const showModal_history = (id) => {
     setIsModal_history_Open(true);
     setVehicleId(id);
+    // Find the service history for this vehicle
+    let found = [];
+    for (const [plate, data] of Object.entries(serviceData)) {
+      if (data.id === id) {
+        found = data.services;
+        break;
+      }
+    }
+    setServiceHistory(found || []);
   };
 
   const handleCancel_add = () => {
@@ -67,17 +94,18 @@ const ServiceMaintenance = () => {
       const grouped = {};
 
       fetchedData.forEach((entry) => {
-        const vehicleId = entry.vehicle.id;
+        const vehicleId = entry.vehicle.plateNo;
+        const vehicleDbId = entry.vehicle.id;
 
         if (!grouped[vehicleId]) {
-          grouped[vehicleId] = [];
+          grouped[vehicleId] = { id: vehicleDbId, services: [] };
         }
 
-        grouped[vehicleId].push({
+        grouped[vehicleId].services.push({
           serviceType: entry.service.serviceType,
           remark: entry.serviceRemark,
           updatedAt: entry.updatedAt,
-          addedBy: entry.user.firstName + " " + entry.User.lastName,
+          addedBy: entry.user.firstName + " " + entry.user.lastName,
           serviceId: entry.service.id,
         });
       });
@@ -98,7 +126,9 @@ const ServiceMaintenance = () => {
     }
 
     const tableData = Object.entries(serviceData).map(
-      ([vehicleId, services]) => {
+      ([vehicleId, data]) => {
+        const services = data.services;
+        const vehicleDbId = data.id;
         if (!Array.isArray(services) || services.length === 0) {
           return [
             vehicleId ?? "N/A",
@@ -106,7 +136,7 @@ const ServiceMaintenance = () => {
             "-",
             "-",
             "-",
-            "{}",
+            JSON.stringify({ vehicleId: vehicleDbId }),
           ];
         }
 
@@ -131,7 +161,7 @@ const ServiceMaintenance = () => {
           firstService.addedBy,
           JSON.stringify({
             ...firstService,
-            vehicleId: vehicleId, // needed for action buttons!
+            vehicleId: vehicleDbId, // pass DB id for delete
           }),
         ];
       }
@@ -152,16 +182,16 @@ const ServiceMaintenance = () => {
             return `
             <div style="display: flex; gap: 6px;">
               <button class="btn-add" data-vehicle-id="${service.vehicleId}" data-service-id="${service.serviceId}"
-                      style="background:#28a745;color:white;padding:5px 10px;border:none;cursor:pointer;">
-                Add New
+                      style="background:none;border:none;cursor:pointer;color:#28a745;" title="Add New">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
               <button class="btn-delete" data-vehicle-id="${service.vehicleId}" data-service-id="${service.serviceId}"
-                      style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">
-                Delete
+                      style="background:none;border:none;cursor:pointer;color:#dc3545;" title="Delete">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M3 6h18M8 6v12a2 2 0 002 2h4a2 2 0 002-2V6m-6 0V4a2 2 0 012-2h0a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
               <button class="btn-history" data-vehicle-id="${service.vehicleId}" data-service-id="${service.serviceId}"
-                      style="background:#b9ba1e;color:white;padding:5px 10px;border:none;cursor:pointer;">
-                View History
+                      style="background:none;border:none;cursor:pointer;color:#b9ba1e;" title="View History">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
           `;
@@ -212,12 +242,13 @@ const ServiceMaintenance = () => {
 
     table.on("click", ".btn-delete", function () {
       const serviceId = $(this).data("service-id");
-      showModal_delete(serviceId);
+      const vehicleId = $(this).data("vehicle-id");
+      showModal_delete(vehicleId, serviceId);
     });
 
     table.on("click", ".btn-history", function () {
-      const serviceId = $(this).data("service-id");
-      showModal_history(serviceId);
+      const vehicleId = $(this).data("vehicle-id");
+      showModal_history(vehicleId);
     });
 
     return () => {
@@ -261,7 +292,9 @@ const ServiceMaintenance = () => {
             footer={null} // Remove default footer buttons
           >
             <ServiceDeleteCard
+              key={vehicleId}
               vehicleId={vehicleId}
+              availableServiceTypes={availableServiceTypes}
               handleCancel={handleCancel_delete}
             />
           </Modal>
@@ -273,7 +306,9 @@ const ServiceMaintenance = () => {
             footer={null} // Remove default footer buttons
           >
             <ServiceHistoryCard
+              key={vehicleId}
               vehicleId={vehicleId}
+              serviceHistory={serviceHistory}
               handleCancel={handleCancel_history}
             />
           </Modal>

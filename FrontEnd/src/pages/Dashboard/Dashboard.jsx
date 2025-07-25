@@ -30,6 +30,11 @@ const Dashboard = () => {
   const [loadingPendingTrips, setLoadingPendingTrips] = useState(true);
   const [errorPendingTrips, setErrorPendingTrips] = useState("");
 
+  const [topDrivers, setTopDrivers] = useState([]);
+  const [topVehicles, setTopVehicles] = useState([]);
+  const [loadingTop, setLoadingTop] = useState(true);
+  const [errorTop, setErrorTop] = useState("");
+
   const fetchPendingTrips = async () => {
     setLoadingPendingTrips(true);
     setErrorPendingTrips("");
@@ -91,17 +96,35 @@ const Dashboard = () => {
     }
   };
 
+  const fetchTopPerformers = async () => {
+    setLoadingTop(true);
+    setErrorTop("");
+    try {
+      const [driversRes, vehiclesRes] = await Promise.all([
+        apiService.get("trip/top-drivers"),
+        apiService.get("trip/top-vehicles"),
+      ]);
+      setTopDrivers(driversRes.data.data || []);
+      setTopVehicles(vehiclesRes.data.data || []);
+    } catch (err) {
+      setErrorTop("Error fetching top performers");
+    } finally {
+      setLoadingTop(false);
+    }
+  };
+
   useEffect(() => {
     fetchTripCounts();
     fetchVehicleCounts();
     fetchPendingTrips();
     fetchDriverCounts();
+    fetchTopPerformers();
   }, []);
 
   return (
-    <div>
+    <div className="bg-[#f8fafc] min-h-screen dashboard-scroll">
       <NavBar />
-      <div className="container_custom mt-5 mx-auto flex flex-row justify-center gap-4 pt-20 pb-19 items-start h-auto">
+      <div className="container_custom mt-5 mx-auto flex flex-row justify-center gap-4 pt-20 pb-16 items-start h-auto">
         <InfoCard
           CardName="Vehicles"
           count_name_1="Total"
@@ -131,58 +154,62 @@ const Dashboard = () => {
         />
       </div>
 
-      <div className="container_custom mx-auto flex flex-col sm:flex-row justify-between w-full">
-        <div className="bg-[#878FA1] w-full sm:w-1/2 m-2 rounded-lg overflow-hidden h-auto">
-          <div className="px-4 py-3 bg-[#878FA1] sticky top-0 z-10">
-            <span className="text-left text-2xl sm:text-3xl text-[#0F2043] font-semibold block">
-              Driver Updates
+      <div className="container_custom mx-auto flex flex-col sm:flex-row justify-between w-full gap-4">
+        {/* Top Performers Section */}
+        <div className="bg-white shadow-sm w-full sm:w-1/2 m-2 rounded-lg overflow-hidden h-auto">
+          <div className="px-5 py-3 border-b border-gray-100">
+            <span className="text-left text-xl sm:text-2xl text-[#0F2043] font-semibold block">
+              Top Drivers
             </span>
           </div>
-
-          {/* Scrollable List */}
-          <div className="flex flex-col space-y-2 max-h-[400px] overflow-y-auto px-2 py-2">
-            <DriverUpdateCard
-              driverName={"Sugath Amarasiri"}
-              destination={"Arrived to the destination - Colombo fort"}
-              time={"02.29 pm"}
-            />
-            <DriverUpdateCard
-              driverName={"Amal Perera"}
-              destination={"Vehicle breakdown - Ja Ela"}
-              time={"02.15 pm"}
-            />
-            <DriverUpdateCard
-              driverName={"Shehan Mihiranga"}
-              destination={"Started the return trip"}
-              time={"02.08 pm"}
-            />
-            <DriverUpdateCard
-              driverName={"Nimal Siripala"}
-              destination={"Arrived to the destination -  Polonnaruwa"}
-              time={"01.45 pm"}
-            />
-            <DriverUpdateCard
-              driverName={"Sugath Amarasiri"}
-              destination={"Arrived to the destination - Colombo fort"}
-              time={"02.29 pm"}
-            />
-            <DriverUpdateCard
-              driverName={"Amal Perera"}
-              destination={"Vehicle breakdown - Ja Ela"}
-              time={"02.15 pm"}
-            />
+          <div className="flex flex-col space-y-2 max-h-[200px] overflow-y-auto px-5 py-4 dashboard-scroll">
+            {loadingTop ? (
+              <span className="text-[#0F2043] text-base">Loading...</span>
+            ) : errorTop ? (
+              <span className="text-[#0F2043] text-base">{errorTop}</span>
+            ) : topDrivers.length > 0 ? (
+              topDrivers.map((driver, idx) => (
+                <div key={driver.driverId} className="flex flex-row justify-between items-center bg-[#f8fafc] mx-1 rounded px-3 py-2 border border-gray-100">
+                  <span className="text-[#0F2043] text-base font-medium">{idx + 1}. {driver.name}</span>
+                  <span className="text-[#6366f1] text-base">Trips: {driver.tripCount}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-[#0F2043] text-base">No data</span>
+            )}
+          </div>
+          <div className="px-5 py-3 border-t border-gray-100">
+            <span className="text-left text-xl sm:text-2xl text-[#0F2043] font-semibold block">
+              Top Vehicles
+            </span>
+          </div>
+          <div className="flex flex-col space-y-2 max-h-[200px] overflow-y-auto px-5 py-4 dashboard-scroll">
+            {loadingTop ? (
+              <span className="text-[#0F2043] text-base">Loading...</span>
+            ) : errorTop ? (
+              <span className="text-[#0F2043] text-base">{errorTop}</span>
+            ) : topVehicles.length > 0 ? (
+              topVehicles.map((vehicle, idx) => (
+                <div key={vehicle.vehicleId} className="flex flex-row justify-between items-center bg-[#f8fafc] mx-1 rounded px-3 py-2 border border-gray-100">
+                  <span className="text-[#0F2043] text-base font-medium">{idx + 1}. {vehicle.vehicleId} {vehicle.brand} {vehicle.model}</span>
+                  <span className="text-[#6366f1] text-base">Trips: {vehicle.tripCount}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-[#0F2043] text-base">No data</span>
+            )}
           </div>
         </div>
-
-        <div className="bg-[#878FA1] w-full sm:w-1/2 m-2 rounded-lg">
-          <div className="flex flex-row justify-between items-center px-4 py-4">
-            <span className="text-center text-2xl sm:text-3xl text-[#0F2043] font-semibold">
+        {/* Pending Trips Section (unchanged) */}
+        <div className="bg-white shadow-sm w-full sm:w-1/2 m-2 rounded-lg">
+          <div className="flex flex-row justify-between items-center px-5 py-5 border-b border-gray-100 rounded-t-lg">
+            <span className="text-center text-xl sm:text-2xl text-[#0F2043] font-semibold">
               Pending Trips
             </span>
 
             <NavLink
               to="/trips/pending-trips"
-              className="text-center flex flex-row items-center gap-2 text-md text-[#0F2043] hover:underline a_custom_s"
+              className="text-center flex flex-row items-center gap-2 text-base text-[#0F2043] hover:underline a_custom_s"
             >
               View All{" "}
               <span>
@@ -191,14 +218,14 @@ const Dashboard = () => {
             </NavLink>
           </div>
 
-          <div className="flex flex-col space-y-2 max-h-[400px] overflow-y-auto px-2 py-2">
+          <div className="flex flex-col space-y-2 max-h-[400px] overflow-y-auto px-5 py-4 dashboard-scroll">
             {loadingPendingTrips ? (
               <div className="flex flex-row justify-center items-center bg-[#F0F3F8] mx-5 rounded-xl px-4 py-4">
-                <span className="text-[#0F2043] text-lg">Loading...</span>
+                <span className="text-[#0F2043] text-base">Loading...</span>
               </div>
             ) : errorPendingTrips ? (
               <div className="flex flex-row justify-center items-center bg-[#F0F3F8] mx-5 rounded-xl px-4 py-4">
-                <span className="text-[#0F2043] text-lg">
+                <span className="text-[#0F2043] text-base">
                   {errorPendingTrips}
                 </span>
               </div>
@@ -217,7 +244,7 @@ const Dashboard = () => {
               ))
             ) : (
               <div className="flex flex-row justify-center items-center bg-[#F0F3F8] mx-5 rounded-xl px-4 py-4">
-                <span className="text-[#0F2043] text-lg">No pending trips</span>
+                <span className="text-[#0F2043] text-base">No pending trips</span>
               </div>
             )}
           </div>

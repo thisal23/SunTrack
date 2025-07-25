@@ -101,6 +101,8 @@ const DocumentEditCard = ({
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+
+      console.log(formDataToSend);
       if (response.status === 200 && response.data.status) {
         setStatusMessage(response.data.message);
         setIsSuccess(true);

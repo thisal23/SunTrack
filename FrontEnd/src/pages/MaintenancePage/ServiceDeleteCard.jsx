@@ -1,30 +1,12 @@
 import React, { useState, useEffect } from "react";
 import apiService from "../../config/axiosConfig";
 
-const ServiceDeleteCard = ({ vehicleId, onClose, onDeleteSuccess }) => {
-  const [serviceTypes, setServiceTypes] = useState([]);
+const ServiceDeleteCard = ({ vehicleId, availableServiceTypes = [], handleCancel, onDeleteSuccess }) => {
   const [selectedServiceType, setSelectedServiceType] = useState("");
   const [lastRecord, setLastRecord] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetchingRecord, setFetchingRecord] = useState(false);
-
-  // Fetch service types on mount
-  useEffect(() => {
-    const fetchServiceTypes = async () => {
-      try {
-        const res = await apiService.get("service/serviceType/all");
-        if (res.status === 200) {
-          setServiceTypes(res.data.data);
-        } else {
-          setStatusMessage("Failed to fetch service types.");
-        }
-      } catch (err) {
-        setStatusMessage("Error fetching service types.");
-      }
-    };
-    fetchServiceTypes();
-  }, []);
 
   // Fetch last record when service type changes
   useEffect(() => {
@@ -67,7 +49,7 @@ const ServiceDeleteCard = ({ vehicleId, onClose, onDeleteSuccess }) => {
         setStatusMessage("Service record deleted successfully.");
         setTimeout(() => {
           onDeleteSuccess?.();
-          onClose?.();
+          handleCancel?.();
         }, 1500);
       } else {
         setStatusMessage(res.data.message || "Failed to delete record.");
@@ -105,7 +87,7 @@ const ServiceDeleteCard = ({ vehicleId, onClose, onDeleteSuccess }) => {
             <option value="" disabled>
               Select Service Type
             </option>
-            {serviceTypes.map((type) => (
+            {availableServiceTypes.map((type) => (
               <option key={type.id} value={type.id}>
                 {type.serviceType}
               </option>
@@ -142,7 +124,7 @@ const ServiceDeleteCard = ({ vehicleId, onClose, onDeleteSuccess }) => {
             {loading ? "Deleting..." : "Delete"}
           </button>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             disabled={loading}
             className="py-2 px-4 bg-white text-blue-600 font-semibold rounded-md shadow hover:bg-blue-50"
           >

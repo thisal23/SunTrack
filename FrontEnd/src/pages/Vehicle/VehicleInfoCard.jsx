@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import vehicle from "../../assets/vehicle.jpeg";
+// import vehicle from "../../assets/vehicle.jpeg";
 import apiService from "../../config/axiosConfig"; // assuming you use axios through apiService
 
 const VehicleInfoCard = ({ vehicleId }) => {
@@ -34,10 +34,6 @@ const VehicleInfoCard = ({ vehicleId }) => {
     <div>
       <div className="flex flex-row justify-center">
         <span className="text-2xl text-[#0F2043]">Vehicle Details</span>
-      </div>
-
-      <div className="rounded-full flex flex-row justify-center">
-        <img src={vehicle} alt="vehicle_img" />
       </div>
 
       <div className="mx-auto flex flex-row justify-center w-full">

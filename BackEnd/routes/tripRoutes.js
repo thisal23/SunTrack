@@ -10,7 +10,10 @@ const {
   fetchPendingTrips,
   fetchVehiclesForTrip,
   fetchAvailableDriversByDate,
-  fetchAvailableVehiclesByDate
+  fetchAvailableVehiclesByDate,
+  getTopDrivers,
+  getTopVehicles,
+  deleteTrip
 } = require("../controllers/tripController");
 
 const router = express.Router();
@@ -22,11 +25,14 @@ router.get("/trip/all", fetchAllTrips);
 // router.put("/trip/assign_vehicle/:id", assignVehicle);
 router.get("/trip/count", fetchTripCount);
 router.get("/trip/pending", fetchPendingTrips);
+router.get('/trip/top-drivers', getTopDrivers);
+router.get('/trip/top-vehicles', getTopVehicles);
+router.delete("/trip/:id", deleteTrip);
 
 router.post("/trip/:id/assign-driver", assignDriver);
 router.post("/trip/:id/assign-vehicle", assignVehicle);
 router.get("/trip/:tripId/available-drivers", fetchDriverForTrip);
-router.get("/trip/:tripId/available-vehicles", fetchVehiclesForTrip); 
+router.get("/trip/:tripId/available-vehicles", fetchVehiclesForTrip);
 router.get("/available-vehicles", fetchAvailableVehiclesByDate);
 router.get("/available-drivers", fetchAvailableDriversByDate);
 

@@ -1,5 +1,5 @@
 const express = require("express");
-const { createServiceType, fetchServiceDetails, fetchDocumentDetails, updateDocumentDetails, fetchServiceType, updateServiceDetails, createServiceInfo} = require("../controllers/maintenanceController");
+const { createServiceType, fetchServiceDetails, fetchDocumentDetails, updateDocumentDetails, fetchServiceType, updateServiceDetails, createServiceInfo, getServiceHistory } = require("../controllers/maintenanceController");
 const router = express.Router();
 const upload = require("../config/multreConfig"); // Or your custom config
 
@@ -9,7 +9,8 @@ router.get('/service/serviceType/all', fetchServiceType);
 router.get('/service/detailFetch', fetchServiceDetails);
 router.post('/service/create', createServiceInfo);
 router.get('/document/detailFetch', fetchDocumentDetails);
-router.put('/document/update/:licenseId', upload.single("document"), updateDocumentDetails);
+router.put('/document/update/:plateNo', upload.single("document"), updateDocumentDetails);
+router.get('/service/history/:vehicleId', getServiceHistory);
 
 module.exports = router;
 

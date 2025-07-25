@@ -1,6 +1,5 @@
 import React from "react";
 
-// Sachini part
 const InfoCard = ({
   CardName,
   count_name_1,
@@ -11,26 +10,21 @@ const InfoCard = ({
   count_3,
 }) => {
   return (
-    <div className="flex flex-col items-center w-full">
-      <div className="heading bg-[#878FA0] w-full rounded-tl-2xl rounded-tr-2xl">
-        <span className="text-[#0F2043] text-2xl p-5 text-left">
-          {CardName}
-        </span>
+    <div className="flex flex-col items-center w-full bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
+      <div className="w-full px-5 py-3 border-b border-gray-100 bg-white">
+        <span className="text-[#0F2043] text-xl font-semibold">{CardName}</span>
       </div>
-
-      <div className="flex flex-row justify-between border-l-2 border-r-2 border-b-2 border-[#0F2043] w-full text-[#0f2043]">
-        <span className="p-4 text-xl">{count_name_1}</span>
-        <span className="p-4 text-xl">{count_1}</span>
+      <div className="flex flex-row justify-between w-full text-[#0f2043] px-5 py-3 border-b border-gray-50">
+        <span className="text-base">{count_name_1}</span>
+        <span className="text-base font-medium">{count_1}</span>
       </div>
-
-      <div className="flex flex-row justify-between border-l-2 border-r-2 border-b-2 border-[#0F2043] w-full text-[#0f2043]">
-        <span className="p-4 text-xl">{count_name_2}</span>
-        <span className="p-4 text-xl">{count_2}</span>
+      <div className="flex flex-row justify-between w-full text-[#0f2043] px-5 py-3 border-b border-gray-50">
+        <span className="text-base">{count_name_2}</span>
+        <span className="text-base font-medium">{count_2}</span>
       </div>
-
-      <div className="flex flex-row justify-between border-l-2 border-r-2 border-b-2 border-[#0F2043] w-full text-[#0f2043]">
-        <span className="p-4 text-xl">{count_name_3}</span>
-        <span className="p-4 text-xl">{count_3}</span>
+      <div className="flex flex-row justify-between w-full text-[#0f2043] px-5 py-3">
+        <span className="text-base">{count_name_3}</span>
+        <span className="text-base font-medium">{count_3}</span>
       </div>
     </div>
   );

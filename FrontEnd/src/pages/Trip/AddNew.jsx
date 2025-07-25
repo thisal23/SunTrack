@@ -4,8 +4,6 @@ import apiService from "../../config/axiosConfig";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-<ToastContainer position="top-right" autoClose={3000} />;
-
 const AddNew = () => {
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -21,22 +19,6 @@ const AddNew = () => {
     vehicleId: "",
     status: "pending",
   });
-
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       try {
-  //         const [driverRes, vehicleRes] = await Promise.all([
-  //           apiService.get("/available-drivers"),
-  //           apiService.get("available-vehicles"),
-  //         ]);
-  //         setDrivers(driverRes.data);
-  //         setVehicles(vehicleRes.data);
-  //       } catch (err) {
-  //         console.error("Error fetching drivers/vehicles", err);
-  //       }
-  //     };
-  //     fetchData();
-  //   }, []);
 
   useEffect(() => {
     if (tripData.date) {
@@ -58,7 +40,7 @@ const AddNew = () => {
           }
 
           setVehicles(vehicleRes.data);
-          setDrivers(driverRes.data.data); // Assuming { status, message, data }
+          setDrivers(driverRes.data.data);
         } catch (err) {
           console.error("Error fetching filtered drivers/vehicles", err);
           toast.error("Failed to fetch available drivers or vehicles.");
@@ -78,21 +60,33 @@ const AddNew = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting tripData:", tripData);
+    
+    // Validate required fields (note: suggestEndTime is NOT required)
+    if (!tripData.startLocation || !tripData.endLocation || !tripData.date || !tripData.suggestStartTime) {
+      toast.error("Please fill all required fields: start location, end location, date, and suggested start time.");
+      return;
+    }
 
     try {
-      const response = await apiService.post("/trip/create", {
+      // Build the payload, only including suggestEndTime if it's provided
+      const payload = {
         startLocation: tripData.startLocation,
         endLocation: tripData.endLocation,
         date: tripData.date,
         suggestStartTime: tripData.suggestStartTime,
-        suggestEndTime: tripData.suggestEndTime,
-        tripRemark: tripData.tripRemark,
-        driverId: tripData.driverId ? +tripData.driverId : null,
-        vehicleId: tripData.vehicleId ? +tripData.vehicleId : null,
-        status: "pending",
-      });
+        status: tripData.status,
+        ...(tripData.tripRemark && tripData.tripRemark.trim() ? { tripRemark: tripData.tripRemark } : {}),
+        ...(tripData.driverId ? { driverId: +tripData.driverId } : {}),
+        ...(tripData.vehicleId ? { vehicleId: tripData.vehicleId } : {}), // Fixed: removed unnecessary conversion
+        ...(tripData.suggestEndTime ? { suggestEndTime: tripData.suggestEndTime } : {}),
+      };
 
+      console.log("Sending payload:", payload);
+
+      const response = await apiService.post("/trip/create", payload);
+      
+      console.log("Response:", response);
+      
       if (response.status === 201) {
         toast.success(response.data.message || "Trip created successfully");
         setTripData({
@@ -120,9 +114,9 @@ const AddNew = () => {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={3000} />
       <NavBar />
-      <div className="min-h-screen w-full p-6 text-black bg-gray-100">
+      <div className="min-h-screen w-full p-6 text-black bg-gray-100 py-10">
         <div className="flex flex-row justify-between items-center my-5">
           <span className="text-3xl text-[#0F2043] font-semibold">
             Trips &gt; Create New Trip
@@ -137,7 +131,7 @@ const AddNew = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-left mb-1 font-medium text-gray-700">
-                Start Location
+                Start Location *
               </label>
               <input
                 type="text"
@@ -145,13 +139,14 @@ const AddNew = () => {
                 value={tripData.startLocation}
                 onChange={handleChange}
                 required
+                autoComplete="off"
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-200"
               />
             </div>
 
             <div>
               <label className="block text-left mb-1 font-medium text-gray-700">
-                End Location
+                End Location *
               </label>
               <input
                 type="text"
@@ -159,13 +154,14 @@ const AddNew = () => {
                 value={tripData.endLocation}
                 onChange={handleChange}
                 required
+                autoComplete="off"
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-200"
               />
             </div>
 
             <div>
               <label className="block text-left mb-1 font-medium text-gray-700">
-                Date
+                Date *
               </label>
               <input
                 type="date"
@@ -180,7 +176,7 @@ const AddNew = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-left mb-1 font-medium text-gray-700">
-                  Suggested Start Time
+                  Suggested Start Time *
                 </label>
                 <input
                   type="time"
@@ -191,17 +187,15 @@ const AddNew = () => {
                   className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-200"
                 />
               </div>
-
               <div>
                 <label className="block text-left mb-1 font-medium text-gray-700">
-                  Suggested End Time
+                  Suggested End Time <span className="text-gray-400">(Optional)</span>
                 </label>
                 <input
                   type="time"
                   name="suggestEndTime"
                   value={tripData.suggestEndTime}
                   onChange={handleChange}
-                  required
                   className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-200"
                 />
               </div>
@@ -209,20 +203,19 @@ const AddNew = () => {
 
             <div>
               <label className="block text-left mb-1 font-medium text-gray-700">
-                Assign Vehicle
+                Assign Vehicle <span className="text-gray-400">(Optional)</span>
               </label>
               <select
                 name="vehicleId"
                 value={tripData.vehicleId}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-4 py-2"
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-200"
               >
                 <option value="">Select a vehicle</option>
                 {Array.isArray(vehicles) &&
                   vehicles.map((vehicle, index) => (
-                    <option key={index} value={vehicle.id}>
-                      {vehicle.vehicleBrand.brand} {vehicle.vehicleModel.model}-{" "}
-                      {vehicle.category}
+                    <option key={index} value={vehicle.plateNo}>
+                      {vehicle.vehicleBrand?.brand || 'Unknown Brand'} {vehicle.vehicleModel?.model || 'Unknown Model'} - {vehicle.category}
                     </option>
                   ))}
               </select>
@@ -230,19 +223,19 @@ const AddNew = () => {
 
             <div>
               <label className="block text-left mb-1 font-medium text-gray-700">
-                Assign Driver
+                Assign Driver <span className="text-gray-400">(Optional)</span>
               </label>
               <select
                 name="driverId"
                 value={tripData.driverId}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-4 py-2"
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-200"
               >
                 <option value="">Select a driver</option>
-                {Array.isArray(vehicles) &&
+                {Array.isArray(drivers) &&
                   drivers.map((driver, index) => (
                     <option key={index} value={driver.id}>
-                      {driver.user.firstName} - {driver.licenseType}
+                      {driver.user?.firstName || 'Unknown Name'} - {driver.licenseType}
                     </option>
                   ))}
               </select>
@@ -250,13 +243,14 @@ const AddNew = () => {
 
             <div>
               <label className="block text-left mb-1 font-medium text-gray-700">
-                Trip Remark
+                Trip Remark <span className="text-gray-400">(Optional)</span>
               </label>
               <textarea
                 name="tripRemark"
                 value={tripData.tripRemark}
                 onChange={handleChange}
-                rows="1"
+                rows="3"
+                placeholder="Enter any additional notes about this trip..."
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-200"
               ></textarea>
             </div>

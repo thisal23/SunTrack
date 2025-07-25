@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import MenuLink from "../MenuLink/MenuLink";
 import "./NavBar.css";
 import { useNavigate, NavLink } from "react-router-dom";
@@ -10,6 +10,8 @@ function NavBar() {
 
   const [dropMenuOpen_1, setDropMenuOpen_1] = useState(false);
   const [dropMenuOpen_2, setDropMenuOpen_2] = useState(false);
+  const closeTimeoutRef1 = useRef(null);
+  const closeTimeoutRef2 = useRef(null);
 
   const handleHover_1 = () => {
     setDropMenuOpen_1(() => !dropMenuOpen_1);
@@ -73,19 +75,26 @@ function NavBar() {
               <MenuLink className="menuLink" url="/tracking" name="Tracking" />
               <MenuLink className="menuLink" url="/reports" name="Reports" />
 
+              {/* Maintenance Dropdown */}
               <div
-                className="text-white  hover:underline"
-                onMouseEnter={handleHover_1}
-                onMouseLeave={handleHover_1}
+                className="text-white"
+                style={{ position: "relative", display: "inline-block" }}
+                onMouseEnter={() => {
+                  if (closeTimeoutRef1.current) clearTimeout(closeTimeoutRef1.current);
+                  setDropMenuOpen_1(true);
+                  setDropMenuOpen_2(false); // Close the other dropdown
+                }}
+                onMouseLeave={() => {
+                  closeTimeoutRef1.current = setTimeout(() => setDropMenuOpen_1(false), 2000);
+                }}
               >
                 Maintenance
-                {/* Dropdown menu */}
                 <div
-                  className={`${
+                  className={
                     dropMenuOpen_1
-                      ? "dropdown_menu_show h-auto w-auto px-0 py-2 space-y-2 right-10 z-[99] bg-[#c9c9c9]"
+                      ? "dropdown_menu_show h-auto w-250px px-0 py-2 space-y-2 right-10 z-[99] bg-[#c9c9c9]"
                       : "dropdown_menu_hide"
-                  }`}
+                  }
                 >
                   <NavLink
                     to="/maintenance/document-maintenance"
@@ -105,26 +114,30 @@ function NavBar() {
                 </div>
               </div>
 
+              {/* Manage Dropdown */}
               <div
-                className="text-white  hover:underline"
-                onMouseEnter={handleHover_2}
-                onMouseLeave={handleHover_2}
+                className="text-white hover:underline"
+                style={{ position: "relative", display: "inline-block" }}
+                onMouseEnter={() => {
+                  if (closeTimeoutRef2.current) clearTimeout(closeTimeoutRef2.current);
+                  setDropMenuOpen_2(true);
+                  setDropMenuOpen_1(false); // Close the other dropdown
+                }}
+                onMouseLeave={() => {
+                  closeTimeoutRef2.current = setTimeout(() => setDropMenuOpen_2(false), 2000);
+                }}
               >
                 Manage
-                {/* Dropdown menu */}
                 <div
-                  className={`${
+                  className={
                     dropMenuOpen_2
                       ? "dropdown_menu_show h-auto w-auto px-0 py-2 space-y-2 right-10 z-[98] bg-[#c9c9c9]"
                       : "dropdown_menu_hide"
-                  }`}
+                  }
                 >
                   <NavLink
-
-
                     to="/register"
                     className="text-black hover:underline pr-10 pl-2 py-2 bg-[#e8e8e8] text-left"
-
                     end
                   >
                     Add New Driver

@@ -60,7 +60,7 @@ app.use('/api', geoRoutes);
 
 app.use('/api', maintenanceRoutes)
 app.use('/api', userRoutes)
-//app.use('/api', vehicleRoutes)
+app.use('/api', vehicleRoutes)
 app.use('/api', tripRoutes)
 app.use('/api', geoFenceEventRoutes);
 app.use('/api', mapRouteHistory);

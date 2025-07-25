@@ -59,7 +59,7 @@ const fetchServiceDetails = async (req, res) => {
         },
         {
           model: Vehicle,
-          attributes: ['id'], // Only fetch 'vehicleId' from Vehicle table
+          attributes: ['id', 'plateNo'], // Only fetch 'vehicleId' from Vehicle table
           required: true,
         },
       ],
@@ -77,46 +77,63 @@ const fetchServiceDetails = async (req, res) => {
 
 //update existing document record
 const updateDocumentDetails = async (req, res) => {
-  const { id } = req.params;
+  const { plateNo } = req.params;
   const {
     documentType,
     lastUpdate,
     expiryDate
   } = req.body;
-  const sequelize = VehicleDetail.sequelize; // Get sequelize instance from any model
+  const sequelize = VehicleDetail.sequelize;
   const transaction = await sequelize.transaction();
-  const documentFile = req.file; // multer uploaded file info
+  const documentFile = req.file;
 
   try {
+    // ✅ Step 1: Get vehicle by plateNo
+    const vehicle = await Vehicle.findOne({
+      where: { plateNo },
+      transaction,
+    });
+
+    if (!vehicle) {
+      await transaction.rollback();
+      if (documentFile) {
+        fs.unlink(documentFile.path, err => {
+          if (err) console.error('Error deleting uploaded file after rollback:', err);
+        });
+      }
+      return res.status(404).json({ status: false, message: "No vehicle found for given plate number." });
+    }
+
+    // ✅ Step 2: Get corresponding VehicleDetail by vehicle.id
     const vehicleDetail = await VehicleDetail.findOne({
-      where: { id },
+      where: { vehicleId: vehicle.id },
       transaction,
     });
 
     if (!vehicleDetail) {
       await transaction.rollback();
-      // If a file was uploaded but no vehicleDetail found, delete the uploaded file
       if (documentFile) {
-        fs.unlink(documentFile.path, (err) => {
+        fs.unlink(documentFile.path, err => {
           if (err) console.error('Error deleting uploaded file after rollback:', err);
         });
       }
-      return res.status(404).json({ status: false, message: "Vehicle document details not found for the given license ID." });
+      return res.status(404).json({ status: false, message: "Vehicle document details not found for this vehicle." });
     }
 
     const updateFields = {};
-    let oldFilePath = null; // To store path of old document file for deletion
+    let oldFilePath = null;
 
-    // Conditionally update fields based on documentType
+    // ✅ Step 3: Update document-specific fields
     switch (documentType) {
       case 'License':
         updateFields.licenseLastUpdate = lastUpdate || null;
         updateFields.licenseExpireDate = expiryDate || null;
         if (documentFile) {
-          oldFilePath = vehicleDetail.licenseDocument; // Get old path
+          oldFilePath = vehicleDetail.licenseDocument;
           updateFields.licenseDocument = `/uploads/documents/${documentFile.filename}`;
         }
         break;
+
       case 'Insurance':
         updateFields.insuranceLastUpdate = lastUpdate || null;
         updateFields.insuranceExpireDate = expiryDate || null;
@@ -125,6 +142,7 @@ const updateDocumentDetails = async (req, res) => {
           updateFields.insuranceDocument = `/uploads/documents/${documentFile.filename}`;
         }
         break;
+
       case 'Eco Test':
         updateFields.ecoLastUpdate = lastUpdate || null;
         updateFields.ecoExpireDate = expiryDate || null;
@@ -133,30 +151,30 @@ const updateDocumentDetails = async (req, res) => {
           updateFields.ecoDocument = `/uploads/documents/${documentFile.filename}`;
         }
         break;
+
       default:
         await transaction.rollback();
-        if (documentFile) { // Delete uploaded file if document type is invalid
-          fs.unlink(documentFile.path, (err) => {
+        if (documentFile) {
+          fs.unlink(documentFile.path, err => {
             if (err) console.error('Error deleting uploaded file for invalid document type:', err);
           });
         }
         return res.status(400).json({ status: false, message: "Invalid document type provided." });
     }
 
-    // Update the VehicleDetail record within the transaction
+    // ✅ Step 4: Update VehicleDetail
     await vehicleDetail.update(updateFields, { transaction });
-
     await transaction.commit();
 
-    // If a new file was uploaded AND there was an old file, delete the old file AFTER successful commit
+    // ✅ Step 5: Delete old file if new one is uploaded
     if (documentFile && oldFilePath) {
-      // Remove '/uploads/' prefix if it's stored in the DB this way
-      const filePathToDelete = oldFilePath.startsWith('/uploads/') ? oldFilePath.substring('/uploads/'.length) : oldFilePath;
-      const fullPathToDelete = path.join(__dirname, '../', 'uploads', filePathToDelete); // Adjust path as needed
+      const filePathToDelete = oldFilePath.startsWith('/uploads/')
+        ? oldFilePath.substring('/uploads/'.length)
+        : oldFilePath;
+      const fullPathToDelete = path.join(__dirname, '../', 'uploads', filePathToDelete);
 
-      fs.unlink(fullPathToDelete, (err) => {
+      fs.unlink(fullPathToDelete, err => {
         if (err) {
-          // Log the error but don't stop the response as update was successful
           console.error(`Failed to delete old document file: ${fullPathToDelete}`, err);
         } else {
           console.log(`Old document file deleted: ${fullPathToDelete}`);
@@ -167,26 +185,25 @@ const updateDocumentDetails = async (req, res) => {
     res.status(200).json({
       status: true,
       message: `${documentType} document updated successfully!`,
-      data: vehicleDetail, // Return the updated vehicleDetail
+      data: vehicleDetail,
     });
 
   } catch (error) {
     await transaction.rollback();
-    // If an error occurred and a file was uploaded, delete it
     if (documentFile) {
-      fs.unlink(documentFile.path, (err) => {
+      fs.unlink(documentFile.path, err => {
         if (err) console.error('Error deleting uploaded file after rollback:', err);
       });
     }
     console.error('Error updating vehicle document details:', error);
-    res.status(500).json({ // Use 500 for server-side errors
+    res.status(500).json({
       status: false,
       message: "Failed to update vehicle document details.",
       error: error.message,
-      stack: error.stack // Include stack for debugging in development, remove in production
     });
   }
-}
+};
+
 
 
 
@@ -203,7 +220,9 @@ const fetchDocumentDetails = async (req, res) => {
         "licenseLastUpdate",
         "licenseExpireDate",
         "insuranceLastUpdate",
-        "insuranceExpireDate"
+        "insuranceExpireDate",
+        "ecoLastUpdate",
+        "ecoExpireDate",
       ],
       include: [
         {
@@ -261,6 +280,32 @@ const createServiceInfo = async (req, res) => {
 };
 
 
+const getServiceHistory = async (req, res) => {
+  const { vehicleId } = req.params;
+  if (!vehicleId) {
+    return res.status(400).json({ status: false, message: 'Vehicle ID is required' });
+  }
+  try {
+    const history = await ServiceInfo.findAll({
+      where: { vehicleId },
+      include: [
+        { model: Service, as: 'service', attributes: ['serviceType'] },
+        { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
+      ],
+      order: [['updatedAt', 'DESC']],
+    });
+    const formatted = history.map(h => ({
+      serviceType: h.service?.serviceType,
+      remark: h.serviceRemark,
+      updatedAt: h.updatedAt,
+      addedBy: h.user ? `${h.user.firstName} ${h.user.lastName}` : '',
+    }));
+    res.json({ status: true, data: formatted });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
 
 module.exports = {
   fetchServiceType,
@@ -269,4 +314,5 @@ module.exports = {
   fetchServiceDetails,
   fetchDocumentDetails,
   updateDocumentDetails,
+  getServiceHistory,
 };

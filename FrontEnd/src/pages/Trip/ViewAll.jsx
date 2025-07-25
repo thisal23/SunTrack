@@ -29,6 +29,7 @@ const ViewAll = () => {
 
   const [tripData, setTripData] = useState([]);
   const [tripId, setTripId] = useState("");
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
   const showModal_assign = (id) => {
     setIsModal_assignOpen(true);
@@ -40,14 +41,17 @@ const ViewAll = () => {
     setTripId(id);
   };
 
-  const showModal_delete = (id) => {
+  const showModal_delete = (id, startLocation, endLocation, date) => {
     setIsModal_deleteOpen(true);
     setTripId(id);
+    setSelectedTrip({ startLocation, endLocation, date });
   };
 
   const handleTripUpdateSuccess = () => {
     console.log("Trip Data update successful! Refreshing data...");
     fetchTrips(); // Call the fetch function to get the latest data
+    setIsModal_deleteOpen(false);
+    setSelectedTrip(null);
   };
 
   const handleCancel_edit = () => {
@@ -105,6 +109,8 @@ const ViewAll = () => {
     $(tableRef.current).DataTable({
       data: tripData?.map((item) => [
         item.id,
+        item.startLocation, // 1 (hidden)
+  item.endLocation,   
         `<a href="https://www.google.com/maps/dir/${
           (item.startLocation ?? "").split(",")[0]
         },${(item.startLocation ?? "").split(",")[1]}/${
@@ -123,6 +129,8 @@ const ViewAll = () => {
       order: [],
       columns: [
         { title: "ID" },
+        { title: "Start Location", visible: false },
+  { title: "End Location", visible: false },
         { title: "Trip Location" },
         { title: "Date" },
         { title: "Suggested Start" },
@@ -134,7 +142,7 @@ const ViewAll = () => {
           title: "Ass: Driver/Ass:Vehicle",
           data: null,
           render: function (data, type, row) {
-            const tripStatus = row[4]; // Index of 'status' column
+            const tripStatus = row[6]; // Index of 'status' column
             const disabled =
               tripStatus !== "pending"
                 ? 'disabled style="background:gray;cursor:not-allowed;"'
@@ -153,20 +161,31 @@ const ViewAll = () => {
           data: null,
           render: function (data, type, row) {
             return `
-              <button class="btn-edit" data-id="${row[0]}" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
-              <button class="btn-delete" data-id="${row[0]}" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="btn-edit" data-id="${row[0]}" style="background:none;border:none;cursor:pointer;color:#28a745;" title="Edit">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zm17.71-10.04a1.003 1.003 0 000-1.42l-2.5-2.5a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  </svg>
+                </button>
+                <button class="btn-delete" data-id="${row[0]}" data-start-location="${row[1]}" data-end-location="${row[2]}" data-date="${row[4]}" style="background:none;border:none;cursor:pointer;color:#dc3545;" title="Delete">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5a2 2 0 01-2 1.5H8.5a2 2 0 01-2-1.5L5 9zm5 2v7h2v-7h-2zm4 0v7h2v-7h-2zm-8 0v7h2v-7H6z"/>
+                  </svg>
+                </button>
+              </div>
             `;
           },
-        },
+        }
+        ,
       ],
       createdRow: function (row, data, dataIndex) {
-        if (data[4].toLowerCase() === "pending") {
+        if (data[6].toLowerCase() === "pending") {
           $(row).css("background-color", "#eceb8dff"); // Yellow
-        } else if (data[4].toLowerCase() === "ready") {
+        } else if (data[6].toLowerCase() === "ready") {
           $(row).css("background-color", "#ffad5f"); // Orange
-        } else if (data[4].toLowerCase() === "live") {
+        } else if (data[6].toLowerCase() === "live") {
           $(row).css("background-color", "#d4edda"); // Green
-        } else if (data[4].toLowerCase() === "finished") {
+        } else if (data[6].toLowerCase() === "finished") {
           $(row).css("background-color", "#f8d7da"); // Red
         }
       },
@@ -177,7 +196,7 @@ const ViewAll = () => {
     });
 
     $(tableRef.current).on("click", ".btn-delete", function () {
-      showModal_delete($(this).data("id"));
+      showModal_delete($(this).data("id"), $(this).data("start-location"), $(this).data("end-location"), $(this).data("date"));
     });
 
     $(tableRef.current).on("click", ".assign_data", function () {
@@ -240,11 +259,14 @@ const ViewAll = () => {
             okButtonProps={{ style: { display: "none" } }}
           >
             <PendingTripDeleteCard
-              tripId={tripId}
-              handleCancel={handleCancel_delete}
-              onUpdateSuccess={handleTripUpdateSuccess}
-            />
-          </Modal>
+  tripId={tripId}
+  startLocation={selectedTrip?.startLocation}
+  endLocation={selectedTrip?.endLocation}
+  date={selectedTrip?.date}
+  handleCancel={handleCancel_delete}
+  onUpdateSuccess={handleTripUpdateSuccess}
+/>
+  </Modal>
         </div>
       </div>
     </>

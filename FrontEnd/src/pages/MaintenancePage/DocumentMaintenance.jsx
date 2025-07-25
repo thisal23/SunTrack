@@ -7,10 +7,9 @@ import "datatables.net-dt";
 import "datatables.net-responsive-dt";
 import "datatables.net-select-dt";
 import { Modal } from "antd";
-import DocumentDeleteCard from "./DocumentDeleteCard";
 import NavBar from "../../components/NavBar/NavBar";
-//import "datatables.net-rowgroup";
-//import "datatables.net-rowgroup-dt/css/rowGroup.dataTables.min.css";
+import "datatables.net-rowgroup";
+import "datatables.net-rowgroup-dt/css/rowGroup.dataTables.min.css";
 import apiService from "../../config/axiosConfig";
 import DocumentEditCard from "./DocumentEditCard";
 import { toast, ToastContainer } from "react-toastify";
@@ -18,7 +17,6 @@ import { toast, ToastContainer } from "react-toastify";
 const DocumentMaintenance = () => {
   const tableRef = useRef(null);
   const [isModal_1_Open, setIsModal_1_Open] = useState(false);
-  const [isModal_2_Open, setIsModal_2_Open] = useState(false);
   const [plateNo, setPlateNo] = useState("");
   const [documentData, setDocumentData] = useState([]);
   const [currentDocumentType, setCurrentDocumentType] = useState("");
@@ -44,11 +42,6 @@ const DocumentMaintenance = () => {
     setCurrentDocumentType("");
     setExpiryDate("");
     setLastUpdate("");
-  };
-
-  const handleCancel_2 = () => {
-    setIsModal_2_Open(false);
-    setPlateNo("");
   };
 
   const fetchDocumentDetails = async () => {
@@ -126,7 +119,7 @@ const DocumentMaintenance = () => {
     $(tableRef.current).DataTable({
       data: prepareTableData(documentData),
       columns: [
-        { title: "VehicleNo", visible: false },
+        { title: "VehicleNo", visible: false},
         { title: "Document Type" },
         { title: "Last Update Date" },
         { title: "Next Update Date" },
@@ -156,28 +149,19 @@ const DocumentMaintenance = () => {
             const licenseValue = row[6] !== undefined ? row[6] : "";
             return `
             <div style="display: flex; gap: 6px;">
-            <button class="btn-edit"
-                      data-id="${row[0]}"
-                      data-document-type="${row[1]}"
-                      data-lastupdatevalue="${row[2]}"
-                      data-expiredatevalue="${row[3]}"
-                      style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">
-                Edit
+              <button class="btn-edit"
+                data-id="${row[0]}"
+                data-document-type="${row[1]}"
+                data-lastupdatevalue="${row[2]}"
+                data-expiredatevalue="${row[3]}"
+                style="background:none;border:none;cursor:pointer;color:#28a745;" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zm17.71-10.04a1.003 1.003 0 000-1.42l-2.5-2.5a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
               </button>
-
-              </div>
+            </div>
             `;
           },
         },
       ],
-
-      // <button class="btn-delete"
-      //                 data-id="${row[0]}"
-      //                 data-dt="${row[1]}"
-      //                 data-license="${licenseValue}"
-      //                 style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">
-      //           Delete
-      //         </button>
 
       responsive: true,
       select: true, // If you want row selection
@@ -244,18 +228,6 @@ const DocumentMaintenance = () => {
             />
           </Modal>
 
-          {/* <Modal
-            title="Delete Document Services"
-            open={isModal_2_Open}
-            onCancel={handleCancel_2}
-            footer={null} // Remove default footer buttons
-          >
-            <DocumentDeleteCard
-              plateNo={plateNo}
-              handleCancel={handleCancel_2}
-              onDeleteSuccess={fetchDocumentDetails}
-            />
-          </Modal> */}
         </div>
       </div>
     </>

@@ -154,14 +154,16 @@ const AllVehicle = () => {
             console.log(row);
             return `
             <div style="display: flex; gap: 6px;">
-
-            <button class="btn-view" data-id="${row[8]}" style="background:#007bff;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">View</button>
-
-              <button class="btn-edit" data-id="${row[8]}" style="background:#28a745;color:white;padding:5px 10px;border:none;margin-right:5px;cursor:pointer;">Edit</button>
-              
-              <button class="btn-delete" data-plateno="${row[0]}" style="background:#dc3545;color:white;padding:5px 10px;border:none;cursor:pointer;">Delete</button>
-
-            </div>
+                <button class="btn-view" data-id="${row[8]}" style="background:none;border:none;cursor:pointer;color:#007bff;" title="View">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 5c-7 0-9 7-9 7s2 7 9 7 9-7 9-7-2-7-9-7zm0 12c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/></svg>
+                </button>
+                <button class="btn-edit" data-id="${row[8]}" style="background:none;border:none;cursor:pointer;color:#28a745;" title="Edit">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zm17.71-10.04a1.003 1.003 0 000-1.42l-2.5-2.5a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                </button>
+                <button class="btn-delete" data-plateno="${row[0]}" style="background:none;border:none;cursor:pointer;color:#dc3545;" title="Delete">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5a2 2 0 01-2 1.5H8.5a2 2 0 01-2-1.5L5 9zm5 2v7h2v-7h-2zm4 0v7h2v-7h-2zm-8 0v7h2v-7H6z"/></svg>
+                </button>
+              </div>
             `;
           },
         },

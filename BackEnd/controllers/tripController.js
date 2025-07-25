@@ -1,21 +1,24 @@
-const { Trip, TripDetail, User, Vehicle, driverDetail, VehicleBrand, VehicleModel } = require("../models");
+const { Trip, TripDetail, User, Vehicle, DriverDetail, VehicleBrand, VehicleModel } = require("../models");
 const { Op } = require("sequelize");
+const axios = require('axios');
+const sequelize = require('sequelize');
 
 //create new trip
 const createTrip = async (req, res) => {
   const {
-      startLocation,
-      endLocation,
-      date,
-      suggestStartTime,
-      status,
-      driverStartTime,
-      driverEndTime,
-      suggestEndTime,
-      tripRemark,
-      driverId,
-      vehicleId,
-    } = req.body;
+    startLocation,
+    endLocation,
+    date,
+    status,
+    suggestStartTime,
+    suggestEndTime,
+    tripRemark,
+    driverId,
+    vehicleId,
+    driverStartTime,
+    driverEndTime,
+
+  } = req.body;
 
   if (!startLocation || !endLocation) {
     return res
@@ -79,7 +82,7 @@ const assignDriver = async (req, res) => {
 
   try {
     // ✅ Check if the driver exists
-    const driver = await driverDetail.findByPk(driverId);
+    const driver = await DriverDetail.findByPk(driverId);
     if (!driver) {
       return res.status(404).json({ status: false, message: "Driver not found" });
     }
@@ -131,15 +134,15 @@ const fetchAvailableVehiclesByDate = async (req, res) => {
           [Op.notIn]: unavailable,
         },
       },
-      include:[{
-          model:VehicleModel,
-          as:'vehicleModel'
+      include: [{
+        model: VehicleModel,
+        as: 'vehicleModel'
       },
       {
-        model:VehicleBrand,
+        model: VehicleBrand,
         as: 'vehicleBrand'
       },
-    ],
+      ],
     });
 
     res.json(availableVehicles);
@@ -174,7 +177,7 @@ const fetchAvailableDriversByDate = async (req, res) => {
 
     const assignedDriverIds = assignedDrivers.map(d => d.driverId);
 
-    const driverData = await driverDetail.findAll({
+    const driverData = await DriverDetail.findAll({
       include: [
         {
           model: User,
@@ -252,14 +255,14 @@ const fetchAllTrips = async (req, res) => {
           required: false,
           include: [
             {
-              model: driverDetail,
+              model: DriverDetail,
               as: 'driver',
               required: false,
               include: [
                 {
                   model: User,
                   as: 'driverUser',
-                  attributes: ['firstName','lastName'], // or firstName, lastName depending on your schema
+                  attributes: ['firstName', 'lastName'], // or firstName, lastName depending on your schema
                   required: false
                 }
               ]
@@ -274,24 +277,24 @@ const fetchAllTrips = async (req, res) => {
     }
 
     const formatted = data.map(trip => {
-  const detail = trip.tripDetail;20
-  const user = detail?.driver?.driverUser;
+      const detail = trip.tripDetail; 20
+      const user = detail?.driver?.driverUser;
 
-  const driverName = user ? `${user.firstName} ${user.lastName}` : null;
+      const driverName = user ? `${user.firstName} ${user.lastName}` : null;
 
-  return {
-    id: trip.id,
-    date: trip.date,
-    status: trip.status,
-    driverName: driverName,
-    vehicleId: detail?.vehicleId ?? null,
-    tripRemark: detail?.tripRemark ?? null,
-    startLocation: trip.startLocation ?? null,
-    endLocation: trip.endLocation ?? null,
-    suggestStartTime: trip.suggestStartTime ?? null,
-    suggestEndTime: trip.suggestEndTime ?? null,
-  };
-});
+      return {
+        id: trip.id,
+        date: trip.date,
+        status: trip.status,
+        driverName: driverName,
+        vehicleId: detail?.vehicleId ?? null,
+        tripRemark: detail?.tripRemark ?? null,
+        startLocation: trip.startLocation ?? null,
+        endLocation: trip.endLocation ?? null,
+        suggestStartTime: trip.suggestStartTime ?? null,
+        suggestEndTime: trip.suggestEndTime ?? null,
+      };
+    });
 
 
     return res.status(200).json({
@@ -336,7 +339,7 @@ const fetchDriverForTrip = async (req, res) => {
 
     const assignedDriverIds = assignedDrivers.map(d => d.driverId);
 
-    const driverData = await driverDetail.findAll({
+    const driverData = await DriverDetail.findAll({
       include: [
         {
           model: User,
@@ -369,24 +372,24 @@ const fetchDriverForTrip = async (req, res) => {
 
 
 //fetchTripCount
-const fetchTripCount = async (req,res) => {
-    try {
-      const [pending, live, finished] = await Promise.all([
-        Trip.count({ where: { status: "pending" } }),
-        Trip.count({ where: { status: "live" } }),
-        Trip.count({ where: { status: "finished" } }),
-      ]);
+const fetchTripCount = async (req, res) => {
+  try {
+    const [pending, live, finished] = await Promise.all([
+      Trip.count({ where: { status: "pending" } }),
+      Trip.count({ where: { status: "live" } }),
+      Trip.count({ where: { status: "finished" } }),
+    ]);
 
-      return res.json({
-        pending,
-        live,
-        finished,
-      });
-    } catch (error) {
-      console.error("Error fetching trip counts:", error);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  }; 
+    return res.json({
+      pending,
+      live,
+      finished,
+    });
+  } catch (error) {
+    console.error("Error fetching trip counts:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 //fetch vehicles for trip
 const fetchVehiclesForTrip = async (req, res) => {
@@ -475,6 +478,103 @@ const fetchPendingTrips = async (req, res) => {
   }
 };
 
+// Get top drivers by trip count in a period
+const getTopDrivers = async (req, res) => {
+  try {
+    const { period } = req.query;
+    // Default: current month
+    const now = new Date();
+    const start = period === 'all' ? new Date(0) : new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = period === 'all' ? new Date() : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    const results = await TripDetail.findAll({
+      where: {
+        createdAt: { [Op.between]: [start, end] },
+        driverId: { [Op.ne]: null },
+      },
+      attributes: ['driverId', [sequelize.fn('COUNT', sequelize.col('driverId')), 'tripCount']],
+      group: ['driverId'],
+      order: [[sequelize.literal('tripCount'), 'DESC']],
+      include: [{
+        model: DriverDetail,
+        as: 'driver',
+        include: [{ model: User, as: 'user', attributes: ['firstName', 'lastName'] }],
+        attributes: ['id'],
+      }],
+      limit: 5,
+    });
+    const topDrivers = results.map(r => ({
+      driverId: r.driverId,
+      name: r.driver?.user ? `${r.driver.user.firstName} ${r.driver.user.lastName}` : 'Unknown',
+      tripCount: r.get('tripCount'),
+    }));
+    res.json({ status: true, data: topDrivers });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+// Get top vehicles by trip count in a period
+const getTopVehicles = async (req, res) => {
+  try {
+    const { period } = req.query;
+    const now = new Date();
+    const start = period === 'all' ? new Date(0) : new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = period === 'all' ? new Date() : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    const results = await TripDetail.findAll({
+      where: {
+        createdAt: { [Op.between]: [start, end] },
+        vehicleId: { [Op.ne]: null },
+      },
+      attributes: ['vehicleId', [sequelize.fn('COUNT', sequelize.col('vehicleId')), 'tripCount']],
+      group: ['vehicleId'],
+      order: [[sequelize.literal('tripCount'), 'DESC']],
+      include: [{
+        model: Vehicle,
+        as: 'vehicle',
+        include: [
+          { model: VehicleBrand, as: 'vehicleBrand', attributes: ['brand'] },
+          { model: VehicleModel, as: 'vehicleModel', attributes: ['model'] },
+        ],
+        attributes: ['id', 'plateNo'],
+      }],
+      limit: 5,
+    });
+    const topVehicles = results.map(r => ({
+      vehicleId: r.vehicleId,
+      plateNo: r.vehicle?.plateNo,
+      brand: r.vehicle?.vehicleBrand?.brand,
+      model: r.vehicle?.vehicleModel?.model,
+      tripCount: r.get('tripCount'),
+    }));
+    res.json({ status: true, data: topVehicles });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+// Delete a trip by ID
+const deleteTrip = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ status: false, message: 'Trip ID is required' });
+  }
+  try {
+    // Delete TripDetail first (if exists)
+    await TripDetail.destroy({ where: { tripId: id } });
+    // Then delete the Trip
+    const deleted = await Trip.destroy({ where: { id } });
+    if (deleted) {
+      return res.status(200).json({ status: true, message: 'Trip deleted successfully' });
+    } else {
+      return res.status(404).json({ status: false, message: 'Trip not found' });
+    }
+  } catch (err) {
+    return res.status(500).json({ status: false, message: err.message });
+  }
+};
+
 module.exports = {
   createTrip,
   assignDriver,
@@ -485,5 +585,8 @@ module.exports = {
   fetchTripCount,
   fetchPendingTrips,
   fetchAvailableDriversByDate,
-  fetchAvailableVehiclesByDate
+  fetchAvailableVehiclesByDate,
+  getTopDrivers,
+  getTopVehicles,
+  deleteTrip,
 };
