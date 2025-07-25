@@ -15,13 +15,15 @@ function DailySummary() {
     if (!selectedDate) return;
 
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+    const token = localStorage.getItem('token'); // <-- Add this line
     console.log("Searching for date:", formattedDate);
 
     try {
-      const response = await fetch(`http://localhost:8000/api/daily-summary?date=${formattedDate}`, {
+      const response = await fetch(`http://localhost:8000/api/DailySumreports?date=${formattedDate}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
       });
 

@@ -504,7 +504,7 @@ const styles = {
   gap: '5px', // Space between buttons
 },
   viewBtn: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#007bfe',
     color: 'white',
     border: 'none',
     padding: '6px 12px',
