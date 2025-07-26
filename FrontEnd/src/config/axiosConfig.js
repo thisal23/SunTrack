@@ -14,7 +14,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-
+    console.log("Token:", token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,12 +24,24 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// const apiService = {
+//   get: (url, params,config = {}) => api.get(url, { params }, config),
+//   post: (url, data = {}) => api.post(url, data,{ headers: { "Content-Type": "application/json" } }),
+//   put: (url, data = {}) =>
+//     api.put(url, data, { headers: { "Content-Type": "multipart/form-data" } }),
+//   delete: (url) => api.delete(url),
+// };
 const apiService = {
-  get: (url, params = {}) => api.get(url, { params }),
-  post: (url, data = {}) => api.post(url, data,{ headers: { "Content-Type": "application/json" } }),
+  get: (url, params = {}, config = {}) =>
+    api.get(url, { ...config, params }),  // merge config correctly
+  post: (url, data = {}, config = {}) =>
+    api.post(url, data, config),
   put: (url, data = {}) =>
     api.put(url, data, { headers: { "Content-Type": "multipart/form-data" } }),
-  delete: (url) => api.delete(url),
+  delete: (url, config = {}) =>
+    api.delete(url, config),
 };
+
+
 
 export default apiService;

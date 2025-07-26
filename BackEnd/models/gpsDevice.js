@@ -25,6 +25,15 @@ const gpsDevice = sequelize.define('GpsDevice', {
     type: DataTypes.STRING(15),
     allowNull: false,
   },
+  fleetManagerId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users', 
+      key: 'id',
+    },
+  
+  },
 }, {
   tableName: 'gpsdevices',
   timestamps: false, // remove this if you don't have createdAt/updatedAt

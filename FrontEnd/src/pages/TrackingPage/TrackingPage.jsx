@@ -89,12 +89,19 @@ function TrackingPage() {
     ];
   };
   
-  
+  const token = localStorage.getItem('token');
 
   const display = async () => {
     try{
       const response = await apiService
-  .get("/geofence/all")
+  .get("/geofence/all" ,
+    {
+      headers: {
+        
+        'Authorization': `Bearer ${token}`,
+      },
+    }
+  )
   
   const data = response.data.data;
   console.log(data);

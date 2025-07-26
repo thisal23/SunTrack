@@ -2,22 +2,34 @@ const sequelize = require('../config/db');
 const { gpsdata } = require('../models');
 
 const getLiveTrackingData = async (req, res) => {
+
+    const fleetManagerId = req.user?.id;
+    if (!fleetManagerId) {
+        return res.status(401).json({ status: false, message: "Unauthorized" });
+    }
+
     try {
         const [liveTrackingData] = await sequelize.query(
             `SELECT 
-  g.deviceId, 
-  d.plateNo,        
-  g.latitude, 
-  g.longitude
+    g.deviceId,
+    d.plateNo,
+    g.latitude,
+    g.longitude
 FROM gpsdatas g
 JOIN (
-  SELECT deviceId, MAX(CONCAT(recDate, ' ', recTime)) AS max_datetime
-  FROM gpsdatas
-  GROUP BY deviceId
-) latest ON CONCAT(g.recDate, ' ', g.recTime) = latest.max_datetime
-       AND g.deviceId = latest.deviceId
-JOIN gpsdevices d ON g.deviceId = d.deviceId;
-`
+    SELECT deviceId, MAX(CONCAT(recDate, ' ', recTime)) AS max_datetime
+    FROM gpsdatas
+    GROUP BY deviceId
+) latest 
+    ON CONCAT(g.recDate, ' ', g.recTime) = latest.max_datetime
+   AND g.deviceId = latest.deviceId
+JOIN gpsdevices d 
+    ON g.deviceId = d.deviceId
+WHERE d.fleetManagerId = ?;`,
+            {
+                replacements: [fleetManagerId],
+               
+            }
         );
         console.log(liveTrackingData);
 
