@@ -21,6 +21,7 @@ api.interceptors.request.use(
     console.log('Request method:', config.method);
     console.log('Content-Type:', config.headers['Content-Type']);
 
+    console.log("Token:", token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
       console.log('Authorization header set:', config.headers.Authorization);
@@ -39,6 +40,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// const apiService = {
+//   get: (url, params,config = {}) => api.get(url, { params }, config),
+//   post: (url, data = {}) => api.post(url, data,{ headers: { "Content-Type": "application/json" } }),
+//   put: (url, data = {}) =>
+//     api.put(url, data, { headers: { "Content-Type": "multipart/form-data" } }),
+//   delete: (url) => api.delete(url),
+// };
 const apiService = {
   get: (url, params = {}) => api.get(url, { params }),
   post: (url, data = {}) => {
@@ -66,6 +74,16 @@ const apiService = {
     return api.put(url, data, { headers });
   },
   delete: (url) => api.delete(url),
+  get: (url, params = {}, config = {}) =>
+    api.get(url, { ...config, params }),  // merge config correctly
+  post: (url, data = {}, config = {}) =>
+    api.post(url, data, config),
+  put: (url, data = {}) =>
+    api.put(url, data, { headers: { "Content-Type": "multipart/form-data" } }),
+  delete: (url, config = {}) =>
+    api.delete(url, config),
 };
+
+
 
 export default apiService;

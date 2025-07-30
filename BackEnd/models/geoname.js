@@ -35,6 +35,14 @@ const geoname = sequelize.define('geoname', {
     length: {
         type: DataTypes.INTEGER,
         allowNull: true
+    },
+    fleetManagerId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'users', 
+            key: 'id',
+        },
     }
 }, {tableName: 'geonames', timestamps: false});
 

@@ -33,6 +33,7 @@ const gpsDevice = sequelize.define('GpsDevice', {
       key: 'id',
     },
   },
+
 }, {
   tableName: 'gpsdevices',
   timestamps: false, // remove this if you don't have createdAt/updatedAt

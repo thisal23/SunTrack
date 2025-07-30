@@ -15,14 +15,18 @@ function Reportspage() {
   // const [selectedDate, setSelectedDate] = useState(null);
   const [selectedGeoName, setSelectedGeoName] = useState('');
   const [geoReport, setGeoReport] = useState([]);
-
-
+   
   const displayGeoReport = async() => {
+      const token = localStorage.getItem('token');
+  
+    console.log("Token:", token);
 
     
     try{
       console.log("Selected Geo Name:", selectedGeoName);
-      const response = await apiService.get(`/reports/${selectedGeoName}`);
+      const response = await apiService.get(`/reports` ,{geoFenceName: selectedGeoName}
+        
+    );
 
       const data= response.data.data;
       console.log(data);  

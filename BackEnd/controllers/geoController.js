@@ -1,4 +1,6 @@
 const { geoname } = require('../models');
+const sequelize = require('../config/db');
+const authMiddleware = require('../middleware/authMiddleware');
 
 
 const addGeoFence = async (req, res) => {
@@ -12,19 +14,28 @@ const addGeoFence = async (req, res) => {
         length
     } = req.body;
 
+    const fleetManagerId = req.user?.id;
     
+    const safeWidth = isNaN(width) ? null : width;
+    const safeLength = isNaN(length) ? null : length;
+    const safeRadius = isNaN(radius) ? null : radius;
 
+
+    console.log("Fleet Manager ID:", fleetManagerId);
+    if (!fleetManagerId) {
+        return res.status(401).json({ status: false, message: "Unauthorized" });
+    }
     console.log("received Data" ,req.body);
     try {
         if(type === "circle"){
             if(!radius || radius <= 0){
                 return res.status(400).json({ status: false, message: "Radius is required and should be greater than 0!" });
             }
-            const nameExists = await geoname.findOne({attributes: ['name'] , where: { name } });
+            const nameExists = await geoname.findOne({attributes: ['name'] , where: { name, fleetManagerId } });
             if (nameExists) {
                 return res.status(400).json({ status: false, message: "Name already exists!" });
             } 
-            const setName = await geoname.create({ name, type, centerLatitude, centerLongitude, radius, width, length });
+            const setName = await geoname.create({ name, type, centerLatitude, centerLongitude, radius, safeWidth, safeLength , fleetManagerId });
             if (setName) {
                 return res.status(200).json({ status: true, message: "Name added successfully!" });
             } else {
@@ -35,11 +46,11 @@ const addGeoFence = async (req, res) => {
             if(!width || width <= 0 || !length || length <= 0){
                 return res.status(400).json({ status: false, message: "Width and Length are required and should be greater than 0!" });
             }
-            const nameExists = await geoname.findOne({attributes: ['name'] , where: { name } });
+            const nameExists = await geoname.findOne({attributes: ['name'] , where: { name , fleetManagerId} });
             if (nameExists) {
                 return res.status(400).json({ status: false, message: "Name already exists!" });
             } 
-            const setName = await geoname.create({ name, type, centerLatitude, centerLongitude, radius, width, length });
+            const setName = await geoname.create({ name, type, centerLatitude, centerLongitude, safeRadius, width, length , fleetManagerId });
             if (setName) {
                 return res.status(200).json({ status: true, message: "Name added successfully!" });
             } else {
@@ -56,13 +67,15 @@ const addGeoFence = async (req, res) => {
 
 const displayGeoFence = async (req,res) => {
     try{
+        const fleetManagerId = req.user?.id;
         const display = await geoname.findAll({
-            attributes: ['name', 'type', 'centerLatitude', 'centerLongitude', 'radius', 'width', 'length']
+            attributes: ['name', 'type', 'centerLatitude', 'centerLongitude', 'radius', 'width', 'length'],
+            where: { fleetManagerId }
         });
         if(display){
             return res.status(200).json({ status: true, message: "Data fetched successfully!", data: display });
     }
-    const data = res.json(res.data);
+    // const data = res.json(res.data);
     console.log(data);
 }
     catch(err){
