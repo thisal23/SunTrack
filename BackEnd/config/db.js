@@ -15,6 +15,19 @@ const sequelize = new Sequelize(
   host: process.env.DB_HOST || "62.171.129.214",
   port: process.env.DB_PORT || "3306",
   dialect: 'mysql',
+  logging: (sql, queryObject) => {
+    // Filter out repetitive geofence check queries
+    if (sql.includes('gpsdatas') && sql.includes('ORDER BY') && sql.includes('DESC') && sql.includes('LIMIT 1')) {
+      return; // Don't log these repetitive queries
+    }
+    if (sql.includes('geonames') && sql.includes('SELECT')) {
+      return; // Don't log geofence queries
+    }
+    if (sql.includes('geofenceevents') && sql.includes('ORDER BY') && sql.includes('DESC')) {
+      return; // Don't log geofence event queries
+    }
+    console.log(sql); // Log all other queries
+  },
 
 });
 

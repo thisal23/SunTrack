@@ -1,6 +1,8 @@
 const { Service, ServiceInfo, Vehicle, User, VehicleDetail } = require("../models");
+const { Op } = require("sequelize");
 const fs = require('fs');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 // Fetch service Types
 const fetchServiceType = async (req, res) => {
@@ -13,6 +15,59 @@ const fetchServiceType = async (req, res) => {
 
     res.status(200).json({ status: true, message: "success", data: serviceType });
   } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+// Fetch service types by vehicle number
+const fetchServiceTypesByVehicle = async (req, res) => {
+  const { vehicleId } = req.params;
+
+  try {
+    // First, find the vehicle by plate number or ID
+    const vehicle = await Vehicle.findOne({
+      where: {
+        [Op.or]: [
+          { id: vehicleId },
+          { plateNo: vehicleId }
+        ]
+      }
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({
+        status: false,
+        message: "Vehicle not found"
+      });
+    }
+
+    // Find all service types that have been used for this vehicle
+    const serviceTypes = await ServiceInfo.findAll({
+      where: { vehicleId: vehicle.id },
+      include: [
+        {
+          model: Service,
+          attributes: ['id', 'serviceType'],
+          required: true,
+        }
+      ],
+      attributes: ['serviceId'],
+      group: ['serviceId'], // Group by service type to avoid duplicates
+    });
+
+    // Extract unique service types
+    const uniqueServiceTypes = serviceTypes.map(st => ({
+      id: st.service.id,
+      serviceType: st.service.serviceType
+    }));
+
+    res.status(200).json({
+      status: true,
+      message: "Service types fetched successfully",
+      data: uniqueServiceTypes
+    });
+  } catch (error) {
+    console.error("Error fetching service types by vehicle:", error);
     res.status(500).json({ status: false, message: error.message });
   }
 };
@@ -246,12 +301,22 @@ const fetchDocumentDetails = async (req, res) => {
 
 
 const createServiceInfo = async (req, res) => {
-  const { serviceType, remark, addedBy, vehicleId } = req.body;
+  const { serviceType, remark, vehicleId } = req.body;
 
-  if (!serviceType || !vehicleId) {
+  const decoded = jwt.verify(req.header('Authorization')?.replace('Bearer ', ''), process.env.JWT_SECRET || `fea72bbf58b952d502f3386a8a59b4b29dfe0f98b8a15be5e9de5e2eb763d980`);
+  const userId = decoded.id;
+
+  if (!serviceType) {
     return res.status(400).json({
       status: false,
-      message: "Service type, vehicle ID, and user ID are required!",
+      message: "Service type is required!",
+    });
+  }
+
+  if (!vehicleId) {
+    return res.status(400).json({
+      status: false,
+      message: "Vehicle ID is required!",
     });
   }
 
@@ -259,7 +324,7 @@ const createServiceInfo = async (req, res) => {
     const serviceInfo = await ServiceInfo.create({
       serviceId: serviceType,
       vehicleId: vehicleId,
-      userId: addedBy || null,
+      userId: userId || null,
       serviceRemark: remark || null,
     });
 
@@ -306,13 +371,147 @@ const getServiceHistory = async (req, res) => {
   }
 };
 
+// Delete last service record for a specific vehicle and service type
+// Get vehicles without service records
+const getVehiclesWithoutServices = async (req, res) => {
+  try {
+    // Get all vehicles
+    const allVehicles = await Vehicle.findAll({
+      attributes: ['id', 'plateNo'],
+      order: [['plateNo', 'ASC']]
+    });
+
+    // Get all vehicles that have service records
+    const vehiclesWithServices = await ServiceInfo.findAll({
+      attributes: ['vehicleId'],
+      group: ['vehicleId']
+    });
+
+    const vehiclesWithServiceIds = vehiclesWithServices.map(v => v.vehicleId);
+
+    // Filter out vehicles that already have services
+    const vehiclesWithoutServices = allVehicles.filter(vehicle =>
+      !vehiclesWithServiceIds.includes(vehicle.id)
+    );
+
+    res.status(200).json({
+      status: true,
+      message: "Vehicles without services fetched successfully",
+      data: vehiclesWithoutServices
+    });
+  } catch (error) {
+    console.error("Error fetching vehicles without services:", error);
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+
+
+
+
+
+const deleteLastServiceRecord = async (req, res) => {
+  const { vehicleId, serviceTypeId } = req.params;
+
+  if (!vehicleId || !serviceTypeId) {
+    return res.status(400).json({
+      status: false,
+      message: 'Vehicle ID and Service Type ID are required'
+    });
+  }
+
+  try {
+    // First, verify the vehicle exists
+    const vehicle = await Vehicle.findOne({
+      where: {
+        [Op.or]: [
+          { id: vehicleId },
+          { plateNo: vehicleId }
+        ]
+      }
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({
+        status: false,
+        message: 'Vehicle not found'
+      });
+    }
+
+    // Verify the service type exists
+    const serviceType = await Service.findByPk(serviceTypeId);
+    if (!serviceType) {
+      return res.status(404).json({
+        status: false,
+        message: 'Service type not found'
+      });
+    }
+
+    // Find the last service record for this vehicle and service type
+    const lastServiceRecord = await ServiceInfo.findOne({
+      where: {
+        vehicleId: vehicle.id,
+        serviceId: serviceTypeId
+      },
+      order: [['createdAt', 'DESC']], // Get the most recent record
+      include: [
+        {
+          model: Service,
+          attributes: ['serviceType']
+        },
+        {
+          model: Vehicle,
+          attributes: ['plateNo']
+        }
+      ]
+    });
+
+    if (!lastServiceRecord) {
+      return res.status(404).json({
+        status: false,
+        message: 'No service record found for this vehicle and service type'
+      });
+    }
+
+    // Store record details before deletion for response
+    const deletedRecord = {
+      id: lastServiceRecord.id,
+      serviceType: lastServiceRecord.service.serviceType,
+      vehiclePlate: lastServiceRecord.vehicle.plateNo,
+      remark: lastServiceRecord.serviceRemark,
+      createdAt: lastServiceRecord.createdAt,
+      updatedAt: lastServiceRecord.updatedAt
+    };
+
+    // Delete the record
+    await lastServiceRecord.destroy();
+
+    res.status(200).json({
+      status: true,
+      message: 'Last service record deleted successfully',
+      data: deletedRecord
+    });
+
+  } catch (error) {
+    console.error('Error deleting last service record:', error);
+    res.status(500).json({
+      status: false,
+      message: 'Failed to delete service record',
+      error: error.message
+    });
+  }
+};
+
 
 module.exports = {
   fetchServiceType,
+  fetchServiceTypesByVehicle,
   createServiceType,
   createServiceInfo,
   fetchServiceDetails,
   fetchDocumentDetails,
   updateDocumentDetails,
   getServiceHistory,
+  getVehiclesWithoutServices,
+  deleteLastServiceRecord,
 };

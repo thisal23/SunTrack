@@ -1,0 +1,210 @@
+/* Document Maintenance Page Specific Styles */
+.document-maintenance-page .dataTables_wrapper .dataTables_length,
+.document-maintenance-page .dataTables_wrapper .dataTables_filter {
+    margin-bottom: 1rem;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_length select {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    background-color: white;
+    font-size: 0.875rem;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    background-color: white;
+    font-size: 0.875rem;
+    width: 250px;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_filter input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_info {
+    color: #6b7280;
+    font-size: 0.875rem;
+    padding-top: 1rem;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_paginate {
+    padding-top: 1rem;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.125rem;
+    background-color: white;
+    color: #374151;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+    color: #111827;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+    background-color: #f9fafb;
+}
+
+/* Document Maintenance Table Styling */
+.document-maintenance-page .dataTables_wrapper .dataTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTable thead th {
+    background-color: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem 0.75rem;
+    font-weight: 600;
+    color: #374151 !important;
+    text-align: left;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTable tbody td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.875rem;
+    color: #374151 !important;
+    vertical-align: middle;
+}
+
+.document-maintenance-page .dataTables_wrapper .dataTable tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Document Maintenance Row Group Styling */
+.document-maintenance-page .dataTables_wrapper .dtrg-group {
+    background-color: #f1f5f9;
+    color: #374151;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+}
+
+/* Document Status Badge Styling */
+.document-maintenance-page .document-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.document-maintenance-page .status-available {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.document-maintenance-page .status-not-available {
+    background-color: #fef2f2;
+    color: #991b1b;
+}
+
+/* Document Maintenance Button Styling */
+.document-maintenance-page .btn-edit {
+    background-color: transparent !important;
+    border: none !important;
+    color: #10b981 !important;
+    transition: all 0.2s;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.document-maintenance-page .btn-edit:hover {
+    background-color: #f0fdf4 !important;
+    color: #059669 !important;
+    transform: scale(1.1);
+}
+
+/* Document Link Styling */
+.document-maintenance-page .document-link {
+    color: #2563eb !important;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.document-maintenance-page .document-link:hover {
+    color: #1e40af !important;
+    text-decoration: none;
+}
+
+/* Document Maintenance Critical: Force all table text to be visible */
+.document-maintenance-page .dataTables_wrapper table.dataTable thead th,
+.document-maintenance-page .dataTables_wrapper table.dataTable tbody td,
+.document-maintenance-page table.dataTable thead th,
+.document-maintenance-page table.dataTable tbody td {
+    color: #000000 !important;
+}
+
+.document-maintenance-page .dataTables_wrapper table.dataTable thead th *,
+.document-maintenance-page .dataTables_wrapper table.dataTable tbody td *,
+.document-maintenance-page table.dataTable thead th *,
+.document-maintenance-page table.dataTable tbody td * {
+    color: #000000 !important;
+}
+
+/* Document Maintenance Force button colors to be visible */
+.document-maintenance-page .dataTables_wrapper table.dataTable tbody td .btn-edit,
+.document-maintenance-page table.dataTable tbody td .btn-edit {
+    color: inherit !important;
+}
+
+.document-maintenance-page .dataTables_wrapper table.dataTable tbody td .btn-edit svg,
+.document-maintenance-page table.dataTable tbody td .btn-edit svg {
+    color: inherit !important;
+    fill: none !important;
+}
+
+.document-maintenance-page .dataTables_wrapper table.dataTable tbody td .btn-edit svg path,
+.document-maintenance-page table.dataTable tbody td .btn-edit svg path {
+    stroke: inherit !important;
+    fill: none !important;
+}
+
+/* Document Maintenance Responsive Design */
+@media (max-width: 768px) {
+    .document-maintenance-page .dataTables_wrapper .dataTables_filter input {
+        width: 200px;
+    }
+
+    .document-maintenance-page .dataTables_wrapper .dataTables_length,
+    .document-maintenance-page .dataTables_wrapper .dataTables_filter {
+        text-align: left;
+        margin-bottom: 0.5rem;
+    }
+}

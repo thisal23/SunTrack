@@ -87,6 +87,10 @@ VehicleBrand.hasMany(Vehicle, { foreignKey: "brandId" });
 Vehicle.belongsTo(VehicleModel, { foreignKey: "modelId", as: "vehicleModel" });
 VehicleModel.hasMany(Vehicle, { foreignKey: "modelId", as: "vehicles" });
 
+// VehicleBrand has many VehicleModels
+VehicleBrand.hasMany(VehicleModel, { foreignKey: "brandId", as: "models" });
+VehicleModel.belongsTo(VehicleBrand, { foreignKey: "brandId", as: "brand" });
+
 TripDetail.belongsTo(Trip, { foreignKey: 'tripId', as: 'trip' });
 Trip.hasOne(TripDetail, { foreignKey: 'tripId', as: 'tripDetail', onDelete: 'CASCADE' });
 

@@ -1,5 +1,6 @@
 const { Op, sequelize } = require("sequelize");
 const axios = require("axios");
+const jwt = require("jsonwebtoken");
 const {
   Vehicle,
   VehicleDetail,
@@ -54,14 +55,15 @@ const createBrand = async (req, res) => {
 // Fetch all Brands
 const fetchBrands = async (req, res) => {
   try {
+    console.log('Fetching brands...');
+
     const brands = await VehicleBrand.findAll();
 
-    if (!brands) {
-      res.status(404).json({ status: false, message: "No brands found" });
-    }
+    console.log('Brands found:', brands.length);
 
     res.status(200).json({ status: true, message: "success", data: brands });
   } catch (error) {
+    console.error('Error fetching brands:', error);
     res.status(500).json({ status: false, message: error.message });
   }
 };
@@ -133,6 +135,27 @@ const deleteBrands = async (req, res) => {
 
 // Creating new vehicle
 const createVehicle = async (req, res) => {
+  // Debug: Log request information
+  console.log('Request body:', req.body);
+  console.log('Request files:', req.files);
+  console.log('Request headers:', req.headers['content-type']);
+  console.log('Files keys:', req.files ? Object.keys(req.files) : 'No files');
+
+  const decoded = jwt.verify(req.header('Authorization')?.replace('Bearer ', ''), process.env.JWT_SECRET || `fea72bbf58b952d502f3386a8a59b4b29dfe0f98b8a15be5e9de5e2eb763d980`);
+  const userId = decoded.id;
+
+  // Log each file if present
+  if (req.files) {
+    Object.keys(req.files).forEach(key => {
+      console.log(`File ${key}:`, req.files[key][0] ? {
+        filename: req.files[key][0].filename,
+        originalname: req.files[key][0].originalname,
+        mimetype: req.files[key][0].mimetype,
+        size: req.files[key][0].size
+      } : 'No file');
+    });
+  }
+
   const {
     plateNo,
     brandId,
@@ -148,28 +171,57 @@ const createVehicle = async (req, res) => {
     licenseId,
     licenseLastUpdate,
     licenseExpireDate,
+    licenseDocument,
 
     insuranceNo,
     insuranceLastUpdate,
     insuranceExpireDate,
     insuranceType,
+    insuranceDocument,
 
     ecoId,
     ecoLastUpdate,
     ecoExpireDate,
+    ecoDocument,
 
     deviceId,
     countrycode,
     pnumber,
+    fleetManagerId,
   } = req.body;
 
-  if (
-    !req.files["image"] ||
+  // Debug: Log what files are received
+  console.log('=== VEHICLE CREATE DEBUG ===');
+  console.log('req.files:', req.files);
+  console.log('req.files keys:', req.files ? Object.keys(req.files) : 'No files');
+  if (req.files) {
+    Object.keys(req.files).forEach(key => {
+      console.log(`File ${key}:`, req.files[key][0] ? {
+        filename: req.files[key][0].filename,
+        originalname: req.files[key][0].originalname,
+        mimetype: req.files[key][0].mimetype,
+        size: req.files[key][0].size
+      } : 'No file');
+    });
+  }
+  console.log('=== END DEBUG ===');
+
+  // Check if req.files exists and contains the required documents
+  if (!req.files ||
     !req.files["licenseDocument"] ||
     !req.files["insuranceDocument"] ||
     !req.files["ecoDocument"]
   ) {
-    return res.status(400).json({ status: false, message: "Required documents missing" });
+    console.log('Missing files:');
+    console.log('- req.files exists:', !!req.files);
+    console.log('- licenseDocument exists:', !!(req.files && req.files["licenseDocument"]));
+    console.log('- insuranceDocument exists:', !!(req.files && req.files["insuranceDocument"]));
+    console.log('- ecoDocument exists:', !!(req.files && req.files["ecoDocument"]));
+
+    return res.status(400).json({
+      status: false,
+      message: "Required documents missing. Please upload license, insurance, and eco documents."
+    });
   }
 
   const sequelize = Vehicle.sequelize;
@@ -186,9 +238,8 @@ const createVehicle = async (req, res) => {
       fuelType,
       registeredYear,
       chassieNo,
-      status,
+      status: `available`,
       color,
-      image: `/uploads/${req.files["image"][0].filename}`,
     }, { transaction });
 
     // Create Vehicle Details
@@ -197,16 +248,16 @@ const createVehicle = async (req, res) => {
       licenseId,
       licenseLastUpdate,
       licenseExpireDate,
-      licenseDocument: `/uploads/${req.files["licenseDocument"][0].filename}`,
+      licenseDocument: req.files && req.files["licenseDocument"] ? `/uploads/${req.files["licenseDocument"][0].filename}` : null,
       insuranceNo,
       insuranceLastUpdate,
       insuranceExpireDate,
       insuranceType,
-      insuranceDocument: `/uploads/${req.files["insuranceDocument"][0].filename}`,
+      insuranceDocument: req.files && req.files["insuranceDocument"] ? `/uploads/${req.files["insuranceDocument"][0].filename}` : null,
       ecoId,
       ecoLastUpdate,
       ecoExpireDate,
-      ecoDocument: `/uploads/${req.files["ecoDocument"][0].filename}`,
+      ecoDocument: req.files && req.files["ecoDocument"] ? `/uploads/${req.files["ecoDocument"][0].filename}` : null,
     }, { transaction });
 
     // Create GPS Device info
@@ -215,16 +266,16 @@ const createVehicle = async (req, res) => {
       plateNo,        // Should match vehicle plateNo
       countrycode,
       pnumber,
+      fleetManagerId: userId,
     }, { transaction });
 
 
-
+    await transaction.commit();
     res.status(201).json({
       status: true,
       message: "Vehicle, details, and GPS device created successfully",
       data: { vehicle, vehicleDetail, gpsDeviceData },
     });
-    await transaction.commit();
   } catch (error) {
     await transaction.rollback();
     res.status(500).json({ status: false, message: error.message, error: error, });
@@ -457,14 +508,9 @@ const deleteVehicleData = async (req, res) => {
   }
 };
 
-module.exports = { deleteVehicleData };
-
-
-
-
 // Creating new vehicle model
 const createModel = async (req, res) => {
-  const { model } = req.body;
+  const { model, brandId } = req.body;
 
   if (!model) {
     return res
@@ -472,8 +518,14 @@ const createModel = async (req, res) => {
       .json({ status: false, message: "Model title is required!" });
   }
 
+  if (!brandId) {
+    return res
+      .status(400)
+      .json({ status: false, message: "Brand ID is required!" });
+  }
+
   try {
-    const createdModel = await VehicleModel.create({ model });
+    const createdModel = await VehicleModel.create({ model, brandId });
 
     if (createdModel) {
       return res.status(201).json({
@@ -506,14 +558,49 @@ const createModel = async (req, res) => {
 // Fetch all Models
 const fetchModels = async (req, res) => {
   try {
-    const models = await VehicleModel.findAll();
+    console.log('Fetching models...');
 
-    if (!models) {
-      res.status(404).json({ status: false, message: "No models found" });
-    }
+    const models = await VehicleModel.findAll({
+      include: [
+        {
+          model: VehicleBrand,
+          as: 'brand',
+          attributes: ['id', 'brand']
+        }
+      ]
+    });
+
+    console.log('Models found:', models.length);
 
     res.status(200).json({ status: true, message: "success", data: models });
   } catch (error) {
+    console.error('Error fetching models:', error);
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+// Fetch models by brand ID
+const fetchModelsByBrand = async (req, res) => {
+  try {
+    const { brandId } = req.params;
+    console.log('Fetching models for brand ID:', brandId);
+
+    const models = await VehicleModel.findAll({
+      where: { brandId: brandId },
+      include: [
+        {
+          model: VehicleBrand,
+          as: 'brand',
+          attributes: ['id', 'brand']
+        }
+      ]
+    });
+
+    console.log('Models found for brand:', models.length);
+
+    res.status(200).json({ status: true, message: "success", data: models });
+  } catch (error) {
+    console.error('Error fetching models by brand:', error);
     res.status(500).json({ status: false, message: error.message });
   }
 };
@@ -675,6 +762,35 @@ const fetchVehicleInfo = async (req, res) => {
 
 
 
+// Test function to check models in database
+const testModels = async (req, res) => {
+  try {
+    console.log('Testing models...');
+
+    // Check if VehicleModel table exists and has data
+    const modelCount = await VehicleModel.count();
+    console.log('Total models in database:', modelCount);
+
+    // Get all models without associations
+    const allModels = await VehicleModel.findAll({
+      raw: true
+    });
+    console.log('All models:', allModels);
+
+    res.status(200).json({
+      status: true,
+      message: "Model test completed",
+      data: {
+        count: modelCount,
+        models: allModels
+      }
+    });
+  } catch (error) {
+    console.error('Error testing models:', error);
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
 module.exports = {
   createBrand,
   fetchBrands,
@@ -687,6 +803,8 @@ module.exports = {
   deleteVehicleData,
   createModel,
   fetchModels,
+  fetchModelsByBrand,
+  testModels,
   fetchVehicleInfo,
   fetchVehicleCount
 };

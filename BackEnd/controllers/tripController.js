@@ -78,7 +78,7 @@ const createTrip = async (req, res) => {
 //Assign driver for trip
 const assignDriver = async (req, res) => {
   const { driverId } = req.body;
-  const { id } = req.params; // id = tripId
+  const { tripId } = req.params; // id = tripId
 
   try {
     // ✅ Check if the driver exists
@@ -87,21 +87,35 @@ const assignDriver = async (req, res) => {
       return res.status(404).json({ status: false, message: "Driver not found" });
     }
 
-    const tripDetail = await TripDetail.findOne({ where: { tripId: id } });
-    if (!tripDetail) {
-      return res.status(404).json({ status: false, message: "Trip detail not found" });
+    // ✅ Check if the trip exists
+    const trip = await Trip.findByPk(tripId);
+    if (!trip) {
+      return res.status(404).json({ status: false, message: "Trip not found" });
     }
 
-    const updatedDetail = await tripDetail.update({ driverId });
+    // Find or create trip detail record
+    let tripDetail = await TripDetail.findOne({ where: { tripId: tripId } });
+
+    if (!tripDetail) {
+      // Create new trip detail record if it doesn't exist
+      tripDetail = await TripDetail.create({
+        tripId: tripId,
+        driverId: driverId,
+        vehicleId: null, // Will be assigned later
+        tripRemark: null
+      });
+    } else {
+      // Update existing trip detail record
+      tripDetail = await tripDetail.update({ driverId });
+    }
 
     // ✅ Also update the trip status
-    const trip = await Trip.findByPk(id);
     await trip.update({ status: "Ready" });
 
     res.status(200).json({
       status: true,
       message: "Driver assigned successfully",
-      data: updatedDetail,
+      data: tripDetail,
     });
   } catch (error) {
     res.status(400).json({ status: false, message: error.message });
@@ -215,7 +229,7 @@ const fetchAvailableDriversByDate = async (req, res) => {
 //Assign vehicle for trip
 const assignVehicle = async (req, res) => {
   const { vehicleId } = req.body;
-  const { id } = req.params; // id = tripId
+  const { tripId } = req.params; // id = tripId
 
   try {
     // Find the plateNo from the vehicle id
@@ -226,17 +240,32 @@ const assignVehicle = async (req, res) => {
 
     const plateNo = vehicle.plateNo;
 
-    const tripDetail = await TripDetail.findOne({ where: { tripId: id } });
-    if (!tripDetail) {
-      return res.status(404).json({ status: false, message: "Trip detail not found" });
+    // ✅ Check if the trip exists
+    const trip = await Trip.findByPk(tripId);
+    if (!trip) {
+      return res.status(404).json({ status: false, message: "Trip not found" });
     }
 
-    const updatedDetail = await tripDetail.update({ vehicleId: plateNo });
+    // Find or create trip detail record
+    let tripDetail = await TripDetail.findOne({ where: { tripId: tripId } });
+
+    if (!tripDetail) {
+      // Create new trip detail record if it doesn't exist
+      tripDetail = await TripDetail.create({
+        tripId: tripId,
+        driverId: null, // Will be assigned later
+        vehicleId: plateNo,
+        tripRemark: null
+      });
+    } else {
+      // Update existing trip detail record
+      tripDetail = await tripDetail.update({ vehicleId: plateNo });
+    }
 
     res.status(200).json({
       status: true,
       message: "Vehicle assigned successfully",
-      data: updatedDetail,
+      data: tripDetail,
     });
   } catch (error) {
     res.status(400).json({ status: false, message: error.message });
@@ -374,14 +403,18 @@ const fetchDriverForTrip = async (req, res) => {
 //fetchTripCount
 const fetchTripCount = async (req, res) => {
   try {
-    const [pending, live, finished] = await Promise.all([
+    const [pending, ready, planned, live, finished] = await Promise.all([
       Trip.count({ where: { status: "pending" } }),
+      Trip.count({ where: { status: "ready" } }),
+      Trip.count({ where: { status: "planned" } }),
       Trip.count({ where: { status: "live" } }),
       Trip.count({ where: { status: "finished" } }),
     ]);
 
     return res.json({
       pending,
+      ready,
+      planned,
       live,
       finished,
     });
@@ -458,14 +491,25 @@ const fetchVehiclesForTrip = async (req, res) => {
 //fetch pending trips
 const fetchPendingTrips = async (req, res) => {
   try {
+    // Get current date (start of day) for comparison
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
     const data = await Trip.findAll({
       where: {
         status: "pending",
+        date: {
+          [Op.gte]: currentDate, // Only trips with date >= today
+        },
       },
+      order: [
+        ['date', 'ASC'], // Order by date ascending (earliest first)
+        ['suggestStartTime', 'ASC'], // Secondary sort by start time
+      ],
     });
 
     if (!data || data.length === 0) {
-      res.status(404).json({ status: true, message: "Data not found" });
+      return res.status(404).json({ status: true, message: "Data not found" });
     }
 
     res.status(200).json({
@@ -575,6 +619,131 @@ const deleteTrip = async (req, res) => {
   }
 };
 
+// Update trip statuses based on dates and assignments
+const updateTripStatuses = async (req, res) => {
+  try {
+    // Get current date (start of day) for comparison
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    // Get yesterday's date (start of day)
+    const yesterday = new Date(currentDate);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // Find all trips that need status updates
+    const tripsToUpdate = await Trip.findAll({
+      include: [
+        {
+          model: TripDetail,
+          as: 'tripDetail',
+          required: false,
+        }
+      ],
+      where: {
+        status: {
+          [Op.in]: ['pending', 'ready'] // Only update these statuses
+        }
+      }
+    });
+
+    let updatedCount = 0;
+    const updateResults = [];
+
+    for (const trip of tripsToUpdate) {
+      let newStatus = trip.status;
+      let updateReason = '';
+
+      // Check if trip date is yesterday or earlier
+      const tripDate = new Date(trip.date);
+      tripDate.setHours(0, 0, 0, 0);
+
+      if (tripDate <= yesterday) {
+        // Trip is from yesterday or earlier - mark as "planned"
+        newStatus = 'planned';
+        updateReason = 'Trip date is in the past';
+      } else if (trip.status === 'pending') {
+        // Check if both driver and vehicle are assigned
+        const tripDetail = trip.tripDetail;
+        if (tripDetail && tripDetail.driverId && tripDetail.vehicleId) {
+          newStatus = 'ready';
+          updateReason = 'Both driver and vehicle assigned';
+        }
+      }
+
+      // Update trip status if it changed
+      if (newStatus !== trip.status) {
+        await trip.update({ status: newStatus });
+        updatedCount++;
+        updateResults.push({
+          tripId: trip.id,
+          oldStatus: trip.status,
+          newStatus: newStatus,
+          reason: updateReason
+        });
+      }
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: `Successfully updated ${updatedCount} trip statuses`,
+      data: {
+        updatedCount,
+        updates: updateResults
+      }
+    });
+
+  } catch (error) {
+    console.error('Error updating trip statuses:', error);
+    return res.status(500).json({
+      status: false,
+      message: 'Failed to update trip statuses',
+      error: error.message
+    });
+  }
+};
+
+// Update trip by ID
+const updateTrip = async (req, res) => {
+  const { id } = req.params;
+  const {
+    startLocation,
+    endLocation,
+    date,
+    suggestStartTime,
+    suggestEndTime,
+  } = req.body;
+
+  try {
+    // Check if trip exists
+    const trip = await Trip.findByPk(id);
+    if (!trip) {
+      return res.status(404).json({ status: false, message: "Trip not found" });
+    }
+
+    // Update trip data
+    await trip.update({
+      startLocation: startLocation || trip.startLocation,
+      endLocation: endLocation || trip.endLocation,
+      date: date || trip.date,
+      suggestStartTime: suggestStartTime || trip.suggestStartTime,
+      suggestEndTime: suggestEndTime || trip.suggestEndTime,
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Trip updated successfully",
+      data: trip,
+    });
+  } catch (error) {
+    console.error("Error updating trip:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Failed to update trip",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createTrip,
   assignDriver,
@@ -589,4 +758,6 @@ module.exports = {
   getTopDrivers,
   getTopVehicles,
   deleteTrip,
+  updateTripStatuses,
+  updateTrip,
 };

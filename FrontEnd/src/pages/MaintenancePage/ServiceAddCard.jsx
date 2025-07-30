@@ -6,12 +6,56 @@ const ServiceAddCard = ({ vehicleId, handleCancel, onUpdateSuccess }) => {
   const [statusMessage, setStatusMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [vehiclePlateNo, setVehiclePlateNo] = useState("");
 
   const [formDataToSend, setFormDataToSend] = useState({
     service_type: "",
     remark: "",
-    added_by: "",
   });
+
+  // Add CSS for dropdown height limitation
+  useEffect(() => {
+    const styleId = "serviceaddcard-dropdown-styles";
+    const existingStyle = document.getElementById(styleId);
+    
+    if (!existingStyle) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        /* Limit dropdown height to show only 8 items */
+        .serviceaddcard-page select {
+          max-height: none;
+        }
+        
+        .serviceaddcard-page select option {
+          padding: 8px 12px;
+        }
+        
+        /* Style for dropdown when opened */
+        .serviceaddcard-page select[size] {
+          max-height: 320px; /* Approximately 8 items * 40px each */
+          overflow-y: auto;
+        }
+        
+        /* Ensure consistent option height */
+        .serviceaddcard-page select option {
+          height: 40px;
+          line-height: 24px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    document.body.classList.add("serviceaddcard-page");
+
+    return () => {
+      document.body.classList.remove("serviceaddcard-page");
+      const styleElement = document.getElementById(styleId);
+      if (styleElement) {
+        styleElement.remove();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const fetchServiceType = async () => {
@@ -31,8 +75,31 @@ const ServiceAddCard = ({ vehicleId, handleCancel, onUpdateSuccess }) => {
     fetchServiceType();
   }, []);
 
+  // Fetch vehicle plate number
   useEffect(() => {
-    setFormDataToSend("");
+    const fetchVehiclePlateNo = async () => {
+      if (vehicleId) {
+        try {
+          const response = await apiService.get(`vehicle/details/${vehicleId}`);
+          if (response.status === 200 && response.data.data) {
+            setVehiclePlateNo(response.data.data.plateNo || "N/A");
+          } else {
+            setVehiclePlateNo("N/A");
+          }
+        } catch (error) {
+          console.error("Error fetching vehicle details:", error);
+          setVehiclePlateNo("N/A");
+        }
+      }
+    };
+    fetchVehiclePlateNo();
+  }, [vehicleId]);
+
+  useEffect(() => {
+    setFormDataToSend({
+      service_type: "",
+      remark: "",
+    });
     setStatusMessage("");
     setIsSuccess(false);
   }, [vehicleId]);
@@ -47,26 +114,28 @@ const ServiceAddCard = ({ vehicleId, handleCancel, onUpdateSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form data
+    if (!formDataToSend.service_type) {
+      setStatusMessage("Please select a service type");
+      setIsSuccess(false);
+      return;
+    }
+
     setStatusMessage("");
     setIsSuccess(false);
     setLoading(true);
 
     try {
-      const data = new FormData();
-      data.append("serviceType", formDataToSend.service_type);
-      data.append("remark", formDataToSend.remark);
-      if (formDataToSend.added_by) {
-        data.append("addedBy", formDataToSend.added_by);
-      }
-      data.append("vehicleId", vehicleId);
+      const requestData = {
+        serviceType: formDataToSend.service_type,
+        remark: formDataToSend.remark,
+        vehicleId: vehicleId
+      };
 
-      for (let pair of data.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
+      console.log("Sending data:", requestData);
 
-      const response = await apiService.post(`/service/create`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await apiService.post(`service/create`, requestData);
 
       if ((response.status === 200 || response.status === 201) && response.data.status) {
         setStatusMessage(response.data.message);
@@ -76,12 +145,13 @@ const ServiceAddCard = ({ vehicleId, handleCancel, onUpdateSuccess }) => {
           onUpdateSuccess?.();
         }, 2000);
       } else {
-        setStatusMessage(response.data.message || "Failed to update document.");
+        setStatusMessage(response.data.message || "Failed to add service.");
         setIsSuccess(false);
       }
     } catch (error) {
+      console.error("Error adding service:", error);
       setStatusMessage(
-        error.response?.data?.message || "An error occurred during update."
+        error.response?.data?.message || "An error occurred while adding service."
       );
       setIsSuccess(false);
     }
@@ -96,9 +166,9 @@ const ServiceAddCard = ({ vehicleId, handleCancel, onUpdateSuccess }) => {
         <input
           type="text"
           name="vehicle_No"
-          value={vehicleId}
+          value={vehiclePlateNo}
           readOnly
-          className="py-2 px-3 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+          className="py-2 px-3 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none bg-gray-50"
         />
       </div>
 
@@ -109,6 +179,7 @@ const ServiceAddCard = ({ vehicleId, handleCancel, onUpdateSuccess }) => {
           name="service_type"
           value={formDataToSend.service_type}
           onChange={handleInputChange}
+          required
           className="block w-full py-2.5 px-3 mt-1 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
         >
           <option value="" disabled>
@@ -129,18 +200,6 @@ const ServiceAddCard = ({ vehicleId, handleCancel, onUpdateSuccess }) => {
           type="text"
           name="remark"
           value={formDataToSend.remark}
-          onChange={handleInputChange}
-          className="py-2.5 px-3 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
-        />
-      </div>
-
-      {/* Added By */}
-      <div className="flex flex-col">
-        <label className="font-medium text-gray-700 mb-1">Added By:</label>
-        <input
-          type="text"
-          name="added_by" // fixed typo here
-          value={formDataToSend.added_by}
           onChange={handleInputChange}
           className="py-2.5 px-3 border border-gray-300 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
         />

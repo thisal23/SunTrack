@@ -122,7 +122,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen dashboard-scroll">
+    <div className="bg-[#ffffff] min-h-screen dashboard-scroll">
       <NavBar />
       <div className="container_custom mt-5 mx-auto flex flex-row justify-center gap-4 pt-20 pb-16 items-start h-auto">
         <InfoCard

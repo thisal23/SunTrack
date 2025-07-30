@@ -21,7 +21,6 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
     deviceId: "",
     countrycode: "",
     pnumber: "",
-    image: null,
   });
 
   const handleInputChange = (e) => {
@@ -76,7 +75,6 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
     try {
       const response = await apiService.get(`vehicle/details/${id}`);
       const vehicle = response.data.data;
-      console.log("Fetched vehicle data:", vehicle);
 
       setFormData((prev) => ({
         ...prev,
@@ -132,6 +130,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
           Edit vehicle Details
         </span>
       </div>
+      
       <form onSubmit={handleSubmit}>
         <table>
           <tbody>
@@ -157,11 +156,14 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
                   className="w-full p-2 border rounded"
                 >
                   <option value="">Select type</option>
-                  <option value="car">Car</option>
-                  <option value="van">Van</option>
-                  <option value="three-wheel">Three wheel</option>
-                  <option value="bike">Bike</option>
-                  <option value="cab">Cab</option>
+                  <option value="Bike">Bike</option>
+                  <option value="Three Wheel">Three Wheel</option>
+                  <option value="Car">Car</option>
+                  <option value="Van">Van</option>
+                  <option value="Cab">Cab</option>
+                  <option value="Lorry">Lorry</option>
+                  <option value="Bus">Bus</option>
+                  <option value="Other">Other</option>
                 </select>
               </td>
             </tr>
@@ -175,8 +177,8 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
                   className="w-full p-2 border rounded"
                 >
                   <option value="">Select category</option>
-                  <option value="H">Heavy</option>
-                  <option value="L">Light</option>
+                  <option value="Heavy">Heavy</option>
+                  <option value="Light">Light</option>
                 </select>
               </td>
             </tr>
@@ -228,6 +230,8 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
                 >
                   <option value="Petrol">Petrol</option>
                   <option value="Diesel">Diesel</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Hybrid">Hybrid</option>
                 </select>
               </td>
             </tr>
@@ -277,8 +281,8 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
                   className="w-full p-2 border rounded"
                 >
                   <option value="">Select status</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
+                  <option value="available">Available</option>
+                  <option value="outOfService">Out of Service</option>
                 </select>
               </td>
             </tr>
@@ -318,7 +322,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
                 />
               </td>
             </tr>
-            <tr>
+            {/* <tr>
               <td className="px-4 py-2 font-bold">Image:</td>
               <td className="pb-2">
                 <input
@@ -329,7 +333,7 @@ const VehicleEditCard = ({ vehicleId, onClose, onSuccess }) => {
                   className="w-full p-2 border rounded"
                 />
               </td>
-            </tr>
+            </tr> */}
           </tbody>
         </table>
 

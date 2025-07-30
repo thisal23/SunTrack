@@ -17,13 +17,56 @@ const CustomDateInput = React.forwardRef(({ value, onClick }, ref) => (
 ));
 
 const PendingTripEditCard = ({ tripId, handleCancel, onUpdateSuccess }) => {
-  const [startLocation, setStartLocation] = useState(null);
-  const [endLocation, setEndLocation] = useState(null);
-  const [date, setDate] = useState(null);
-  const [suggestStartTime, setSuggestStartTime] = useState(null);
-  const [suggestEndTime, setSuggestEndTime] = useState(null);
+  const [startLocation, setStartLocation] = useState("");
+  const [endLocation, setEndLocation] = useState("");
+  const [date, setDate] = useState("");
+  const [suggestStartTime, setSuggestStartTime] = useState("");
+  const [suggestEndTime, setSuggestEndTime] = useState("");
   const [statusMessage, setStatusMessage] = useState(""); // New state for status message
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch trip data when component mounts
+  const fetchTripData = async () => {
+    if (!tripId) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await apiService.get(`/trip/all`);
+      
+      if (response.status === 200 && response.data.data) {
+        // Find the specific trip by ID
+        const trip = response.data.data.find(trip => trip.id === parseInt(tripId));
+        
+        if (trip) {
+          setStartLocation(trip.startLocation || "");
+          setEndLocation(trip.endLocation || "");
+          
+          // Format date for input field (YYYY-MM-DD)
+          if (trip.date) {
+            const tripDate = new Date(trip.date);
+            const year = tripDate.getFullYear();
+            const month = String(tripDate.getMonth() + 1).padStart(2, "0");
+            const day = String(tripDate.getDate()).padStart(2, "0");
+            setDate(`${year}-${month}-${day}`);
+          }
+          
+          setSuggestStartTime(trip.suggestStartTime || "");
+          setSuggestEndTime(trip.suggestEndTime || "");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching trip data:", error);
+      setStatusMessage("Failed to fetch trip data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch trip data when component mounts or tripId changes
+  useEffect(() => {
+    fetchTripData();
+  }, [tripId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission (page reload)
@@ -38,25 +81,20 @@ const PendingTripEditCard = ({ tripId, handleCancel, onUpdateSuccess }) => {
       return; // Stop submission
     }
 
-    const formDataToSend = new FormData();
-    if (date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-      const day = String(date.getDate()).padStart(2, "0");
-      formDataToSend.append("date", `${year}-${month}-${day}`);
-    }
-    if (startLocation) formDataToSend.append("startLocation", startLocation);
-    if (endLocation) formDataToSend.append("endLocation", endLocation);
-    if (suggestStartTime)
-      formDataToSend.append("suggestStartTime", suggestStartTime);
-    if (suggestEndTime) formDataToSend.append("suggestEndTime", suggestEndTime);
+    const updateData = {
+      startLocation: startLocation,
+      endLocation: endLocation,
+      date: date,
+      suggestStartTime: suggestStartTime,
+      suggestEndTime: suggestEndTime || null
+    };
 
     try {
       const response = await apiService.put(
-        `/document/update/${licenseId}`,
-        formDataToSend,
+        `/trip/${tripId}`,
+        updateData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { "Content-Type": "application/json" },
         }
       );
       if (response.status === 200 && response.data.status) {
@@ -71,11 +109,11 @@ const PendingTripEditCard = ({ tripId, handleCancel, onUpdateSuccess }) => {
           }
         }, 2000);
       } else {
-        setStatusMessage(response.data.message || "Failed to update document.");
+        setStatusMessage(response.data.message || "Failed to update trip.");
         setIsSuccess(false);
       }
     } catch (error) {
-      console.error("Error updating document:", error);
+      console.error("Error updating trip:", error);
       setStatusMessage(
         error.response?.data?.message || "An error occurred during update."
       );
@@ -85,7 +123,13 @@ const PendingTripEditCard = ({ tripId, handleCancel, onUpdateSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-      <div className="flex flex-col space-y-4">
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Loading trip data...</span>
+        </div>
+      ) : (
+        <div className="flex flex-col space-y-4">
         {/* start location */}
         <div className="flex flex-col">
           <label className="font-medium text-gray-700 mb-1">
@@ -165,7 +209,8 @@ const PendingTripEditCard = ({ tripId, handleCancel, onUpdateSuccess }) => {
             Cancel
           </button>
         </div>
-      </div>
+        </div>
+      )}
     </form>
   );
 };

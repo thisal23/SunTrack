@@ -13,9 +13,11 @@ const {
   updateVehicleById,
   fetchVehicleInfo,
   fetchVehicleCount,
+  fetchModelsByBrand,
 } = require("../controllers/vehicleController");
 const upload = require("../config/multreConfig");
 const validateVehicleFields = require("../utils/vehicleDataValidation");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const uploadFields = upload.fields([
   { name: 'image', maxCount: 1 },
@@ -25,7 +27,7 @@ const uploadFields = upload.fields([
 ]);
 
 const router = express.Router();
-router.post('/vehicle/create', uploadFields, createVehicle);
+router.post('/vehicle/create', authMiddleware, uploadFields, createVehicle);
 
 // Vehicle Brand routes
 router.post("/brand/create", createBrand);
@@ -36,6 +38,7 @@ router.delete("/brand/destroy/:id", deleteBrands);
 // Vehicle Model routes
 router.post("/model/create", createModel);
 router.get("/model/all", fetchModels);
+router.get("/model/brand/:brandId", fetchModelsByBrand);
 
 router.put(
   "/vehicle/update/:id",
@@ -50,7 +53,7 @@ router.put(
 router.get("/vehicle/all", fetchVehicle);
 router.get("/vehicle/details/:id", fetchVehicleById);
 router.delete("/vehicle/remove/:plateNo", deleteVehicleData);
-router.get("/vehicle/count",fetchVehicleCount);
+router.get("/vehicle/count", fetchVehicleCount);
 
 //vehicleInfo routes
 router.get("/vehicleInfo/all", fetchVehicleInfo);

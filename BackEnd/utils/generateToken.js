@@ -5,10 +5,10 @@ const generateToken = (user) => {
     {
       id: user.id,
       username: username,
-      role:role,
+      role: role,
       email: user.email,
     },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'fea72bbf58b952d502f3386a8a59b4b29dfe0f98b8a15be5e9de5e2eb763d980',
     {
       expiresIn: '1h',
     }

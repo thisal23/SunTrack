@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt'); // Use bcryptjs
-const crypto = require('crypto'); 
-const sendEmail = require('../utils/sendEmail'); 
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const { User } = require('../models'); // Ensure correct import
@@ -17,7 +17,7 @@ exports.register = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
-        
+
         // Hash the password before saving
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -123,30 +123,30 @@ exports.login = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        
+
         // Find user by email
         const user = await User.findOne({ where: { email } });
-        
+
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
+
         // Generate a 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        
+
         // Set OTP and expiry in user record
         user.resetPasswordOtp = otp;
         user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-        
+
         await user.save();
-        
+
         // Send email with OTP
         await sendEmail(
             user.email,
             "Password Reset OTP",
             `Your OTP for password reset is: ${otp}\n\nThis OTP expires in 10 minutes.`
         );
-        
+
         res.json({ message: 'OTP sent to your email' });
     } catch (error) {
         console.error("Forgot Password Error:", error);
@@ -281,19 +281,19 @@ exports.createPassword = async (req, res) => {
 
 
 
-        // Find user by email and OTP
-        const user = await User.findOne({
-            where: {
-                email,
-                resetPasswordOtp: otp,
-                resetPasswordExpires: { [Op.gt]: Date.now() } // Check if OTP hasn't expired
-            }
-        });
-
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired OTP' });
+    // Find user by email and OTP
+    const user = await User.findOne({
+        where: {
+            email,
+            resetPasswordOtp: otp,
+            resetPasswordExpires: { [Op.gt]: Date.now() } // Check if OTP hasn't expired
         }
-try{
+    });
+
+    if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+    try {
         // Generate a temporary token for password creation
         const tempToken = jwt.sign(
             { email: user.email, otpVerified: true },

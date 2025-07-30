@@ -4,7 +4,6 @@ import { FaLocationDot } from "react-icons/fa6";
 import apiService from "../../config/axiosConfig";
 import { formatTimeToHoursMinutes } from "../../utils/timeFormatter";
 
-// Sachini part
 const PendingTripCard = ({ tripData }) => {
   if (!tripData) {
     return null;

@@ -11,6 +11,14 @@ const VehicleModel = sequelize.define("vehiclemodel", {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
+    },
+    brandId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'vehiclebrands',
+            key: 'id'
+        }
     }
 }, { timestamps: true });
 

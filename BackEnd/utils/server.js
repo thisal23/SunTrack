@@ -1,9 +1,11 @@
 require('dotenv').config();
 
 require('../shedulers/geoFenceSheduler');
+require('../shedulers/tripStatusScheduler');
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 8000;
+const path = require('path');
 const connectDB = require('../config/db'); // Assuming you have a database connection file
 
 const { User, Role, driverDetail, sequelize } = require('../models');
@@ -38,6 +40,21 @@ app.use(cors({
   credentials: true,               // Allow cookies/session handling
   allowedHeaders: "Content-Type,Authorization"
 }));
+
+app.use('/uploads/documents', express.static(path.join(__dirname, '../uploads/documents')));
+
+// Test endpoint to verify static file serving
+app.get('/test-document/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, '../uploads/documents', filename);
+  console.log('Testing file path:', filePath);
+
+  if (require('fs').existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ error: 'File not found', path: filePath });
+  }
+});
 
 // Define Routes
 app.use('/api/auth', require('../routes/authRoutes'));
