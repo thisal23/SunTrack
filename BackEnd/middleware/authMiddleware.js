@@ -10,11 +10,6 @@ const authMiddleware = (req, res, next) => {
 
   if (!authHeader) {
     console.log('No Authorization header found');
-    console.log("Authorization header:", req.header('Authorization'));
-  }
-
-  const authHeader = req.header('Authorization');
-  if (!authHeader) {
     return res.status(401).json({ message: 'No token, authorization denied' });
   }
 
